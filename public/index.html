@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Punkman</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <div id="game-area">
+        <div id="connect-page">
+            <div class="row">
+                <div class="col">
+                    <div class="title">Connecting...</div>
+                    <div id="connect-message" class="message"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="start-page" style="display: none">
+            <div class="row">
+                <div class="col">
+                    <div class="title">Punkman</div>
+                    <div class="row">
+                        <button id="start-signin-button">Sign In</button>
+                        <button id="start-register-button">Register</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="register-page" style="display: none">
+            <div class="row">
+                <form id="register-form" class="col">
+                    <div class="subtitle">Register</div>
+                    <input id="register-username" maxlength="10" placeholder="Enter your username"></input>
+                    <select id="register-avatar">
+                        <option class="placeholder" value="">Select your avatar</option>
+                    </select>
+                    <input id="register-name" maxlength="16" placeholder="Enter your name"></input>
+                    <input id="register-password" type="password" placeholder="Enter your password"></input>
+                    <input id="register-confirm" type="password" placeholder="Enter your password again"></input>
+                    <div class="row">
+                        <button id="register-button" type="submit">Register</button>
+                        <button class="back-button" type="button">Back</button>
+                    </div>
+                    <div id="register-message" class="message"></div>
+                </form>
+            </div>
+        </div>
+
+        <div id="signin-page" style="display: none">
+            <div class="row">
+                <form id="signin-form" class="col">
+                    <div class="subtitle">Sign In</div>
+                    <input id="signin-username" placeholder="Enter your username"></input>
+                    <input id="signin-password" type="password" placeholder="Enter your password"></input>
+                    <div class="row">
+                        <button id="signin-button" type="submit">Sign In</button>
+                        <button class="back-button" type="button">Back</button>
+                    </div>
+                    <div id="signin-message" class="message"></div>
+                </form>
+            </div>
+        </div>
+
+        <div id="join-page" style="display: none">
+            <div class="row">
+                <div class="col">
+                    <div class="title">
+                        Hello
+                        <span id="user-avatar">avatar</span>
+                        <span id="user-name">name</span>!
+                    </div>
+                    <div class="col">
+                        <form id="signout-form" class="col">
+                            <button id="signout-button" type="submit">Sign Out</button>
+                        </form>
+                        <form id="join-form" class="col">
+                            <button id="join-button">Join</button>
+                        </form>
+                        <div id="join-message" class="message"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="wait-page" style="display: none">
+            <div class="row">
+                <div class="col">
+                    <div class="title">Punkman</div>
+                    <div class="row players">
+                        <div id="player1" class="col player" style="display: none">
+                            <img src="images/icon.jpg" alt="Sign" class="sign">
+                            <div class="status"></div>
+                        </div>
+                        <div id="player2" class="col player" style="display: none">
+                            <img src="images/icon.jpg" alt="Sign" class="sign">
+                            <div class="status"></div>
+                        </div>
+                        <div id="player3" class="col player" style="display: none">
+                            <img src="images/icon.jpg" alt="Sign" class="sign">
+                            <div class="status"></div>
+                        </div>
+                        <div id="player4" class="col player" style="display: none">
+                            <img src="images/icon.jpg" alt="Sign" class="sign">
+                            <div class="status"></div>
+                        </div>
+                    </div>
+                    <button id="ready-button">Get Ready!</button>
+                    <div id="game-message" class="message"></div>
+                    <button id="restart-button" style="display: none">Start Again!</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-page" style="display: none">
+            <img src="images/title.png">
+        </div>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="scripts/avatar.js"></script>
+    <script src="scripts/punkman.js"></script>
+    <script>
+        $(function(){
+            Punkman.init();
+        });
+    </script>
+</body>
+</html>
