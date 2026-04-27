@@ -179,8 +179,8 @@ const Punkman = (function(){
         const cv = $("canvas").get(0);
         const context = cv.getContext("2d");
         const sounds = {};
-        const gameArea = BoundingBox(context, 50, 50, 1000, 1000);
-        const player = Player(context, 500, 500, gameArea);
+        const gameArea = BoundingBox(context, 0, 0, 1080, 1920);
+        const player = Player(context, 960, 540, gameArea);
         context.imageSmoothingEnabled = false;
 
         function doFrame(now) {
@@ -202,11 +202,13 @@ const Punkman = (function(){
                     player.move(1);
                     break;
                 case 38:
+                    player.move(2);
                     break;
                 case 39:
                     player.move(3);
                     break;
                 case 40:
+                    player.move(4);
                     break;
             }
         });
@@ -220,11 +222,13 @@ const Punkman = (function(){
                     player.stop(1);
                     break;
                 case 38:
+                    player.stop(2);
                     break;
                 case 39:
                     player.stop(3);
                     break;
                 case 40:
+                    player.stop(4);
                     break;
             }
         });
