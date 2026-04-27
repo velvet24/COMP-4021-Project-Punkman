@@ -2,80 +2,6 @@ const Punkman = (function(){
     let user = null;
     let inGame = false;
 
-    const initJoinPage = function(){
-        $("#join-button").on("click", function(e){
-            e.preventDefault();
-
-            socket.emit("join", user.name);
-        });
-
-        socket.on("join_error", (error) => {
-            $("#join-message").text(error);
-        });
-
-        socket.on("join_success", () => {
-            $("#join-page").hide();
-            $("#wait-page").show();
-
-            initWaitPage();
-            inGame = true;
-        });
-    };
-
-    const initWaitPage = function(){
-        socket.on("update_players", (players) => {
-            if(!inGame)
-                return;
-            updatePlayers(players);
-        });
-
-        $("#ready-button").on("click", function(e){
-            socket.emit("ready");
-            $("#ready-button").hide();
-            $("#game-message").text("Please wait for the other players...");
-        });
-
-        socket.on("game_start", () => {
-            if(!inGame)
-                return;
-
-            $("#wait-page").hide();
-            $("#main-page").show();
-        });
-
-        socket.on("game_end", (players) => {
-            if(!inGame)
-                return;
-            updatePlayers(players);
-
-            inGame = false;
-        });
-    };
-
-    const updatePlayers = function(players){
-        $(".player").hide();
-
-        let index = 1;
-        for (const id in players) {
-            const player = players[id];
-            let name = "You are";
-            if (id != socket.id)
-                name = `${player["name"]} is`;
-            let status = "";
-            if (player["sign"])
-                status = `${name} ${player["sign"]}!`;
-            else if (player["ready"])
-                status = `${name} ready!`;
-            else
-                status = `${name} not yet ready!`;
-            $("#player" + index).find(".status").text(status);
-
-            $("#player" + index).show();
-
-            index++;
-        }
-    };
-
     const init = function(){
         socket = io();
 
@@ -119,17 +45,17 @@ const Punkman = (function(){
             e.preventDefault();
 
             const username = $("#register-username").val().trim();
-            const avatar   = $("#register-avatar").val();
-            const name     = $("#register-name").val().trim();
+            const avatar = $("#register-avatar").val();
+            const name = $("#register-name").val().trim();
             const password = $("#register-password").val().trim();
             const confirmPassword = $("#register-confirm").val().trim();
 
-            if (password != confirmPassword) {
+            if(password != confirmPassword) {
                 $("#register-message").text("Passwords do not match.");
                 return;
             }
 
-            const json = JSON.stringify({ username, avatar, name, password });
+            const json = JSON.stringify({username, avatar, name, password});
             fetch("/register", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
@@ -153,7 +79,7 @@ const Punkman = (function(){
             e.preventDefault();
             const username = $("#signin-username").val().trim();
             const password = $("#signin-password").val().trim();
-            const json = JSON.stringify({ username, password });
+            const json = JSON.stringify({username, password});
             fetch("/signin", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
@@ -181,27 +107,103 @@ const Punkman = (function(){
         $("#signout-button").on("click", function(e) {
             e.preventDefault();
             fetch("/signout")
-                .then((res) => res.json())
-                .then((json) => {
-                    if (json.error) {
-                        console.log(json.error);
-                        return;
-                    }
-                    user = null;
-                    $("#join-page").hide();
-                    $("#start-page").show();
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
+            .then((res) => res.json())
+            .then((json) => {
+                if (json.error) {
+                    console.log(json.error);
+                    return;
+                }
+                user = null;
+                $("#join-page").hide();
+                $("#start-page").show();
+            })
+            .catch((err) => {
+                console.log(err);
+            });
         });
+    };
+
+    const initJoinPage = function(){
+        $("#join-button").on("click", function(e){
+            e.preventDefault();
+            socket.emit("join", user.name);
+        });
+
+        socket.on("join_error", (error) => {
+            $("#join-message").text(error);
+        });
+
+        socket.on("join_success", () => {
+            $("#join-page").hide();
+            $("#wait-page").show();
+
+            initWaitPage();
+            inGame = true;
+        });
+    };
+
+    const initWaitPage = function(){
+        $("#ready-button").on("click", function(e){
+            socket.emit("ready");
+            $("#ready-button").hide();
+            $("#game-message").text("Please wait for the other players...");
+        });
+
+        socket.on("update_players", (players) => {
+            if(!inGame)
+                return;
+            updatePlayers(players);
+        });
+
+        socket.on("game_start", () => {
+            if(!inGame)
+                return;
+
+            $("#wait-page").hide();
+            $("#main-page").show();
+
+            initMainPage();
+        });
+    };
+
+    const initMainPage = function(){
+        socket.on("game_end", (players) => {
+            if(!inGame)
+                return;
+            updatePlayers(players);
+
+            inGame = false;
+        });
+    };
+
+    const updatePlayers = function(players){
+        $(".player").hide();
+
+        let index = 1;
+        for (const id in players) {
+            const player = players[id];
+
+            let name = "You are";
+            if (id != socket.id)
+                name = `${player["name"]} is`;
+
+            let status = "";
+            if (player["ready"])
+                status = `${name} ready!`;
+            else
+                status = `${name} not yet ready!`;
+
+            $("#player" + index).find(".status").text(status);
+            $("#player" + index).show();
+
+            index++;
+        }
     };
 
     const validate = function(){
         fetch("/validate")
         .then((res) => res.json())
         .then((json) => {
-            console.log("Endpoint '/validate' -", json);
             if(json.error){
                 console.log(json.error);
                 return;
