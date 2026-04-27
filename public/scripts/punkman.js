@@ -175,6 +175,61 @@ const Punkman = (function(){
 
             inGame = false;
         });
+
+        const cv = $("canvas").get(0);
+        const context = cv.getContext("2d");
+        const sounds = {};
+        const gameArea = BoundingBox(context, 50, 50, 1000, 1000);
+        const player = Player(context, 500, 500, gameArea);
+        context.imageSmoothingEnabled = false;
+
+        function doFrame(now) {
+            player.update(now);
+
+            context.clearRect(0, 0, cv.width, cv.height);
+
+            player.draw();
+
+            requestAnimationFrame(doFrame);
+        }
+
+        $(document).on("keydown", function(event) {
+            switch (event.keyCode){
+                case 32:
+                    player.speedUp();
+                    break;
+                case 37:
+                    player.move(1);
+                    break;
+                case 38:
+                    break;
+                case 39:
+                    player.move(3);
+                    break;
+                case 40:
+                    break;
+            }
+        });
+
+        $(document).on("keyup", function(event) {
+            switch (event.keyCode){
+                case 32:
+                    player.slowDown();
+                    break;
+                case 37:
+                    player.stop(1);
+                    break;
+                case 38:
+                    break;
+                case 39:
+                    player.stop(3);
+                    break;
+                case 40:
+                    break;
+            }
+        });
+
+        requestAnimationFrame(doFrame);
     };
 
     const updatePlayers = function(players){
