@@ -178,10 +178,13 @@ const Punkman = (function(){
 
         const cv = $("canvas").get(0);
         const context = cv.getContext("2d");
-        const sounds = {};
         const gameArea = BoundingBox(context, 0, 0, 1080, 1920);
-        const player = Player(context, 960, 952, gameArea);
-        const floor = [
+        
+        const sounds = {
+            background: new Audio("sounds/FlashManStage.mp3")
+        };
+
+        const obstacles = [
             Floor(context, 128, 1048),
             Floor(context, 384, 1048),
             Floor(context, 640, 1048),
@@ -189,12 +192,12 @@ const Punkman = (function(){
             Floor(context, 1152, 1048),
             Floor(context, 1408, 1048),
             Floor(context, 1664, 1048),
-            Floor(context, 1920, 1048)
-        ]
-        const wall = [
+            Floor(context, 1920, 1048),
             Wall(context, 32, 920),
             Wall(context, 1888, 920)
-        ]
+        ];
+        const player = Player(context, 960, 300, gameArea, obstacles);
+
         context.imageSmoothingEnabled = false;
 
         function doFrame(now) {
@@ -202,8 +205,7 @@ const Punkman = (function(){
 
             context.clearRect(0, 0, cv.width, cv.height);
 
-            floor.forEach(_ => _.draw());
-            wall.forEach(_ => _.draw());
+            obstacles.forEach(_ => _.draw());
             player.draw();
 
             requestAnimationFrame(doFrame);
@@ -212,7 +214,7 @@ const Punkman = (function(){
         $(document).on("keydown", function(event) {
             switch (event.keyCode){
                 case 32:
-                    player.speedUp();
+                    player.jump();
                     break;
                 case 37:
                     player.move(1);
@@ -230,7 +232,6 @@ const Punkman = (function(){
         $(document).on("keyup", function(event) {
             switch (event.keyCode){
                 case 32:
-                    player.slowDown();
                     break;
                 case 37:
                     player.stop(1);
@@ -245,6 +246,7 @@ const Punkman = (function(){
             }
         });
 
+        sounds.background.play();
         requestAnimationFrame(doFrame);
     };
 

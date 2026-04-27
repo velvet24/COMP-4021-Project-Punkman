@@ -6,6 +6,7 @@ const Floor = function(ctx, x, y){
     sprite.setSequence(sequence).setScale(2).setShadowScale({x: 0, y: 0}).useSheet("images/tiles/1_Industrial_Tileset_1B.png");
 
     return {
+        getBoundingBox: sprite.getBoundingBox,
         draw: sprite.draw,
         update: sprite.update
     };

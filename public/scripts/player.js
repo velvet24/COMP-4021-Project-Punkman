@@ -3,7 +3,7 @@
 // - `x` - The initial x position of the player
 // - `y` - The initial y position of the player
 // - `gameArea` - The bounding box of the game area
-const Player = function(ctx, x, y, gameArea) {
+const Player = function(ctx, x, y, gameArea, obstacles) {
 
     // This is the sprite sequences of the player facing different directions.
     // It contains the idling sprite sequences `idleLeft`, `idleUp`, `idleRight` and `idleDown`,
@@ -36,7 +36,7 @@ const Player = function(ctx, x, y, gameArea) {
     let direction = 0;
 
     // This is the moving speed (pixels per second) of the player
-    let speed = 150;
+    let speed = 250;
 
     // This function sets the player's moving direction.
     // - `dir` - the moving direction (1: Left, 2: Up, 3: Right, 4: Down)
@@ -68,31 +68,56 @@ const Player = function(ctx, x, y, gameArea) {
 
     // This function speeds up the player.
     const speedUp = function() {
-        speed = 250;
+        speed = 350;
     };
 
     // This function slows down the player.
     const slowDown = function() {
-        speed = 150;
+        speed = 250;
     };
+
+    const jump = function() {};
+
+    const shoot = function() {};
 
     // This function updates the player depending on his movement.
     // - `time` - The timestamp when this function is called
     const update = function(time) {
+        let { x, y } = sprite.getXY();
+
+        let validLocation = true;
+        let voffset = 0;
+        while (validLocation && voffset <= 10) {
+            voffset++;
+            for (const obstacle of obstacles) {
+                if (obstacle.getBoundingBox().isPointInBox(x, y+64+voffset)) {
+                    validLocation = false;
+                    voffset--;
+                    break;
+                }
+            }
+        }
+        y += voffset;
+        sprite.setXY(x, y);
+
         /* Update the player if the player is moving */
         if (direction != 0) {
-            let { x, y } = sprite.getXY();
-
             /* Move the player */
             switch (direction) {
                 case 1: x -= speed / 60; break;
-                case 2: y -= speed / 60; break;
                 case 3: x += speed / 60; break;
-                case 4: y += speed / 60; break;
+            }
+
+            let validLocation = true;
+            for (const obstacle of obstacles) {
+                if (obstacle.getBoundingBox().isPointInBox(x, y)) {
+                    validLocation = false;
+                    break;
+                }
             }
 
             /* Set the new position if it is within the game area */
-            if (gameArea.isPointInBox(x, y))
+            if (gameArea.isPointInBox(x, y) && validLocation)
                 sprite.setXY(x, y);
         }
 
