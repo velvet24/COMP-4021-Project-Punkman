@@ -22,9 +22,16 @@ const io = new Server(httpServer);
 let players = {};
 let gameStarted = false;
 
+const usersFilePath = "data/users.json";
+
+if(!fs.existsSync(usersFilePath)){
+    fs.mkdirSync("data");
+    fs.writeFileSync(usersFilePath, JSON.stringify({}, null, 2));
+}
+
 app.post("/register", async (req, res) => {
     const {username, avatar, name, password} = req.body;
-    let users = JSON.parse(fs.readFileSync("data/users.json"));
+    let users = JSON.parse(fs.readFileSync(usersFilePath));
 
     if(username == "" || avatar == "" || name == "" || password == ""){
         res.json({error: "Username/avatar/name/password cannot be empty."});
@@ -45,13 +52,13 @@ app.post("/register", async (req, res) => {
         "name": name,
         "password": hash
     };
-    fs.writeFileSync("data/users.json", JSON.stringify(users, null, 2));
+    fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
     res.json({success: true});
 });
 
 app.post("/signin", async (req, res) => {
     const {username, password} = req.body;
-    let users = JSON.parse(fs.readFileSync("data/users.json"));
+    let users = JSON.parse(fs.readFileSync(usersFilePath));
 
     if(username == "" || password == "" || !(username in users)){
         res.json({error: "Incorrect username/password."});
