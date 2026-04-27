@@ -10,26 +10,22 @@ const Player = function(ctx, x, y, gameArea) {
     // and the moving sprite sequences `moveLeft`, `moveUp`, `moveRight` and `moveDown`.
     const sequences = {
         /* Idling sprite sequences for facing different directions */
-        idleLeft:  { x: 0, y: 25, width: 24, height: 25, count: 3, timing: 2000, loop: false },
-        idleUp:    { x: 0, y: 50, width: 24, height: 25, count: 1, timing: 2000, loop: false },
-        idleRight: { x: 0, y: 75, width: 24, height: 25, count: 3, timing: 2000, loop: false },
-        idleDown:  { x: 0, y:  0, width: 24, height: 25, count: 3, timing: 2000, loop: false },
+        idleLeft:  { x: 1024, y: 1536, width: 256, height: 256, count: 1, timing: 2000, loop: false },
+        idleRight: { x: 0, y: 0, width: 256, height: 256, count: 1, timing: 2000, loop: false },
 
         /* Moving sprite sequences for facing different directions */
-        moveLeft:  { x: 0, y: 125, width: 24, height: 25, count: 10, timing: 50, loop: true },
-        moveUp:    { x: 0, y: 150, width: 24, height: 25, count: 10, timing: 50, loop: true },
-        moveRight: { x: 0, y: 175, width: 24, height: 25, count: 10, timing: 50, loop: true },
-        moveDown:  { x: 0, y: 100, width: 24, height: 25, count: 10, timing: 50, loop: true }
+        moveLeft:  { x: 1024, y: 1792, width: -256, height: 256, count: 4, timing: 150, loop: true },
+        moveRight: { x: 0, y: 256, width: 256, height: 256, count: 4, timing: 150, loop: true },
     };
 
     // This is the sprite object of the player created from the Sprite module.
     const sprite = Sprite(ctx, x, y);
 
     // The sprite object is configured for the player sprite here.
-    sprite.setSequence(sequences.idleDown)
-          .setScale(2)
-          .setShadowScale({ x: 0.75, y: 0.20 })
-          .useSheet("images/player_sprite.png");
+    sprite.setSequence(sequences.idleRight)
+          .setScale(0.5)
+          .setShadowScale({ x: 0, y: 0 })
+          .useSheet("images/rockman_spritesheet.png");
 
     // This is the moving direction, which can be a number from 0 to 4:
     // - `0` - not moving
@@ -48,9 +44,9 @@ const Player = function(ctx, x, y, gameArea) {
         if (dir >= 1 && dir <= 4 && dir != direction) {
             switch (dir) {
                 case 1: sprite.setSequence(sequences.moveLeft); break;
-                case 2: sprite.setSequence(sequences.moveUp); break;
+                case 2: sprite.setSequence(sequences.moveLeft); break;
                 case 3: sprite.setSequence(sequences.moveRight); break;
-                case 4: sprite.setSequence(sequences.moveDown); break;
+                case 4: sprite.setSequence(sequences.moveRight); break;
             }
             direction = dir;
         }
@@ -62,9 +58,9 @@ const Player = function(ctx, x, y, gameArea) {
         if (direction == dir) {
             switch (dir) {
                 case 1: sprite.setSequence(sequences.idleLeft); break;
-                case 2: sprite.setSequence(sequences.idleUp); break;
+                case 2: sprite.setSequence(sequences.idleLeft); break;
                 case 3: sprite.setSequence(sequences.idleRight); break;
-                case 4: sprite.setSequence(sequences.idleDown); break;
+                case 4: sprite.setSequence(sequences.idleRight); break;
             }
             direction = 0;
         }

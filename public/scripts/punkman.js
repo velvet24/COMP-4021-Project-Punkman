@@ -180,7 +180,21 @@ const Punkman = (function(){
         const context = cv.getContext("2d");
         const sounds = {};
         const gameArea = BoundingBox(context, 0, 0, 1080, 1920);
-        const player = Player(context, 960, 540, gameArea);
+        const player = Player(context, 960, 952, gameArea);
+        const floor = [
+            Floor(context, 128, 1048),
+            Floor(context, 384, 1048),
+            Floor(context, 640, 1048),
+            Floor(context, 896, 1048),
+            Floor(context, 1152, 1048),
+            Floor(context, 1408, 1048),
+            Floor(context, 1664, 1048),
+            Floor(context, 1920, 1048)
+        ]
+        const wall = [
+            Wall(context, 32, 920),
+            Wall(context, 1888, 920)
+        ]
         context.imageSmoothingEnabled = false;
 
         function doFrame(now) {
@@ -188,6 +202,8 @@ const Punkman = (function(){
 
             context.clearRect(0, 0, cv.width, cv.height);
 
+            floor.forEach(_ => _.draw());
+            wall.forEach(_ => _.draw());
             player.draw();
 
             requestAnimationFrame(doFrame);
@@ -202,13 +218,11 @@ const Punkman = (function(){
                     player.move(1);
                     break;
                 case 38:
-                    player.move(2);
                     break;
                 case 39:
                     player.move(3);
                     break;
                 case 40:
-                    player.move(4);
                     break;
             }
         });
@@ -222,13 +236,11 @@ const Punkman = (function(){
                     player.stop(1);
                     break;
                 case 38:
-                    player.stop(2);
                     break;
                 case 39:
                     player.stop(3);
                     break;
                 case 40:
-                    player.stop(4);
                     break;
             }
         });

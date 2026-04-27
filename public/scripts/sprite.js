@@ -85,7 +85,7 @@ const Sprite = function(ctx, x, y) {
     // This function gets the display size of the sprite.
     const getDisplaySize = function() {
         /* Find the scaled width and height of the sprite */
-        const scaledWidth  = sequence.width * scale;
+        const scaledWidth  = Math.abs(sequence.width) * scale;
         const scaledHeight = sequence.height * scale;
         return {width: scaledWidth, height: scaledHeight};
     };
@@ -140,7 +140,7 @@ const Sprite = function(ctx, x, y) {
         /* TODO */
         /* Replace the following code to draw the sprite correctly */
         ctx.drawImage(sheet, sequence.x+index*sequence.width, sequence.y, 
-            sequence.width, sequence.height, 
+            Math.abs(sequence.width), sequence.height, 
             parseInt(x-size.width/2), parseInt(y-size.height/2), size.width, size.height);
         
         /* Restore saved settings */
