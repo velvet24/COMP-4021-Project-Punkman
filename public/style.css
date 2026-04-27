@@ -59,7 +59,7 @@ form button {
     font-style: italic;
 }
 
-#game-area {
+#lobby {
     width: 100vw;
     height: 100vh;
     padding: 0;
@@ -69,19 +69,13 @@ form button {
 #start-page,
 #signin-page,
 #register-page,
-#join-page,
-#main-page {
+#join-page {
     display: flex;
     align-items: stretch;
     justify-content: center;
     width: 100%;
     height: 100%;
     flex-direction: column;
-}
-
-.caption {
-    font-size: 30px;
-    font-weight: bold;
 }
 
 #signin-form,
@@ -111,15 +105,13 @@ img.sign {
     height: 150px;
 }
 
-#sign-buttons {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
-    border-radius: 50px;
-    background: rgba(255, 255, 255, 0.8);
-}
-
 #game-message {
     font-size: 30px;
+}
+
+/* Main Page */
+
+canvas {
+    background: url(images/title.png);
+    background-size: cover;
 }

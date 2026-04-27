@@ -160,6 +160,7 @@ const Punkman = (function(){
                 return;
 
             $("#wait-page").hide();
+            $("#lobby").hide();
             $("#main-page").show();
 
             initMainPage();
