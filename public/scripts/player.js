@@ -76,7 +76,26 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
         speed = 250;
     };
 
-    const jump = function() {};
+    const gravity = 1;
+
+    const jumpVelocity = -20;
+
+    let velocityY = 0;
+
+    const jump = function() {
+        if (standing())
+            velocityY = jumpVelocity;
+    };
+
+    const standing = function() {
+        let {x, y} = sprite.getXY();
+        for (const obstacle of obstacles) {
+            if (obstacle.getBoundingBox().isPointInBox(x, y+65)) {
+                return true;
+            }
+        }
+        return false;
+    };
 
     const shoot = function() {};
 
@@ -85,20 +104,41 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
     const update = function(time) {
         let { x, y } = sprite.getXY();
 
-        let validLocation = true;
-        let voffset = 0;
-        while (validLocation && voffset <= 10) {
-            voffset++;
-            for (const obstacle of obstacles) {
-                if (obstacle.getBoundingBox().isPointInBox(x, y+64+voffset)) {
-                    validLocation = false;
-                    voffset--;
-                    break;
+        if (!standing() || velocityY < 0) {
+            velocityY += gravity;
+            let validLocation = true;
+            let voffset = 0;
+            if (velocityY > 0) {
+                while (validLocation && voffset <= velocityY) {
+                    voffset++;
+                    for (const obstacle of obstacles) {
+                        if (obstacle.getBoundingBox().isPointInBox(x, y+64+voffset)) {
+                            validLocation = false;
+                            voffset--;
+                            break;
+                        }
+                    }
                 }
             }
+            else{
+                while (validLocation && velocityY <= voffset) {
+                    voffset--;
+                    for (const obstacle of obstacles) {
+                        if (obstacle.getBoundingBox().isPointInBox(x, y+64+voffset)) {
+                            validLocation = false;
+                            voffset++;
+                            break;
+                        }
+                    }
+                }
+            }
+            console.log(voffset);
+            y += voffset;
+            sprite.setXY(x, y);
         }
-        y += voffset;
-        sprite.setXY(x, y);
+        else{
+            velocityY = 0;
+        }
 
         /* Update the player if the player is moving */
         if (direction != 0) {
@@ -129,6 +169,8 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
     return {
         move: move,
         stop: stop,
+        jump: jump,
+        shoot: shoot,
         speedUp: speedUp,
         slowDown: slowDown,
         getBoundingBox: sprite.getBoundingBox,
