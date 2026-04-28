@@ -50,7 +50,8 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
     let animationDirection = 3;
 
     const sounds = {
-        buster: new Audio("sounds/MegaBuster.wav")
+        buster: new Audio("sounds/MegaBuster.wav"),
+        damage: new Audio("sounds/MegamanDamage.wav")
     };
 
     // This is the moving speed (pixels per second) of the player
@@ -83,6 +84,22 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
         speed = 250;
     };
 
+    const maxHealth = 100;
+    let health = maxHealth;
+
+    const takeDamage = function(damage) {
+        health -= damage;
+        sounds.damage.currentTime = 0;
+        sounds.damage.play();
+        if (health > 0) {
+            let progress = health / maxHealth * 100 + '%';
+            $("#player1-healthbar").animate({height: progress}, 500);
+        }
+        else {
+            $("#player1-healthbar").animate({height: "0%"}, 500);
+        }
+    }
+
     const gravity = 1;
     const jumpVelocity = -20;
     let velocityY = 0;
@@ -90,13 +107,14 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
 
     const jump = function() {
         if (standing() && enableJump){
+            takeDamage(10);
             enableJump = false;
             velocityY = jumpVelocity;
         }
     };
 
     const resetJump = function() {
-        velocityY = 0;
+        velocityY /= 3;
         enableJump = true;
     }
 
