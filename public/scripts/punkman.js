@@ -193,6 +193,12 @@ const Punkman = (function(){
             Floor(context, 1408, 1048),
             Floor(context, 1664, 1048),
             Floor(context, 1920, 1048),
+            Floor(context, 128, 792),
+            Floor(context, 384, 792),
+            Floor(context, 640, 792),
+            Floor(context, 896, 792),
+            Floor(context, 1152, 792),
+            Floor(context, 1408, 792),
             Wall(context, 32, 920),
             Wall(context, 1888, 920)
         ];
