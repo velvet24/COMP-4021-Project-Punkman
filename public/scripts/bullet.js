@@ -12,11 +12,14 @@ const Bullet = function(ctx, x, y, direction, enemies){
     const sprite = Sprite(ctx, x, y);
     sprite.setSequence(sequence).setScale(0.5).setShadowScale({x: 0, y: 0}).useSheet("images/rockman_spritesheet.png");
 
+    const damage = 10;
+
     const update = function(){
         let {x, y} = sprite.getXY();
 
         for(const enemy of enemies){
             if(enemy.getBoundingBox().isPointInBox(x, y)){
+                enemy.takeDamage(damage);
                 return false;
             }
         }
