@@ -264,6 +264,9 @@ const Punkman = (function(){
                 case 74:
                     player.shoot();
                     break;
+                case 76:
+                    player.takeDamage(10);
+                    break;
             }
         });
 

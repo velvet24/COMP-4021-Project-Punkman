@@ -9,14 +9,12 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
     // It contains the idling sprite sequences `idleLeft`, `idleUp`, `idleRight` and `idleDown`,
     // and the moving sprite sequences `moveLeft`, `moveUp`, `moveRight` and `moveDown`.
     const sequences = {
-        /* Idling sprite sequences for facing different directions */
         idleLeft:  { x: 1024, y: 1536, width: 256, height: 256, count: 1, timing: 2000, loop: false },
         idleRight: { x: 0, y: 0, width: 256, height: 256, count: 1, timing: 2000, loop: false },
 
         idleShootLeft:  { x: 0, y: 1792, width: 256, height: 256, count: 1, timing: 2000, loop: false },
         idleShootRight: { x: 1024, y: 256, width: 256, height: 256, count: 1, timing: 2000, loop: false },
 
-        /* Moving sprite sequences for facing different directions */
         moveLeft:  { x: 1024, y: 1792, width: -256, height: 256, count: 4, timing: 150, loop: true },
         moveRight: { x: 0, y: 256, width: 256, height: 256, count: 4, timing: 150, loop: true },
 
@@ -28,6 +26,9 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
 
         jumpShootLeft: { x: 1024, y: 2048, width: 256, height: 256, count: 1, timing: 2000, loop: false },
         jumpShootRight: { x: 0, y: 512, width: 256, height: 256, count: 1, timing: 2000, loop: false },
+
+        recoverLeft:  { x: 768, y: 2304, width: -256, height: 256, count: 2, timing: 100, loop: true },
+        recoverRight: { x: 256, y: 768, width: 256, height: 256, count: 2, timing: 100, loop: true },
     };
 
     // This is the sprite object of the player created from the Sprite module.
@@ -54,44 +55,40 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
         damage: new Audio("sounds/MegamanDamage.wav")
     };
 
-    // This is the moving speed (pixels per second) of the player
     let speed = 250;
 
-    // This function sets the player's moving direction.
-    // - `dir` - the moving direction (1: Left, 2: Up, 3: Right, 4: Down)
     const move = function(dir) {
-        if (dir >= 1 && dir <= 4 && dir != direction) {
+        if (recoverTimer == 0) {
             direction = dir;
             animationDirection = dir;
         }
     };
 
-    // This function stops the player from moving.
-    // - `dir` - the moving direction when the player is stopped (1: Left, 2: Up, 3: Right, 4: Down)
     const stop = function(dir) {
         if (direction == dir) {
             direction = 0;
         }
     };
 
-    // This function speeds up the player.
     const speedUp = function() {
         speed = 350;
     };
 
-    // This function slows down the player.
     const slowDown = function() {
         speed = 250;
     };
 
     const maxHealth = 100;
     let health = maxHealth;
+    let recoverTimer = 0;
 
     const takeDamage = function(damage) {
         health -= damage;
         sounds.damage.currentTime = 0;
         sounds.damage.play();
         if (health > 0) {
+            recoverTimer = 40;
+            velocityY = 0;
             let progress = health / maxHealth * 100 + '%';
             $("#player1-healthbar").animate({height: progress}, 500);
         }
@@ -150,105 +147,117 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
         enableShoot = true;
     };
 
-    let animationState = 6;
+    let animationState = 7;
 
     const updateAnimation = function() {
         if (animationDirection == 1) {
-            if (standing()) {
-                if (direction == 0) {
-                    if (shootStanceTimer == 0){
-                        if (animationState != 0){
-                            sprite.setSequence(sequences.idleLeft);
-                            animationState = 0;
+            if (recoverTimer == 0) {
+                if (standing()) {
+                    if (direction == 0) {
+                        if (shootStanceTimer == 0) {
+                            if (animationState != 0) {
+                                sprite.setSequence(sequences.idleLeft);
+                                animationState = 0;
+                            }
+                        }
+                        else {
+                            if (animationState != 1) {
+                                sprite.setSequence(sequences.idleShootLeft);
+                                animationState = 1;
+                            }
+                            shootStanceTimer--;
                         }
                     }
                     else {
-                        if (animationState != 1){
-                            sprite.setSequence(sequences.idleShootLeft);
-                            animationState = 1;
+                        if (shootStanceTimer == 0) {
+                            if (animationState != 2) {
+                                sprite.setSequence(sequences.moveLeft);
+                                animationState = 2;
+                            }
                         }
-                        shootStanceTimer--;
+                        else {
+                            if (animationState != 3) {
+                                sprite.setSequence(sequences.moveShootLeft);
+                                animationState = 3;
+                            }
+                            shootStanceTimer--;
+                        }
                     }
                 }
                 else {
-                    if (shootStanceTimer == 0){
-                        if (animationState != 2){
-                            sprite.setSequence(sequences.moveLeft);
-                            animationState = 2;
+                    if (shootStanceTimer == 0) {
+                        if (animationState != 4) {
+                            sprite.setSequence(sequences.jumpLeft);
+                            animationState = 4;
                         }
                     }
                     else {
-                        if (animationState != 3){
-                            sprite.setSequence(sequences.moveShootLeft);
-                            animationState = 3;
+                        if (animationState != 5) {
+                            sprite.setSequence(sequences.jumpShootLeft);
+                            animationState = 5;
                         }
                         shootStanceTimer--;
                     }
                 }
             }
-            else {
-                if (shootStanceTimer == 0){
-                    if (animationState != 4){
-                        sprite.setSequence(sequences.jumpLeft);
-                        animationState = 4;
-                    }
-                }
-                else {
-                    if (animationState != 5){
-                        sprite.setSequence(sequences.jumpShootLeft);
-                        animationState = 5;
-                    }
-                    shootStanceTimer--;
-                }
+            else if (animationState != 6) {
+                sprite.setSequence(sequences.recoverLeft);
+                animationState = 6;
             }
         }
         else if (animationDirection == 3) {
-            if (standing()) {
-                if (direction == 0) {
-                    if (shootStanceTimer == 0){
-                        if (animationState != 6){
-                            sprite.setSequence(sequences.idleRight);
-                            animationState = 6;
+            if (recoverTimer == 0) {
+                if (standing()) {
+                    if (direction == 0) {
+                        if (shootStanceTimer == 0) {
+                            if (animationState != 7) {
+                                sprite.setSequence(sequences.idleRight);
+                                animationState = 7;
+                            }
+                        }
+                        else {
+                            if (animationState != 8) {
+                                sprite.setSequence(sequences.idleShootRight);
+                                animationState = 8;
+                            }
+                            shootStanceTimer--;
                         }
                     }
                     else {
-                        if (animationState != 7){
-                            sprite.setSequence(sequences.idleShootRight);
-                            animationState = 7;
+                        if (shootStanceTimer == 0) {
+                            if (animationState != 9) {
+                                sprite.setSequence(sequences.moveRight);
+                                animationState = 9;
+                            }
                         }
-                        shootStanceTimer--;
+                        else {
+                            if (animationState != 10) {
+                                sprite.setSequence(sequences.moveShootRight);
+                                animationState = 10;
+                            }
+                            shootStanceTimer--;
+                        }
                     }
                 }
                 else {
-                    if (shootStanceTimer == 0){
-                        if (animationState != 8){
-                            sprite.setSequence(sequences.moveRight);
-                            animationState = 8;
+                    if (shootStanceTimer == 0) {
+                        if (animationState != 11) {
+                            sprite.setSequence(sequences.jumpRight);
+                            animationState = 11;
                         }
                     }
                     else {
-                        if (animationState != 9){
-                            sprite.setSequence(sequences.moveShootRight);
-                            animationState = 9;
+                        if (animationState != 12) {
+                            sprite.setSequence(sequences.jumpShootRight);
+                            animationState = 12;
                         }
                         shootStanceTimer--;
                     }
                 }
             }
-            else {
-                if (shootStanceTimer == 0){
-                    if (animationState != 10){
-                        sprite.setSequence(sequences.jumpRight);
-                        animationState = 10;
-                    }
-                }
-                else {
-                    if (animationState != 11){
-                        sprite.setSequence(sequences.jumpShootRight);
-                        animationState = 11;
-                    }
-                    shootStanceTimer--;
-                }
+            else if (animationState != 13) {
+                sprite.setSequence(sequences.recoverRight);
+                animationState = 13;
             }
         }
     };
@@ -262,8 +271,6 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
         return BoundingBox(ctx, y-vUpperSize, x-hHalfSize, y+vLowerSize, x+hHalfSize);
     }
 
-    // This function updates the player depending on his movement.
-    // - `time` - The timestamp when this function is called
     const update = function(time) {
         let { x, y } = sprite.getXY();
 
@@ -306,9 +313,7 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
             velocityY = 0;
         }
 
-        /* Update the player if the player is moving */
-        if (direction != 0) {
-            /* Move the player */
+        if (recoverTimer == 0) {
             let validLocation = true;
             let hoffset = 0;
             if (direction == 1) {
@@ -341,6 +346,9 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
             if (gameArea.isPointInBox(x, y))
                 sprite.setXY(x, y);
         }
+        else {
+            recoverTimer--;
+        }
 
         if(cooldownTimer > 0)
             cooldownTimer--;
@@ -348,7 +356,6 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
         sprite.update(time);
     };
 
-    // The methods are returned as an object here.
     return {
         move: move,
         stop: stop,
@@ -356,6 +363,7 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
         resetJump: resetJump,
         shoot: shoot,
         stopShoot: stopShoot,
+        takeDamage: takeDamage,
         speedUp: speedUp,
         slowDown: slowDown,
         getBoundingBox: getBoundingBox,
