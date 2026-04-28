@@ -234,8 +234,6 @@ const Punkman = (function(){
             const playerBoundingBox = player.getBoundingBox();
             gems.forEach((gem) => {
                 const gemXY = gem.getXY();
-                console.log(gemXY);
-                console.log(playerBoundingBox.getTop(), playerBoundingBox.getBottom(), playerBoundingBox.getLeft(), playerBoundingBox.getRight());
                 if (playerBoundingBox.isPointInBox(gemXY.x, gemXY.y)) {
                     gem.collect();
                     console.log("Gem collected!");
