@@ -90,7 +90,7 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
     const standing = function() {
         let {x, y} = sprite.getXY();
         for (const obstacle of obstacles) {
-            if (obstacle.getBoundingBox().isPointInBox(x, y+65)) {
+            if (obstacle.getBoundingBox().isPointInBox(x, y+vLowerSize+1)) {
                 return true;
             }
         }
@@ -98,6 +98,14 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
     };
 
     const shoot = function() {};
+
+    const hHalfSize = 25;
+    const vUpperSize = 30;
+    const vLowerSize = 55;
+
+    const getBoundingBox = function() {
+        return BoundingBox(ctx, y-vUpperSize, x-hHalfSize, y+vLowerSize, x+hHalfSize);
+    }
 
     // This function updates the player depending on his movement.
     // - `time` - The timestamp when this function is called
@@ -111,7 +119,7 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
             if (velocityY > 0) {
                 while (validLocation && voffset <= velocityY) {
                     voffset++;
-                    let target = BoundingBox(ctx, y-64+voffset, x-64, y+64+voffset, x+64);
+                    let target = BoundingBox(ctx, y-vUpperSize+voffset, x-hHalfSize, y+vLowerSize+voffset, x+hHalfSize);
                     for (const obstacle of obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
@@ -124,7 +132,7 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
             else{
                 while (validLocation && velocityY <= voffset) {
                     voffset--;
-                    let target = BoundingBox(ctx, y-64+voffset, x-64, y+64+voffset, x+64);
+                    let target = BoundingBox(ctx, y-vUpperSize+voffset, x-hHalfSize, y+vLowerSize+voffset, x+hHalfSize);
                     for (const obstacle of obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
@@ -152,7 +160,7 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
             if (direction == 1) {
                 while (validLocation && -hoffset < speed / 60){
                     hoffset--;
-                    let target = BoundingBox(ctx, y-64, x-64+hoffset, y+64, x+64+hoffset);
+                    let target = BoundingBox(ctx, y-vUpperSize, x-hHalfSize+hoffset, y+vLowerSize, x+hHalfSize+hoffset);
                     for (const obstacle of obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
@@ -165,7 +173,7 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
             else if (direction == 3) {
                 while (validLocation && hoffset < speed / 60){
                     hoffset++;
-                    let target = BoundingBox(ctx, y-64, x-64+hoffset, y+64, x+64+hoffset);
+                    let target = BoundingBox(ctx, y-vUpperSize, x-hHalfSize+hoffset, y+vLowerSize, x+hHalfSize+hoffset);
                     for (const obstacle of obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
@@ -192,7 +200,7 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
         shoot: shoot,
         speedUp: speedUp,
         slowDown: slowDown,
-        getBoundingBox: sprite.getBoundingBox,
+        getBoundingBox: getBoundingBox,
         draw: sprite.draw,
         update: update
     };
