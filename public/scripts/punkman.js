@@ -179,6 +179,8 @@ const Punkman = (function(){
         const cv = $("canvas").get(0);
         const context = cv.getContext("2d");
         const gameArea = BoundingBox(context, 0, 0, 1080, 1920);
+
+        let collectedGems = 0; 
         
         const sounds = {
             background: new Audio("sounds/FlashManStage.mp3")
@@ -202,6 +204,13 @@ const Punkman = (function(){
             Wall(context, 32, 920),
             Wall(context, 1888, 920)
         ];
+        const gems = [
+            Gem(context, 150, 980, "green"),
+            Gem(context, 512, 980, "red"),
+            Gem(context, 768, 980, "yellow"),
+            Gem(context, 1024, 980, "purple")
+        ];
+
         const enemies = [];
         const bullets = [];
         const player = Player(context, 960, 300, gameArea, obstacles, enemies, bullets);
@@ -220,6 +229,17 @@ const Punkman = (function(){
             context.clearRect(0, 0, cv.width, cv.height);
 
             obstacles.forEach(_ => _.draw());
+            gems.forEach(_ => _.draw());
+            
+            const playerBoundingBox = player.getBoundingBox();
+            gems.forEach((gem) => {
+                const gemXY = gem.getXY();
+                if (playerBoundingBox.isPointInBox(gemXY.x, gemXY.y)) {
+                    gem.collect();
+                    console.log("Gem collected!");
+                    collectedGems++;
+                }
+            });
             enemies.forEach(_ => _.draw());
             player.draw();
             bullets.forEach(_ => _.draw());
