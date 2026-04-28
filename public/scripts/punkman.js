@@ -238,6 +238,7 @@ const Punkman = (function(){
         $(document).on("keyup", function(event) {
             switch (event.keyCode){
                 case 32:
+                    player.resetJump();
                     break;
                 case 37:
                     player.stop(1);

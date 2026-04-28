@@ -16,6 +16,9 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
         /* Moving sprite sequences for facing different directions */
         moveLeft:  { x: 1024, y: 1792, width: -256, height: 256, count: 4, timing: 150, loop: true },
         moveRight: { x: 0, y: 256, width: 256, height: 256, count: 4, timing: 150, loop: true },
+
+        jumpLeft: { x: 0, y: 1536, width: 256, height: 256, count: 1, timing: 2000, loop: false },
+        jumpRight: { x: 1024, y: 0, width: 256, height: 256, count: 1, timing: 2000, loop: false },
     };
 
     // This is the sprite object of the player created from the Sprite module.
@@ -35,6 +38,8 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
     // - `4` - moving down
     let direction = 0;
 
+    let animationDirection = 1;
+
     // This is the moving speed (pixels per second) of the player
     let speed = 250;
 
@@ -42,13 +47,8 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
     // - `dir` - the moving direction (1: Left, 2: Up, 3: Right, 4: Down)
     const move = function(dir) {
         if (dir >= 1 && dir <= 4 && dir != direction) {
-            switch (dir) {
-                case 1: sprite.setSequence(sequences.moveLeft); break;
-                case 2: sprite.setSequence(sequences.moveLeft); break;
-                case 3: sprite.setSequence(sequences.moveRight); break;
-                case 4: sprite.setSequence(sequences.moveRight); break;
-            }
             direction = dir;
+            animationDirection = dir;
         }
     };
 
@@ -56,12 +56,6 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
     // - `dir` - the moving direction when the player is stopped (1: Left, 2: Up, 3: Right, 4: Down)
     const stop = function(dir) {
         if (direction == dir) {
-            switch (dir) {
-                case 1: sprite.setSequence(sequences.idleLeft); break;
-                case 2: sprite.setSequence(sequences.idleLeft); break;
-                case 3: sprite.setSequence(sequences.idleRight); break;
-                case 4: sprite.setSequence(sequences.idleRight); break;
-            }
             direction = 0;
         }
     };
@@ -77,15 +71,20 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
     };
 
     const gravity = 1;
-
     const jumpVelocity = -20;
-
     let velocityY = 0;
+    let enableJump = true;
 
     const jump = function() {
-        if (standing())
+        if (standing() && enableJump){
             velocityY = jumpVelocity;
+            enableJump = false;
+        }
     };
+
+    const resetJump = function() {
+        enableJump = true;
+    }
 
     const standing = function() {
         let {x, y} = sprite.getXY();
@@ -98,6 +97,49 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
     };
 
     const shoot = function() {};
+
+    let animationState = 0;
+
+    const updateAnimation = function() {
+        if (animationDirection == 1) {
+            if (standing()) {
+                if (direction != 0 && animationState != 0) {
+                    sprite.setSequence(sequences.moveLeft);
+                    animationState = 0;
+                    console.log("walk left")
+                }
+                else if (direction == 0 && animationState != 1) {
+                    sprite.setSequence(sequences.idleLeft);
+                    animationState = 1;
+                    console.log("idle left")
+                }
+            }
+            else if (animationState != 2) {
+                sprite.setSequence(sequences.jumpLeft);
+                animationState = 2;
+                console.log("jump left")
+            }
+        }
+        else if (animationDirection == 3) {
+            if (standing()) {
+                if (direction != 0 && animationState != 3) {
+                    sprite.setSequence(sequences.moveRight);
+                    animationState = 3
+                    console.log("walk right")
+                }
+                else if (direction == 0 && animationState != 4) {
+                    sprite.setSequence(sequences.idleRight);
+                    animationState = 4;
+                    console.log("idle right")
+                }
+            }
+            else if (animationState != 5) {
+                sprite.setSequence(sequences.jumpRight);
+                animationState = 5;
+                console.log("jump right")
+            }
+        }
+    };
 
     const hHalfSize = 25;
     const vUpperSize = 30;
@@ -189,6 +231,7 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
         }
 
         /* Update the sprite object */
+        updateAnimation();
         sprite.update(time);
     };
 
@@ -197,6 +240,7 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
         move: move,
         stop: stop,
         jump: jump,
+        resetJump: resetJump,
         shoot: shoot,
         speedUp: speedUp,
         slowDown: slowDown,
