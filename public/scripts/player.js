@@ -52,7 +52,9 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
 
     const sounds = {
         buster: new Audio("sounds/MegaBuster.wav"),
-        damage: new Audio("sounds/MegamanDamage.wav")
+        land: new Audio("sounds/MegamanLand.wav"),
+        damage: new Audio("sounds/MegamanDamage.wav"),
+        death: new Audio("sounds/MegamanDefeat.wav")
     };
 
     let speed = 250;
@@ -81,18 +83,26 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
     const maxHealth = 100;
     let health = maxHealth;
     let recoverTimer = 0;
+    let alive = true;
 
     const takeDamage = function(damage) {
+        if (!alive)
+            return;
+        
         health -= damage;
-        sounds.damage.currentTime = 0;
-        sounds.damage.play();
+
         if (health > 0) {
             recoverTimer = 40;
             velocityY = 0;
+            sounds.damage.currentTime = 0;
+            sounds.damage.play();
             let progress = health / maxHealth * 100 + '%';
             $("#player1-healthbar").animate({height: progress}, 500);
         }
         else {
+            alive = false;
+            sounds.death.currentTime = 0;
+            sounds.death.play();
             $("#player1-healthbar").animate({height: "0%"}, 500);
         }
     }
@@ -101,9 +111,10 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
     const jumpVelocity = -20;
     let velocityY = 0;
     let enableJump = true;
+    let falling = false;
 
     const jump = function() {
-        if (standing() && enableJump){
+        if (standing() && enableJump && alive){
             enableJump = false;
             velocityY = jumpVelocity;
         }
@@ -129,7 +140,7 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
     let enableShoot = true;
 
     const shoot = function() {
-        if (cooldownTimer == 0 && enableShoot) {
+        if (cooldownTimer == 0 && enableShoot && alive) {
             enableShoot = false;
             shootStanceTimer = 20;
             cooldownTimer = 10;
@@ -150,6 +161,8 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
     let animationState = 7;
 
     const updateAnimation = function() {
+        if (!alive)
+            return;
         if (animationDirection == 1) {
             if (recoverTimer == 0) {
                 if (standing()) {
@@ -272,6 +285,8 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
     }
 
     const update = function(time) {
+        if (!alive)
+            return;
         let { x, y } = sprite.getXY();
 
         if (!standing() || velocityY < 0) {
@@ -348,6 +363,18 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
         }
         else {
             recoverTimer--;
+        }
+
+        if (!standing()) {
+            falling = true;
+        }
+        else if (falling) {
+            falling = false;
+            sounds.land.currentTime = 0;
+            sounds.land.play();
+        }
+        else {
+            falling = false;
         }
 
         if(cooldownTimer > 0)
