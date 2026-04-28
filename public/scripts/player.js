@@ -146,6 +146,7 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
     const vLowerSize = 55;
 
     const getBoundingBox = function() {
+        let { x, y } = sprite.getXY();
         return BoundingBox(ctx, y-vUpperSize, x-hHalfSize, y+vLowerSize, x+hHalfSize);
     }
 
