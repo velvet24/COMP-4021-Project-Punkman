@@ -107,7 +107,6 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
 
     const jump = function() {
         if (standing() && enableJump){
-            takeDamage(10);
             enableJump = false;
             velocityY = jumpVelocity;
         }
