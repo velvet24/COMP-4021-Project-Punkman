@@ -38,6 +38,12 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
     // This is the moving speed (pixels per second) of the player
     let speed = 250;
 
+    const maxHealth = 5;
+    let health = maxHealth;
+    let cheatMode = false;
+    let invulnerableUntil = 0;
+    const damageCooldown = 1000;
+
     // This function sets the player's moving direction.
     // - `dir` - the moving direction (1: Left, 2: Up, 3: Right, 4: Down)
     const move = function(dir) {
@@ -82,6 +88,10 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
 
     let velocityY = 0;
 
+    const hHalfSize = 25;
+    const vUpperSize = 30;
+    const vLowerSize = 55;
+
     const jump = function() {
         if (standing())
             velocityY = jumpVelocity;
@@ -90,7 +100,7 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
     const standing = function() {
         let {x, y} = sprite.getXY();
         for (const obstacle of obstacles) {
-            if (obstacle.getBoundingBox().isPointInBox(x, y+vLowerSize+1)) {
+            if (obstacle.getBoundingBox().isPointInBox(x, y + vLowerSize + 1)) {
                 return true;
             }
         }
@@ -99,13 +109,44 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
 
     const shoot = function() {};
 
-    const hHalfSize = 25;
-    const vUpperSize = 30;
-    const vLowerSize = 55;
-
     const getBoundingBox = function() {
-        return BoundingBox(ctx, y-vUpperSize, x-hHalfSize, y+vLowerSize, x+hHalfSize);
-    }
+        let {x, y} = sprite.getXY();
+        return BoundingBox(ctx, y - vUpperSize, x - hHalfSize, y + vLowerSize, x + hHalfSize);
+    };
+
+    const takeDamage = function(now = performance.now(), amount = 1) {
+        if (cheatMode || health <= 0 || now < invulnerableUntil)
+            return false;
+
+        health = Math.max(0, health - amount);
+        invulnerableUntil = now + damageCooldown;
+        return true;
+    };
+
+    const getHealth = function() {
+        return health;
+    };
+
+    const getMaxHealth = function() {
+        return maxHealth;
+    };
+
+    const isAlive = function() {
+        return health > 0;
+    };
+
+    const setCheatMode = function(enabled) {
+        cheatMode = enabled;
+    };
+
+    const toggleCheatMode = function() {
+        cheatMode = !cheatMode;
+        return cheatMode;
+    };
+
+    const isCheatMode = function() {
+        return cheatMode;
+    };
 
     // This function updates the player depending on his movement.
     // - `time` - The timestamp when this function is called
@@ -119,7 +160,8 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
             if (velocityY > 0) {
                 while (validLocation && voffset <= velocityY) {
                     voffset++;
-                    let target = BoundingBox(ctx, y-vUpperSize+voffset, x-hHalfSize, y+vLowerSize+voffset, x+hHalfSize);
+                    let target = BoundingBox(ctx, y - vUpperSize + voffset, x - hHalfSize,
+                                             y + vLowerSize + voffset, x + hHalfSize);
                     for (const obstacle of obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
@@ -132,7 +174,8 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
             else{
                 while (validLocation && velocityY <= voffset) {
                     voffset--;
-                    let target = BoundingBox(ctx, y-vUpperSize+voffset, x-hHalfSize, y+vLowerSize+voffset, x+hHalfSize);
+                    let target = BoundingBox(ctx, y - vUpperSize + voffset, x - hHalfSize,
+                                             y + vLowerSize + voffset, x + hHalfSize);
                     for (const obstacle of obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
@@ -143,7 +186,6 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
                     }
                 }
             }
-            console.log(voffset);
             y += voffset;
             if (gameArea.isPointInBox(x, y))
                 sprite.setXY(x, y);
@@ -154,13 +196,13 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
 
         /* Update the player if the player is moving */
         if (direction != 0) {
-            /* Move the player */
             let validLocation = true;
             let hoffset = 0;
             if (direction == 1) {
-                while (validLocation && -hoffset < speed / 60){
+                while (validLocation && -hoffset < speed / 60) {
                     hoffset--;
-                    let target = BoundingBox(ctx, y-vUpperSize, x-hHalfSize+hoffset, y+vLowerSize, x+hHalfSize+hoffset);
+                    let target = BoundingBox(ctx, y - vUpperSize, x - hHalfSize + hoffset,
+                                             y + vLowerSize, x + hHalfSize + hoffset);
                     for (const obstacle of obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
@@ -171,9 +213,10 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
                 }
             }
             else if (direction == 3) {
-                while (validLocation && hoffset < speed / 60){
+                while (validLocation && hoffset < speed / 60) {
                     hoffset++;
-                    let target = BoundingBox(ctx, y-vUpperSize, x-hHalfSize+hoffset, y+vLowerSize, x+hHalfSize+hoffset);
+                    let target = BoundingBox(ctx, y - vUpperSize, x - hHalfSize + hoffset,
+                                             y + vLowerSize, x + hHalfSize + hoffset);
                     for (const obstacle of obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
@@ -183,6 +226,8 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
                     }
                 }
             }
+
+            /* Set the new position if it is within the game area */
             x += hoffset;
             if (gameArea.isPointInBox(x, y))
                 sprite.setXY(x, y);
@@ -198,6 +243,13 @@ const Player = function(ctx, x, y, gameArea, obstacles) {
         stop: stop,
         jump: jump,
         shoot: shoot,
+        takeDamage: takeDamage,
+        getHealth: getHealth,
+        getMaxHealth: getMaxHealth,
+        isAlive: isAlive,
+        setCheatMode: setCheatMode,
+        toggleCheatMode: toggleCheatMode,
+        isCheatMode: isCheatMode,
         speedUp: speedUp,
         slowDown: slowDown,
         getBoundingBox: getBoundingBox,

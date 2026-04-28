@@ -55,21 +55,10 @@ const BoundingBox = function(ctx, top, left, bottom, right) {
     // This function checks whether the two bounding boxes intersect.
     // - `box` - The other bounding box
     const intersect = function(box) {
-        /* Check the points of the other box */
-        let points = box.getPoints();
-        for (const key in points) {
-            if (isPointInBox(...points[key]))
-                return true;
-        }
-
-        /* Check the points of this box */
-        points = getPoints();
-        for (const key in points) {
-            if (box.isPointInBox(...points[key]))
-                return true;
-        }
-
-        return false;
+        return !(right < box.getLeft() ||
+                 left > box.getRight() ||
+                 bottom < box.getTop() ||
+                 top > box.getBottom());
     };
 
     // This function generates a random point inside the bounding box.

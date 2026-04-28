@@ -203,16 +203,138 @@ const Punkman = (function(){
             Wall(context, 1888, 920)
         ];
         const player = Player(context, 960, 300, gameArea, obstacles);
+        const enemies = [];
+        const enemyBounds = {left: 96, right: 1824};
+        const enemyLaneY = 951;
+        const enemySpawnDelay = 3000;
+        const enemySpawnInterval = 2500;
+        const maxEnemies = 6;
+        let gameStartTime = 0;
+        let lastSpawnTime = 0;
+        let cheatMessageUntil = 0;
+        let gameOver = false;
 
         context.imageSmoothingEnabled = false;
 
+        const getTargetEnemyCount = function(now) {
+            const elapsed = now - gameStartTime;
+            if (elapsed < enemySpawnDelay)
+                return 0;
+
+            return Math.min(maxEnemies, 1 + Math.floor((elapsed - enemySpawnDelay) / 8000));
+        };
+
+        const spawnEnemy = function(now) {
+            const spawnSide = Math.random() < 0.5 ? "left" : "right";
+            const spawnX = spawnSide === "left" ? enemyBounds.left : enemyBounds.right;
+            enemies.push(Enemy(context, spawnX, enemyLaneY, {
+                spawnSide: spawnSide,
+                movementBounds: enemyBounds,
+                speed: 170 + enemies.length * 15
+            }));
+            lastSpawnTime = now;
+        };
+
+        const drawHealthBar = function() {
+            const barX = 48;
+            const barY = 48;
+            const barWidth = 320;
+            const barHeight = 28;
+            const ratio = player.isCheatMode() ? 1 : player.getHealth() / player.getMaxHealth();
+
+            context.save();
+            context.fillStyle = "rgba(0, 0, 0, 0.65)";
+            context.fillRect(barX - 6, barY - 34, barWidth + 12, barHeight + 46);
+
+            context.font = "28px Helvetica";
+            context.fillStyle = "white";
+            context.fillText("Health", barX, barY - 10);
+
+            context.strokeStyle = "white";
+            context.lineWidth = 3;
+            context.strokeRect(barX, barY, barWidth, barHeight);
+
+            context.fillStyle = player.isCheatMode() ? "#4dd0ff" : "#ff5c5c";
+            context.fillRect(barX, barY, barWidth * ratio, barHeight);
+
+            context.font = "24px Helvetica";
+            context.fillStyle = "white";
+            const healthLabel = player.isCheatMode()
+                ? "INF"
+                : `${player.getHealth()} / ${player.getMaxHealth()}`;
+            context.fillText(healthLabel, barX + barWidth + 24, barY + 24);
+
+            context.font = "22px Helvetica";
+            context.fillText(`Enemies: ${enemies.length}`, barX, barY + 70);
+
+            if (player.isCheatMode() || performance.now() < cheatMessageUntil) {
+                context.fillStyle = "#4dd0ff";
+                context.fillText("Cheat mode active (C)", barX, barY + 104);
+            }
+
+            context.restore();
+        };
+
+        const drawGameOver = function() {
+            context.save();
+            context.fillStyle = "rgba(0, 0, 0, 0.72)";
+            context.fillRect(0, 0, cv.width, cv.height);
+            context.font = "96px Helvetica";
+            context.textAlign = "center";
+            context.fillStyle = "#ff5c5c";
+            context.fillText("Game Over", cv.width / 2, cv.height / 2);
+            context.font = "42px Helvetica";
+            context.fillStyle = "white";
+            context.fillText("The enemies caught you.", cv.width / 2, cv.height / 2 + 80);
+            context.restore();
+        };
+
         function doFrame(now) {
+            if (gameStartTime === 0)
+                gameStartTime = now;
+
+            if (gameOver) {
+                context.clearRect(0, 0, cv.width, cv.height);
+                obstacles.forEach((obstacle) => obstacle.draw());
+                enemies.forEach((enemy) => enemy.draw());
+                player.draw();
+                drawHealthBar();
+                drawGameOver();
+                return;
+            }
+
+            const targetEnemyCount = getTargetEnemyCount(now);
+            const canSpawnEnemy = targetEnemyCount > enemies.length &&
+                now - lastSpawnTime >= enemySpawnInterval;
+            if (canSpawnEnemy)
+                spawnEnemy(now);
+
             player.update(now);
+            enemies.forEach((enemy) => enemy.update(now));
+
+            for (const enemy of enemies) {
+                if (player.getBoundingBox().intersect(enemy.getBoundingBox())) {
+                    player.takeDamage(now);
+                    if (!player.isAlive()) {
+                        gameOver = true;
+                        inGame = false;
+                        sounds.background.pause();
+                    }
+                    break;
+                }
+            }
 
             context.clearRect(0, 0, cv.width, cv.height);
 
             obstacles.forEach(_ => _.draw());
+            enemies.forEach((enemy) => enemy.draw());
             player.draw();
+            drawHealthBar();
+
+            if (gameOver) {
+                drawGameOver();
+                return;
+            }
 
             requestAnimationFrame(doFrame);
         }
@@ -221,6 +343,10 @@ const Punkman = (function(){
             switch (event.keyCode){
                 case 32:
                     player.jump();
+                    break;
+                case 67:
+                    player.toggleCheatMode();
+                    cheatMessageUntil = performance.now() + 2000;
                     break;
                 case 37:
                     player.move(1);

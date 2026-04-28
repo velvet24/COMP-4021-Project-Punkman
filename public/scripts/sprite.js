@@ -15,13 +15,17 @@ const Sprite = function(ctx, x, y) {
     // - `count` - The total number of sprite images in the sequence
     // - `timing` - The timing for each sprite image
     // - `loop` - `true` if the sprite sequence is looped
-    let sequence = { x: 0, y: 0, width: 20, height: 20, count: 1, timing: 0, loop: false };
+    let sequence = { x: 0, y: 0, width: 20, height: 20, count: 1, timing: 0, loop: false, pingpong: false };
+    let pingpongDir = 1;
 
     // This is the index indicating the current sprite image used in the sprite sequence.
     let index = 0;
 
     // This is the scaling factor for drawing the sprite.
     let scale = 1;
+
+    // This optionally overrides the collision box size and position.
+    let boundingBox = null;
 
     // This is the scaling factor to determine the size of the shadow, relative to the scaled sprite image size.
     // - `x` - The x scaling factor
@@ -63,6 +67,7 @@ const Sprite = function(ctx, x, y) {
         sequence = newSequence;
         index = 0;
         lastUpdate = 0;
+        pingpongDir = 1;
         return this;
     };
 
@@ -82,6 +87,16 @@ const Sprite = function(ctx, x, y) {
         return this;
     };
 
+    // This function sets a custom collision box for the sprite.
+    // - `value.width` - The collision width
+    // - `value.height` - The collision height
+    // - `value.offsetX` - The horizontal offset from the sprite center
+    // - `value.offsetY` - The vertical offset from the sprite center
+    const setBoundingBox = function(value) {
+        boundingBox = value;
+        return this;
+    };
+
     // This function gets the display size of the sprite.
     const getDisplaySize = function() {
         /* Find the scaled width and height of the sprite */
@@ -92,14 +107,16 @@ const Sprite = function(ctx, x, y) {
 
     // This function gets the bounding box of the sprite.
     const getBoundingBox = function() {
-        /* Get the display size of the sprite */
-        const size = getDisplaySize();
+        /* Get the collision box size */
+        const size = boundingBox ?? getDisplaySize();
+        const offsetX = boundingBox?.offsetX ?? 0;
+        const offsetY = boundingBox?.offsetY ?? 0;
 
         /* Find the box coordinates */
-        const top = y - size.height / 2;
-        const left = x - size.width / 2;
-        const bottom = y + size.height / 2;
-        const right = x + size.width / 2;
+        const top = y + offsetY - size.height / 2;
+        const left = x + offsetX - size.width / 2;
+        const bottom = y + offsetY + size.height / 2;
+        const right = x + offsetX + size.width / 2;
 
         return BoundingBox(ctx, top, left, bottom, right);
     };
@@ -161,20 +178,28 @@ const Sprite = function(ctx, x, y) {
     // - `time` - The timestamp when this function is called
     const update = function(time) {
         if (lastUpdate == 0) lastUpdate = time;
-
-
-        /* TODO */
-        /* Move to the next sprite when the timing is right */
-        if (time - lastUpdate >= sequence.timing){
-            if (index + 1 < sequence.count){
-                index++;
-            }
-            else if (sequence.loop){
-                index = (index + 1) % sequence.count;
+        if (time - lastUpdate >= sequence.timing) {
+            if (sequence.pingpong) {
+                if (pingpongDir === 1 && index + 1 < sequence.count) {
+                    index++;
+                } else if (pingpongDir === 1 && index + 1 === sequence.count) {
+                    pingpongDir = -1;
+                    index--;
+                } else if (pingpongDir === -1 && index > 0) {
+                    index--;
+                } else if (pingpongDir === -1 && index === 0) {
+                    pingpongDir = 1;
+                    index++;
+                }
+            } else {
+                if (index + 1 < sequence.count) {
+                    index++;
+                } else if (sequence.loop) {
+                    index = (index + 1) % sequence.count;
+                }
             }
             lastUpdate = time;
         }
-
         return this;
     };
 
@@ -186,6 +211,7 @@ const Sprite = function(ctx, x, y) {
         setSequence: setSequence,
         setScale: setScale,
         setShadowScale: setShadowScale,
+        setBoundingBox: setBoundingBox,
         getDisplaySize: getDisplaySize,
         getBoundingBox: getBoundingBox,
         isReady: isReady,
