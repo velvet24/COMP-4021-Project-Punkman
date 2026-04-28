@@ -211,18 +211,25 @@ const Punkman = (function(){
             Gem(context, 1024, 980, "purple")
         ];
 
-        const player = Player(context, 960, 300, gameArea, obstacles);
+        const enemies = [];
+        const bullets = [];
+        const player = Player(context, 960, 300, gameArea, obstacles, enemies, bullets);
 
         context.imageSmoothingEnabled = false;
 
         function doFrame(now) {
+            enemies.forEach(_ => _.update(now));
             player.update(now);
+            for(let i=bullets.length-1; i>=0; i--){
+                let alive = bullets[i].update();
+                if(!alive)
+                    bullets.splice(i, 1);
+            }
 
             context.clearRect(0, 0, cv.width, cv.height);
 
             obstacles.forEach(_ => _.draw());
             gems.forEach(_ => _.draw());
-            player.draw();
             
             const playerBoundingBox = player.getBoundingBox();
             gems.forEach((gem) => {
@@ -235,6 +242,9 @@ const Punkman = (function(){
                     collectedGems++;
                 }
             });
+            enemies.forEach(_ => _.draw());
+            player.draw();
+            bullets.forEach(_ => _.draw());
 
             requestAnimationFrame(doFrame);
         }
@@ -242,17 +252,19 @@ const Punkman = (function(){
         $(document).on("keydown", function(event) {
             switch (event.keyCode){
                 case 32:
+                case 75:
                     player.jump();
                     break;
                 case 37:
+                case 65:
                     player.move(1);
                     break;
-                case 38:
-                    break;
                 case 39:
+                case 68:
                     player.move(3);
                     break;
-                case 40:
+                case 74:
+                    player.shoot();
                     break;
             }
         });
@@ -260,17 +272,19 @@ const Punkman = (function(){
         $(document).on("keyup", function(event) {
             switch (event.keyCode){
                 case 32:
+                case 75:
                     player.resetJump();
                     break;
                 case 37:
+                case 65:
                     player.stop(1);
                     break;
-                case 38:
-                    break;
                 case 39:
+                case 68:
                     player.stop(3);
                     break;
-                case 40:
+                case 74:
+                    player.stopShoot();
                     break;
             }
         });
