@@ -138,6 +138,10 @@ io.on("connection", (socket) => {
                 return;
         }
 
+        for(const id in players){
+            players[id].inGame = true;
+        }
+
         io.emit("game_start");
         gameStarted = true;
     });
@@ -146,6 +150,12 @@ io.on("connection", (socket) => {
         if(players[socket.id]){
             delete players[socket.id];
             io.emit("update_players", players);
+
+            for(const id in players){
+                if(players[id].inGame)
+                    return;
+            }
+            gameStarted = false;
         }
     });
 });

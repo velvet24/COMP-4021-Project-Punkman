@@ -3,7 +3,7 @@
 // - `x` - The initial x position of the gem
 // - `y` - The initial y position of the gem
 // - `color` - The colour of the gem
-const Gem = function(ctx, x, y, color) {
+const Gem = function(ctx, x, y, color, world) {
 
     // This is the sprite sequences of the gem of four colours
     // `green`, `red`, `yellow` and `purple`.
@@ -20,53 +20,28 @@ const Gem = function(ctx, x, y, color) {
     // The sprite object is configured for the gem sprite here.
     sprite.setSequence(sequences[color])
           .setScale(5)
-          .setShadowScale({ x: 0.75, y: 0.2 })
+          .setShadowScale({ x: 0, y: 0 })
           .useSheet("images/object_sprites.png");
 
-    // This is the birth time of the gem for finding its age.
-    let birthTime = performance.now();
+    const sound = new Audio("sounds/EnergyFill.wav");
 
-    // This function sets the color of the gem.
-    // - `color` - The colour of the gem which can be
-    // `"green"`, `"red"`, `"yellow"` or `"purple"`
-    const setColor = function(color) {
-        sprite.setSequence(sequences[color]);
-        birthTime = performance.now();
-    };
-
-    // This function gets the age (in millisecond) of the gem.
-    // - `now` - The current timestamp
-    const getAge = function(now) {
-        return now - birthTime;
-    };
-
-    const collect = function() {
-        // Hide the gem
-        sprite.setScale(0);
-    };
-
-    // This function randomizes the gem colour and position.
-    // - `area` - The area that the gem should be located in.
-    const randomize = function(area) {
-        /* Randomize the color */
-        const colors = ["green", "red", "yellow", "purple"];
-        setColor(colors[Math.floor(Math.random() * 4)]);
-
-        /* Randomize the position */
-        const {x, y} = area.randomPoint();
-        sprite.setXY(x, y);
+    const update = function(time) {
+        let {x, y} = sprite.getXY();
+        for (const player of world.players) {
+            if (player.getBoundingBox().isPointInBox(x, y)) {
+                sound.currentTime = 0;
+                sound.play();
+                return false;
+            }
+        }
+        sprite.update(time);
+        return true;
     };
 
     // The methods are returned as an object here.
     return {
-        getXY: sprite.getXY,
-        setXY: sprite.setXY,
-        setColor: setColor,
-        getAge: getAge,
         getBoundingBox: sprite.getBoundingBox,
-        randomize: randomize,
         draw: sprite.draw,
-        update: sprite.update,
-        collect: collect
+        update: update,
     };
 };

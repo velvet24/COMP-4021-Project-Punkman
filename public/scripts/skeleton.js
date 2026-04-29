@@ -1,4 +1,4 @@
-const Skeleton = function(ctx, x, y, players) {
+const Skeleton = function(ctx, x, y, world) {
 
     const sequences = {
         idleLeft:  { x: 731, y: 296, width: -43, height: 37, count: 11, timing: 150, loop: true },
@@ -25,10 +25,9 @@ const Skeleton = function(ctx, x, y, players) {
     let animationDirection = 3;
 
     const sounds = {
-        buster: new Audio("sounds/MegaBuster.wav"),
-        land: new Audio("sounds/MegamanLand.wav"),
-        damage: new Audio("sounds/MegamanDamage.wav"),
-        death: new Audio("sounds/MegamanDefeat.wav")
+        attack: new Audio("sounds/SwordSwing.mp3"),
+        damage: new Audio("sounds/EnemyDamage.wav"),
+        death: new Audio("sounds/Explosion.wav")
     };
 
     let speed = 150;
@@ -94,8 +93,6 @@ const Skeleton = function(ctx, x, y, players) {
         if (recoverTimer == 0 && cooldownTimer == 0 && enableAttack && alive) {
             attackStanceTimer = 162;
             cooldownTimer = 162;
-            sounds.buster.currentTime = 0;
-            sounds.buster.play();
         }
     };
 
@@ -188,11 +185,13 @@ const Skeleton = function(ctx, x, y, players) {
         let detector = BoundingBox(ctx, y-range, x, y+range, x+range*2);
         if (direction == 1)
             detector = BoundingBox(ctx, y-range, x-range*2, y+range, x);
-        for (const player of players) {
+        for (const player of world.players) {
             if (detector.intersect(player.getBoundingBox())){
-                console.log("OK")
-                if (applyDamage)
+                if (applyDamage) {
+                    sounds.attack.currentTime = 0;
+                    sounds.attack.play();
                     player.takeDamage(25);
+                }
                 return true;
             }
         }

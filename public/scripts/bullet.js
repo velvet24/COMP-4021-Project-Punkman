@@ -1,4 +1,4 @@
-const Bullet = function(ctx, x, y, direction, enemies){
+const Bullet = function(ctx, x, y, direction, world){
     let sequence, speed;
     if(direction == 3){
         sequence = {x: 512, y: 1024, width: 256, height: 256, count:1, timing: 200, loop: false};
@@ -17,7 +17,7 @@ const Bullet = function(ctx, x, y, direction, enemies){
     const update = function(){
         let {x, y} = sprite.getXY();
 
-        for(const enemy of enemies){
+        for(const enemy of world.enemies){
             if(enemy.isAlive() && enemy.getBoundingBox().isPointInBox(x, y)){
                 enemy.takeDamage(damage);
                 return false;
