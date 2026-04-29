@@ -1,6 +1,7 @@
 const Client = (function(){
     let user = null;
     let inGame = false;
+    let selectedCharacter = "knight";
 
     const init = function(){
         socket = io();
@@ -143,6 +144,41 @@ const Client = (function(){
     };
 
     const initWaitPage = function(){
+            function generateCharacterIcon(sheetSrc, frameX, frameY, frameW, frameH, targetWidth) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const scale = targetWidth / Math.abs(frameW);
+                    canvas.width = targetWidth;
+                    canvas.height = frameH * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.drawImage(img, frameX, frameY, frameW, frameH, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL());
+                };
+                img.src = sheetSrc;
+            });
+        }
+
+        Promise.all([
+            generateCharacterIcon("images/knight.png", 29, 23, 32, 32, 80),
+            generateCharacterIcon("images/rockman_spritesheet.png", 0, 0, 256, 256, 80)
+        ]).then(([knightUrl, rockmanUrl]) => {
+            $("#char-knight").attr("src", knightUrl);
+            $("#char-rockman").attr("src", rockmanUrl);
+        });
+
+
+        $(".character-option").on("click", function() {
+            $(".character-option").removeClass("selected");
+            $(this).addClass("selected");
+            if ($(this).hasClass("knight-option")) {
+                selectedCharacter = "knight";
+            } else {
+                selectedCharacter = "rockman";
+            }
+        });
         $("#ready-button").on("click", function(e){
             socket.emit("ready");
             $("#ready-button").hide();
@@ -156,13 +192,10 @@ const Client = (function(){
         });
 
         socket.on("game_start", () => {
-            if(!inGame)
-                return;
-
+            if (!inGame) return;
             $("#wait-page").hide();
             $("#lobby").hide();
             $("#main-page").show();
-
             initMainPage();
         });
     };
@@ -219,6 +252,16 @@ const Client = (function(){
             Gem(context, 768, 976, "yellow", world),
             Gem(context, 1024, 976, "purple", world)
         ];
+        const bullets = [];
+        const shooterBullets = [];
+        let shooterSpawnTimer = 300;
+        let player;
+        if (selectedCharacter === "rockman") {
+            player = Player(context, 960, 300, gameArea, obstacles, enemies, bullets);
+        } else {
+            player = KnightPlayer(context, 960, 300, gameArea, obstacles, enemies);
+        }
+        players.push(player);
 
         context.imageSmoothingEnabled = false;
 
@@ -234,10 +277,20 @@ const Client = (function(){
 
             for(let i=world.coins.length-1; i>=0; i--){
                 let alive = world.coins[i].update(now);
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const alive = enemies[i].update(now);
+                if (alive === false) enemies.splice(i, 1);
+            }
+            player.update(now);
+            for(let i=bullets.length-1; i>=0; i--){
+                let alive = bullets[i].update();
                 if(!alive)
                     world.coins.splice(i, 1);
             }
-
+            for (let i = shooterBullets.length - 1; i >= 0; i--) {
+                const alive = shooterBullets[i].update(players);
+                if (!alive) shooterBullets.splice(i, 1);
+            }
             context.clearRect(0, 0, cv.width, cv.height);
 
             world.obstacles.forEach(_ => _.draw());
@@ -246,6 +299,28 @@ const Client = (function(){
             world.players.forEach(_ => _.draw());
             world.bullets.forEach(_ => _.draw());
 
+            obstacles.forEach(_ => _.draw());
+            gems.forEach(_ => _.draw());
+            
+            const playerBoundingBox = player.getBoundingBox();
+            gems.forEach((gem) => {
+                const gemXY = gem.getXY();
+                if (playerBoundingBox.isPointInBox(gemXY.x, gemXY.y)) {
+                    gem.collect();
+                    console.log("Gem collected!");
+                    collectedGems++;
+                }
+            });
+            enemies.forEach(_ => _.draw());
+            player.draw();
+            bullets.forEach(_ => _.draw());
+            shooterBullets.forEach(_ => _.draw());
+            shooterSpawnTimer--;
+            if (shooterSpawnTimer <= 0) {
+                const randomX = 100 + Math.random() * 1720;
+                enemies.push(Shooter(context, randomX, players, shooterBullets));
+                shooterSpawnTimer = 1200;
+            }
             requestAnimationFrame(doFrame);
         }
 
@@ -270,6 +345,9 @@ const Client = (function(){
                     break;
                 case 76:
                     pawn.takeDamage(10);
+                    break;
+                case 83:
+                    if (pawn.guard) pawn.guard();
                     break;
             }
         });
