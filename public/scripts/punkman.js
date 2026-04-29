@@ -218,6 +218,7 @@ const Punkman = (function(){
         ];
         const bullets = [];
         const player = Player(context, 960, 300, gameArea, obstacles, enemies, bullets);
+        players.push(player);
 
         context.imageSmoothingEnabled = false;
 

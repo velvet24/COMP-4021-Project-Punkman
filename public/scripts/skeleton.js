@@ -21,7 +21,7 @@ const Skeleton = function(ctx, x, y, players) {
 
     sprite.setSequence(sequences.idleRight).setScale(3).setShadowScale({x: 0, y: 0}).useSheet("images/skeleton_spritesheet.png");
 
-    let direction = 0;
+    let direction = 3;
     let animationDirection = 3;
 
     const sounds = {
@@ -46,8 +46,10 @@ const Skeleton = function(ctx, x, y, players) {
         }
     };
 
-    const maxHealth = 100;
+    const maxHealth = 200;
     let health = maxHealth;
+    const maxPoise = 5;
+    let poise = maxPoise;
     let recoverTimer = 0;
     let alive = true;
 
@@ -62,8 +64,13 @@ const Skeleton = function(ctx, x, y, players) {
         health -= damage;
 
         if (health > 0) {
-            if (attackStanceTimer == 0)
-                recoverTimer = 72;
+            if (attackStanceTimer == 0){
+                poise--;
+                if (poise == 0) {
+                    recoverTimer = 72;
+                    poise = maxPoise;
+                }
+            }
             sounds.damage.currentTime = 0;
             sounds.damage.play();
         }
@@ -78,6 +85,7 @@ const Skeleton = function(ctx, x, y, players) {
         }
     }
 
+    const range = 50;
     let attackStanceTimer = 0;
     let cooldownTimer = 0;
     let enableAttack = true;
@@ -176,21 +184,52 @@ const Skeleton = function(ctx, x, y, players) {
         return BoundingBox(ctx, y-vUpperSize, x-hHalfSize, y+vLowerSize, x+hHalfSize);
     }
 
+    const detectPlayer = function(applyDamage=false) {
+        let detector = BoundingBox(ctx, y-range, x, y+range, x+range*2);
+        if (direction == 1)
+            detector = BoundingBox(ctx, y-range, x-range*2, y+range, x);
+        for (const player of players) {
+            if (detector.isPointInBox(player.getBoundingBox())){
+                if (applyDamage)
+                    player.takeDamage(25);
+                return true;
+            }
+        }
+    }
+
+    const xl = 300;
+    const xr = 1500;
+
     const update = function(time) {
         let { x, y } = sprite.getXY();
 
         if (recoverTimer == 0 && attackStanceTimer == 0 && alive) {
-            if (direction == 1) {
-                x -= speed / 60;
+            if (detectPlayer()) {
+                attack();
             }
-            else if (direction == 3) {
-                x += speed / 60;
+            else {
+                if (direction == 1) {
+                    if (x - speed / 60 < xl)
+                        move(3);
+                    else
+                        x -= speed / 60;
+                }
+                else if (direction == 3) {
+                    if (x + speed / 60 > xr)
+                        move(1);
+                    else
+                        x += speed / 60;
+                }
+                sprite.setXY(x, y);
             }
-            sprite.setXY(x, y);
         }
 
         if (cooldownTimer > 0)
             cooldownTimer--;
+
+        if (attackStanceTimer == 99) {
+            detectPlayer(true);
+        }
 
         updateAnimation();
         sprite.update(time);
