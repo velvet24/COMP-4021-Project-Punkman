@@ -185,11 +185,13 @@ const Skeleton = function(ctx, x, y, players) {
     }
 
     const detectPlayer = function(applyDamage=false) {
+        let { x, y } = sprite.getXY();
         let detector = BoundingBox(ctx, y-range, x, y+range, x+range*2);
         if (direction == 1)
             detector = BoundingBox(ctx, y-range, x-range*2, y+range, x);
         for (const player of players) {
-            if (detector.isPointInBox(player.getBoundingBox())){
+            if (detector.intersect(player.getBoundingBox())){
+                console.log("OK")
                 if (applyDamage)
                     player.takeDamage(25);
                 return true;
