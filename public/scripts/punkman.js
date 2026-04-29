@@ -156,13 +156,10 @@ const Punkman = (function(){
         });
 
         socket.on("game_start", () => {
-            if(!inGame)
-                return;
-
+            if (!inGame) return;
             $("#wait-page").hide();
             $("#lobby").hide();
             $("#main-page").show();
-
             initMainPage();
         });
     };
@@ -217,7 +214,8 @@ const Punkman = (function(){
             Skeleton(context, 1500, 960, players)
         ];
         const bullets = [];
-        const player = Player(context, 960, 300, gameArea, obstacles, enemies, bullets);
+        const player = KnightPlayer(context, 960, 300, gameArea, obstacles, enemies);
+        // const player = Player(context, 960, 300, gameArea, obstacles, enemies, bullets);
         players.push(player);
 
         context.imageSmoothingEnabled = false;
