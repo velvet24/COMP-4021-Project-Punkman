@@ -1,4 +1,4 @@
-const Punkman = (function(){
+const Client = (function(){
     let user = null;
     let inGame = false;
     let selectedCharacter = "knight";
@@ -212,14 +212,14 @@ const Punkman = (function(){
         const cv = $("canvas").get(0);
         const context = cv.getContext("2d");
         const gameArea = BoundingBox(context, 0, 0, 1080, 1920);
-
-        let collectedGems = 0; 
         
         const sounds = {
             background: new Audio("sounds/FlashManStage.mp3")
         };
 
-        const obstacles = [
+        const world = World();
+
+        world.obstacles = [
             Floor(context, 128, 1048),
             Floor(context, 384, 1048),
             Floor(context, 640, 1048),
@@ -228,26 +228,29 @@ const Punkman = (function(){
             Floor(context, 1408, 1048),
             Floor(context, 1664, 1048),
             Floor(context, 1920, 1048),
-            Floor(context, 128, 792),
-            Floor(context, 384, 792),
-            Floor(context, 640, 792),
-            Floor(context, 896, 792),
-            Floor(context, 1152, 792),
-            Floor(context, 1408, 792),
+            Floor(context, 128, 856),
+            Floor(context, 384, 856),
+            Floor(context, 640, 856),
+            Floor(context, 896, 856),
+            Floor(context, 1152, 856),
+            Floor(context, 1408, 856),
             Wall(context, 32, 920),
             Wall(context, 1888, 920)
         ];
-        const gems = [
-            Gem(context, 150, 980, "green"),
-            Gem(context, 512, 980, "red"),
-            Gem(context, 768, 980, "yellow"),
-            Gem(context, 1024, 980, "purple")
+
+        world.players = [
+            Punkman(context, 960, 300, world)
         ];
 
-        const players = [];
+        world.enemies = [
+            Skeleton(context, 1500, 960, world)
+        ];
 
-        const enemies = [
-            Skeleton(context, 1500, 960, players)
+        world.coins = [
+            Gem(context, 256, 976, "green", world),
+            Gem(context, 512, 976, "red", world),
+            Gem(context, 768, 976, "yellow", world),
+            Gem(context, 1024, 976, "purple", world)
         ];
         const bullets = [];
         const shooterBullets = [];
@@ -263,6 +266,17 @@ const Punkman = (function(){
         context.imageSmoothingEnabled = false;
 
         function doFrame(now) {
+            world.players.forEach(_ => _.update(now));
+            world.enemies.forEach(_ => _.update(now));
+
+            for(let i=world.bullets.length-1; i>=0; i--){
+                let alive = world.bullets[i].update();
+                if(!alive)
+                    world.bullets.splice(i, 1);
+            }
+
+            for(let i=world.coins.length-1; i>=0; i--){
+                let alive = world.coins[i].update(now);
             for (let i = enemies.length - 1; i >= 0; i--) {
                 const alive = enemies[i].update(now);
                 if (alive === false) enemies.splice(i, 1);
@@ -271,13 +285,19 @@ const Punkman = (function(){
             for(let i=bullets.length-1; i>=0; i--){
                 let alive = bullets[i].update();
                 if(!alive)
-                    bullets.splice(i, 1);
+                    world.coins.splice(i, 1);
             }
             for (let i = shooterBullets.length - 1; i >= 0; i--) {
                 const alive = shooterBullets[i].update(players);
                 if (!alive) shooterBullets.splice(i, 1);
             }
             context.clearRect(0, 0, cv.width, cv.height);
+
+            world.obstacles.forEach(_ => _.draw());
+            world.coins.forEach(_ => _.draw());
+            world.enemies.forEach(_ => _.draw());
+            world.players.forEach(_ => _.draw());
+            world.bullets.forEach(_ => _.draw());
 
             obstacles.forEach(_ => _.draw());
             gems.forEach(_ => _.draw());
@@ -304,7 +324,7 @@ const Punkman = (function(){
             requestAnimationFrame(doFrame);
         }
 
-        let pawn = player;
+        let pawn = world.players[0];
 
         $(document).on("keydown", function(event) {
             switch (event.keyCode){
@@ -351,8 +371,7 @@ const Punkman = (function(){
                     break;
             }
         });
-
-        sounds.background.play();
+        
         requestAnimationFrame(doFrame);
     };
 

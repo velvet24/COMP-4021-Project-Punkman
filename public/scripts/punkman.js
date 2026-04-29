@@ -2,8 +2,7 @@
 // - `ctx` - A canvas context for drawing
 // - `x` - The initial x position of the player
 // - `y` - The initial y position of the player
-// - `gameArea` - The bounding box of the game area
-const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
+const Punkman = function(ctx, x, y, world) {
 
     // This is the sprite sequences of the player facing different directions.
     // It contains the idling sprite sequences `idleLeft`, `idleUp`, `idleRight` and `idleDown`,
@@ -127,7 +126,7 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
 
     const standing = function() {
         let {x, y} = sprite.getXY();
-        for (const obstacle of obstacles) {
+        for (const obstacle of world.obstacles) {
             if (obstacle.getBoundingBox().isPointInBox(x, y+vLowerSize+1)) {
                 return true;
             }
@@ -148,9 +147,9 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
             sounds.buster.play();
             let {x, y} = sprite.getXY();
             if (animationDirection == 3)
-                bullets.push(Bullet(ctx, x+hHalfSize, y, animationDirection, enemies));
+                world.bullets.push(Bullet(ctx, x+hHalfSize, y, animationDirection, world));
             else
-                bullets.push(Bullet(ctx, x-hHalfSize, y, animationDirection, enemies));
+                world.bullets.push(Bullet(ctx, x-hHalfSize, y, animationDirection, world));
         }
     };
 
@@ -297,7 +296,7 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
                 while (validLocation && voffset <= velocityY) {
                     voffset++;
                     let target = BoundingBox(ctx, y-vUpperSize+voffset, x-hHalfSize, y+vLowerSize+voffset, x+hHalfSize);
-                    for (const obstacle of obstacles) {
+                    for (const obstacle of world.obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
                             voffset--;
@@ -310,7 +309,7 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
                 while (validLocation && velocityY <= voffset) {
                     voffset--;
                     let target = BoundingBox(ctx, y-vUpperSize+voffset, x-hHalfSize, y+vLowerSize+voffset, x+hHalfSize);
-                    for (const obstacle of obstacles) {
+                    for (const obstacle of world.obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
                             velocityY = 0;
@@ -321,8 +320,7 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
                 }
             }
             y += voffset;
-            if (gameArea.isPointInBox(x, y))
-                sprite.setXY(x, y);
+            sprite.setXY(x, y);
         }
         else{
             velocityY = 0;
@@ -335,7 +333,7 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
                 while (validLocation && -hoffset < speed / 60){
                     hoffset--;
                     let target = BoundingBox(ctx, y-vUpperSize, x-hHalfSize+hoffset, y+vLowerSize, x+hHalfSize+hoffset);
-                    for (const obstacle of obstacles) {
+                    for (const obstacle of world.obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
                             hoffset++;
@@ -348,7 +346,7 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
                 while (validLocation && hoffset < speed / 60){
                     hoffset++;
                     let target = BoundingBox(ctx, y-vUpperSize, x-hHalfSize+hoffset, y+vLowerSize, x+hHalfSize+hoffset);
-                    for (const obstacle of obstacles) {
+                    for (const obstacle of world.obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
                             hoffset--;
@@ -358,8 +356,7 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
                 }
             }
             x += hoffset;
-            if (gameArea.isPointInBox(x, y))
-                sprite.setXY(x, y);
+            sprite.setXY(x, y);
         }
         else {
             recoverTimer--;
