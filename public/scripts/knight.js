@@ -14,7 +14,9 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
         hurtRight:   { x: 0,    y: 336,   width: 96, height: 84, count: 4,  timing: 100, loop: false },
         hurtLeft:    { x: 1056, y: 840,   width: -96, height: 84, count: 4,  timing: 100, loop: false },
         deathRight:  { x: 0,    y: 420,   width: 96, height: 84, count: 12, timing: 200, loop: false },
-        deathLeft:   { x: 1056, y: 924,   width: -96, height: 84, count: 12, timing: 200, loop: false }
+        deathLeft:   { x: 1056, y: 924,   width: -96, height: 84, count: 12, timing: 200, loop: false },
+        guardRight:  { x: 0,    y: 1008,   width: 96, height: 84, count: 5,  timing: 85, loop: true },
+        guardLeft:   { x: 1056, y: 1090,   width: -96, height: 84, count: 5,  timing: 85, loop: true }
     };
 
     const sprite = Sprite(ctx, x, y);
@@ -36,7 +38,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
     let speed = 250;
 
     const move = function(dir) {
-        if (recoverTimer == 0) {
+        if (recoverTimer == 0 && guardTimer == 0) {
             direction = dir;
             animationDirection = dir;
         }
@@ -55,6 +57,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
 
     const takeDamage = function(damage) {
         if (!alive) return;
+        if (guardTimer > 0) return;
         health -= damage;
         if (health > 0) {
             recoverTimer = 40;
@@ -77,8 +80,13 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
     let enableJump = true;
     let falling = false;
 
+    let guardTimer = 0;
+    let guardCooldownTimer = 0;
+    const GUARD_DURATION = 100;
+    const GUARD_COOLDOWN = 400;
+
     const jump = function() {
-        if (standing() && recoverTimer == 0 && enableJump && alive && attackStanceTimer == 0) {
+        if (standing() && recoverTimer == 0 && enableJump && alive && attackStanceTimer == 0 && guardTimer == 0) {
             enableJump = false;
             velocityY = jumpVelocity;
         }
@@ -108,10 +116,10 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
     let damageApplied = false;
 
     const attack = function() {
-        if (recoverTimer == 0 && cooldownTimer == 0 && enableAttack && alive) {
+        if (recoverTimer == 0 && cooldownTimer == 0 && enableAttack && alive && guardTimer == 0 && guardCooldownTimer == 0) {
             enableAttack = false;
             attackStanceTimer = ATTACK_FRAMES;
-            cooldownTimer = ATTACK_FRAMES;   // 冷卻時間等同攻擊動畫長度
+            cooldownTimer = ATTACK_FRAMES;
             damageApplied = false;
             sounds.attack.currentTime = 0;
             sounds.attack.play();
@@ -120,6 +128,14 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
 
     const stopAttack = function() {
         enableAttack = true;
+    };
+
+    const guard = function() {
+        if (recoverTimer == 0 && guardTimer == 0 && guardCooldownTimer == 0 && attackStanceTimer == 0 && alive) {
+            guardTimer = GUARD_DURATION;
+            velocityY = 0;
+            direction = 0;
+        }
     };
 
     const hHalfSize = 25;
@@ -151,7 +167,6 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
 
     let deathPlayed = false;
 
-    // ========== 動畫狀態管理 ==========
     let animationState = "";
     const updateAnimation = function() {
         if (!alive) {
@@ -159,6 +174,15 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
                 const seqName = (animationDirection == 1) ? "deathLeft" : "deathRight";
                 sprite.setSequence(sequences[seqName]);
                 deathPlayed = true;
+                animationState = seqName;
+            }
+            return;
+        }
+
+        if (guardTimer > 0) {
+            const seqName = (animationDirection == 1) ? "guardLeft" : "guardRight";
+            if (animationState !== seqName) {
+                sprite.setSequence(sequences[seqName]);
                 animationState = seqName;
             }
             return;
@@ -182,7 +206,6 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
             sprite.setSequence(sequences[targetState]);
         }
     };
-    // ==================================
 
     const update = function(time) {
         if (!alive) {
@@ -193,7 +216,15 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
 
         let { x, y } = sprite.getXY();
 
-        // 垂直移動
+        if (guardTimer > 0) {
+            guardTimer--;
+            if (guardTimer == 0) {
+                guardCooldownTimer = GUARD_COOLDOWN;
+            }
+            direction = 0;
+        }
+        if (guardCooldownTimer > 0) guardCooldownTimer--;
+
         if (!standing() || velocityY < 0) {
             velocityY += gravity;
             let validLocation = true;
@@ -230,8 +261,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
             velocityY = 0;
         }
 
-        // 水平移動
-        if (recoverTimer == 0 && attackStanceTimer == 0) {
+        if (recoverTimer == 0 && attackStanceTimer == 0 && guardTimer == 0) {
             let validLocation = true;
             let hoffset = 0;
             if (direction == 1) {
@@ -265,7 +295,6 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
             recoverTimer--;
         }
 
-        // 落地判定
         if (!standing()) {
             falling = true;
         } else if (falling) {
@@ -276,9 +305,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
             falling = false;
         }
 
-        // 攻擊計時器
         if (attackStanceTimer > 0) {
-            // 在動畫播放到一半時觸發傷害（可依需要調整比例）
             if (attackStanceTimer == Math.floor(ATTACK_FRAMES / 2)) {
                 applyMeleeDamage();
             }
@@ -300,6 +327,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
         resetJump: resetJump,
         attack: attack,
         stopAttack: stopAttack,
+        guard: guard,
         takeDamage: takeDamage,
         speedUp: function() { speed = 350; },
         slowDown: function() { speed = 250; },

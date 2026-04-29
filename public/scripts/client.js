@@ -312,6 +312,9 @@ const Punkman = (function(){
                 case 76:
                     pawn.takeDamage(10);
                     break;
+                case 83:
+                    if (pawn.guard) pawn.guard();
+                    break;
             }
         });
 
