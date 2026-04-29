@@ -1,4 +1,4 @@
-const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
+const KnightPlayer = function(ctx, x, y, gameArea, world) {
 
     const sheet = "images/knight.png";
 
@@ -99,7 +99,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
 
     const standing = function() {
         let {x, y} = sprite.getXY();
-        for (const obstacle of obstacles) {
+        for (const obstacle of world.obstacles) {
             if (obstacle.getBoundingBox().isPointInBox(x, y + vLowerSize + 1)) {
                 return true;
             }
@@ -156,7 +156,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
         } else {
             detector = BoundingBox(ctx, y - 30, x - attackRange, y + 30, x);
         }
-        for (const enemy of enemies) {
+        for (const enemy of world.enemies) {
             if (enemy.isAlive && enemy.isAlive() && enemy.getBoundingBox && enemy.getBoundingBox().intersect(detector)) {
                 enemy.takeDamage(30);
                 damageApplied = true;
@@ -233,7 +233,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
                 while (validLocation && voffset <= velocityY) {
                     voffset++;
                     let target = BoundingBox(ctx, y - vUpperSize + voffset, x - hHalfSize, y + vLowerSize + voffset, x + hHalfSize);
-                    for (const obstacle of obstacles) {
+                    for (const obstacle of world.obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
                             voffset--;
@@ -245,7 +245,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
                 while (validLocation && velocityY <= voffset) {
                     voffset--;
                     let target = BoundingBox(ctx, y - vUpperSize + voffset, x - hHalfSize, y + vLowerSize + voffset, x + hHalfSize);
-                    for (const obstacle of obstacles) {
+                    for (const obstacle of world.obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
                             velocityY = 0;
@@ -268,7 +268,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
                 while (validLocation && -hoffset < speed / 60) {
                     hoffset--;
                     let target = BoundingBox(ctx, y - vUpperSize, x - hHalfSize + hoffset, y + vLowerSize, x + hHalfSize + hoffset);
-                    for (const obstacle of obstacles) {
+                    for (const obstacle of world.obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
                             hoffset++;
@@ -280,7 +280,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
                 while (validLocation && hoffset < speed / 60) {
                     hoffset++;
                     let target = BoundingBox(ctx, y - vUpperSize, x - hHalfSize + hoffset, y + vLowerSize, x + hHalfSize + hoffset);
-                    for (const obstacle of obstacles) {
+                    for (const obstacle of world.obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
                             hoffset--;

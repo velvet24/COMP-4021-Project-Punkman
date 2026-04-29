@@ -250,13 +250,12 @@ const Client = (function(){
         ];
 
         if (selectedCharacter == "rockman") {
-            world.players.push(Punkman(context, 960, 300, world));
+            world.players.push(Punkman(context, 960, 300, gameArea, world));
         }
         else {
-            world.players.push(KnightPlayer(context, 960, 300, gameArea, world.obstacles, world.enemies));
+            world.players.push(KnightPlayer(context, 960, 300, gameArea, world));
         }
 
-        const shooterBullets = [];
         let shooterSpawnTimer = 300;
 
         context.imageSmoothingEnabled = false;
@@ -277,11 +276,6 @@ const Client = (function(){
                     world.coins.splice(i, 1);
             }
 
-            for (let i = shooterBullets.length - 1; i >= 0; i--) {
-                const alive = shooterBullets[i].update(world.players);
-                if (!alive) shooterBullets.splice(i, 1);
-            }
-
             context.clearRect(0, 0, cv.width, cv.height);
 
             world.obstacles.forEach(_ => _.draw());
@@ -290,11 +284,10 @@ const Client = (function(){
             world.players.forEach(_ => _.draw());
             world.bullets.forEach(_ => _.draw());
             
-            shooterBullets.forEach(_ => _.draw());
             shooterSpawnTimer--;
             if (shooterSpawnTimer <= 0) {
                 const randomX = 100 + Math.random() * 1720;
-                world.enemies.push(Shooter(context, randomX, world.players, shooterBullets));
+                world.enemies.push(Shooter(context, randomX, world));
                 shooterSpawnTimer = 1200;
             }
             requestAnimationFrame(doFrame);

@@ -1,4 +1,4 @@
-const Shooter = function(ctx, x, players, bullets) {
+const Shooter = function(ctx, x, world) {
     const ROOF_Y = 40;
     const START_Y = -80;
     const SLIDE_SPEED = 5;
@@ -32,7 +32,7 @@ const Shooter = function(ctx, x, players, bullets) {
     const getClosestPlayer = function() {
         let minDist = Infinity;
         let closest = null;
-        for (const player of players) {
+        for (const player of world.players) {
             if (player.getBoundingBox) {
                 const box = player.getBoundingBox();
                 const px = (box.getLeft() + box.getRight()) / 2;
@@ -91,7 +91,7 @@ const Shooter = function(ctx, x, players, bullets) {
                 if (burstTimer <= 0) {
                     const closest = getClosestPlayer();
                     if (closest) {
-                        bullets.push(ShooterBullet(ctx, x, y, closest.x, closest.y));
+                        world.bullets.push(ShooterBullet(ctx, x, y, closest.x, closest.y, world));
                     }
                     burstLeft--;
                     if (burstLeft > 0) {

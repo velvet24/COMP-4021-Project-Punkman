@@ -1,4 +1,4 @@
-const ShooterBullet = function(ctx, x, y, targetX, targetY) {
+const ShooterBullet = function(ctx, x, y, targetX, targetY, world) {
     const dx = targetX - x;
     const dy = targetY - y;
     const dist = Math.sqrt(dx * dx + dy * dy) || 1;
@@ -20,13 +20,13 @@ const ShooterBullet = function(ctx, x, y, targetX, targetY) {
     const damage = 15;
     let alive = true;
 
-    const update = function(players) {
+    const update = function() {
         if (!alive) return false;
         let { x, y } = sprite.getXY();
         x += vx;
         y += vy;
         sprite.setXY(x, y);
-        for (const player of players) {
+        for (const player of world.players) {
             if (player.getBoundingBox && player.getBoundingBox().isPointInBox(x, y)) {
                 player.takeDamage(damage);
                 alive = false;

@@ -2,7 +2,7 @@
 // - `ctx` - A canvas context for drawing
 // - `x` - The initial x position of the player
 // - `y` - The initial y position of the player
-const Punkman = function(ctx, x, y, world) {
+const Punkman = function(ctx, x, y, gameArea, world) {
 
     // This is the sprite sequences of the player facing different directions.
     // It contains the idling sprite sequences `idleLeft`, `idleUp`, `idleRight` and `idleDown`,
@@ -320,7 +320,8 @@ const Punkman = function(ctx, x, y, world) {
                 }
             }
             y += voffset;
-            sprite.setXY(x, y);
+            if (gameArea.isPointInBox(x, y))
+                sprite.setXY(x, y);
         }
         else{
             velocityY = 0;
@@ -356,7 +357,8 @@ const Punkman = function(ctx, x, y, world) {
                 }
             }
             x += hoffset;
-            sprite.setXY(x, y);
+            if (gameArea.isPointInBox(x, y))
+                sprite.setXY(x, y);
         }
         else {
             recoverTimer--;
