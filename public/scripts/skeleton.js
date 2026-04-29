@@ -7,8 +7,8 @@ const Skeleton = function(ctx, x, y, players) {
         walkLeft:  { x: 731, y: 333, width: -43, height: 37, count: 13, timing: 150, loop: true },
         walkRight: { x: 0, y: 148, width: 43, height: 37, count: 13, timing: 150, loop: true },
 
-        attackLeft:  { x: 731, y: 185, width: -43, height: 37, count: 18, timing: 150, loop: false },
-        attackRight: { x: 0, y: 0, width: 43, height: 37, count: 18, timing: 150, loop: false },
+        attackLeft:  { x: 731, y: 185, width: -43, height: 37, count: 18, timing: 150, loop: true },
+        attackRight: { x: 0, y: 0, width: 43, height: 37, count: 18, timing: 150, loop: true },
 
         hitLeft:  { x: 731, y: 259, width: -43, height: 37, count: 8, timing: 150, loop: false },
         hitRight: { x: 0, y: 74, width: 43, height: 37, count: 8, timing: 150, loop: false },
@@ -31,7 +31,7 @@ const Skeleton = function(ctx, x, y, players) {
         death: new Audio("sounds/MegamanDefeat.wav")
     };
 
-    let speed = 250;
+    let speed = 150;
 
     const move = function(dir) {
         if (recoverTimer == 0 && attackStanceTimer == 0) {
@@ -92,7 +92,6 @@ const Skeleton = function(ctx, x, y, players) {
 
     const attack = function() {
         if (recoverTimer == 0 && cooldownTimer == 0 && enableAttack && alive) {
-            enableAttack = false;
             attackStanceTimer = 162;
             cooldownTimer = 162;
             sounds.buster.currentTime = 0;
@@ -185,11 +184,13 @@ const Skeleton = function(ctx, x, y, players) {
     }
 
     const detectPlayer = function(applyDamage=false) {
+        let { x, y } = sprite.getXY();
         let detector = BoundingBox(ctx, y-range, x, y+range, x+range*2);
         if (direction == 1)
             detector = BoundingBox(ctx, y-range, x-range*2, y+range, x);
         for (const player of players) {
-            if (detector.isPointInBox(player.getBoundingBox())){
+            if (detector.intersect(player.getBoundingBox())){
+                console.log("OK")
                 if (applyDamage)
                     player.takeDamage(25);
                 return true;
@@ -227,7 +228,7 @@ const Skeleton = function(ctx, x, y, players) {
         if (cooldownTimer > 0)
             cooldownTimer--;
 
-        if (attackStanceTimer == 99) {
+        if (attackStanceTimer == 90) {
             detectPlayer(true);
         }
 
