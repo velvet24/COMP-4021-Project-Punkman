@@ -1,0 +1,210 @@
+const Skeleton = function(ctx, x, y, players) {
+
+    const sequences = {
+        idleLeft:  { x: 731, y: 296, width: -43, height: 37, count: 11, timing: 150, loop: true },
+        idleRight: { x: 0, y: 111, width: 43, height: 37, count: 11, timing: 150, loop: true },
+
+        walkLeft:  { x: 731, y: 333, width: -43, height: 37, count: 13, timing: 150, loop: true },
+        walkRight: { x: 0, y: 148, width: 43, height: 37, count: 13, timing: 150, loop: true },
+
+        attackLeft:  { x: 731, y: 185, width: -43, height: 37, count: 18, timing: 150, loop: false },
+        attackRight: { x: 0, y: 0, width: 43, height: 37, count: 18, timing: 150, loop: false },
+
+        hitLeft:  { x: 731, y: 259, width: -43, height: 37, count: 8, timing: 150, loop: false },
+        hitRight: { x: 0, y: 74, width: 43, height: 37, count: 8, timing: 150, loop: false },
+
+        deathLeft:  { x: 731, y: 222, width: -43, height: 37, count: 15, timing: 150, loop: false },
+        deathRight: { x: 0, y: 37, width: 43, height: 37, count: 15, timing: 150, loop: false },
+    };
+
+    const sprite = Sprite(ctx, x, y);
+
+    sprite.setSequence(sequences.idleRight).setScale(3).setShadowScale({x: 0, y: 0}).useSheet("images/skeleton_spritesheet.png");
+
+    let direction = 0;
+    let animationDirection = 3;
+
+    const sounds = {
+        buster: new Audio("sounds/MegaBuster.wav"),
+        land: new Audio("sounds/MegamanLand.wav"),
+        damage: new Audio("sounds/MegamanDamage.wav"),
+        death: new Audio("sounds/MegamanDefeat.wav")
+    };
+
+    let speed = 250;
+
+    const move = function(dir) {
+        if (recoverTimer == 0 && attackStanceTimer == 0) {
+            direction = dir;
+            animationDirection = dir;
+        }
+    };
+
+    const stop = function(dir) {
+        if (direction == dir) {
+            direction = 0;
+        }
+    };
+
+    const maxHealth = 100;
+    let health = maxHealth;
+    let recoverTimer = 0;
+    let alive = true;
+
+    const isAlive = function() {
+        return alive;
+    }
+
+    const takeDamage = function(damage) {
+        if (!alive)
+            return;
+        
+        health -= damage;
+
+        if (health > 0) {
+            if (attackStanceTimer == 0)
+                recoverTimer = 72;
+            sounds.damage.currentTime = 0;
+            sounds.damage.play();
+        }
+        else {
+            alive = false;
+            sounds.death.currentTime = 0;
+            sounds.death.play();
+            if (animationDirection == 1)
+                sprite.setSequence(sequences.deathLeft);
+            else
+                sprite.setSequence(sequences.deathRight);
+        }
+    }
+
+    let attackStanceTimer = 0;
+    let cooldownTimer = 0;
+    let enableAttack = true;
+
+    const attack = function() {
+        if (recoverTimer == 0 && cooldownTimer == 0 && enableAttack && alive) {
+            enableAttack = false;
+            attackStanceTimer = 162;
+            cooldownTimer = 162;
+            sounds.buster.currentTime = 0;
+            sounds.buster.play();
+        }
+    };
+
+    const stopAttack = function () {
+        enableAttack = true;
+    };
+
+    let animationState = 4;
+
+    const updateAnimation = function() {
+        if (!alive)
+            return;
+        if (animationDirection == 1) {
+            if (recoverTimer == 0) {
+                if (attackStanceTimer == 0) {
+                    if (direction == 0) {
+                        if (animationState != 0) {
+                            sprite.setSequence(sequences.idleLeft);
+                            animationState = 0;
+                        }
+                    }
+                    else {
+                        if (animationState != 1) {
+                            sprite.setSequence(sequences.walkLeft);
+                            animationState = 1;
+                        }
+                    }
+                }
+                else {
+                    if (animationState != 2) {
+                        sprite.setSequence(sequences.attackLeft);
+                        animationState = 2;
+                    }
+                    attackStanceTimer--;
+                }
+            }
+            else {
+                if (animationState != 3) {
+                    sprite.setSequence(sequences.hitLeft);
+                    animationState = 3;
+                }
+                recoverTimer--;
+            }
+        }
+        else if (animationDirection == 3) {
+            if (recoverTimer == 0) {
+                if (attackStanceTimer == 0) {
+                    if (direction == 0) {
+                        if (animationState != 4) {
+                            sprite.setSequence(sequences.idleRight);
+                            animationState = 4;
+                        }
+                    }
+                    else {
+                        if (animationState != 5) {
+                            sprite.setSequence(sequences.walkRight);
+                            animationState = 5;
+                        }
+                    }
+                }
+                else {
+                    if (animationState != 6) {
+                        sprite.setSequence(sequences.attackRight);
+                        animationState = 6;
+                    }
+                    attackStanceTimer--;
+                }
+            }
+            else {
+                if (animationState != 7) {
+                    sprite.setSequence(sequences.hitRight);
+                    animationState = 7;
+                }
+                recoverTimer--;
+            }
+        }
+    };
+
+    const hHalfSize = 30;
+    const vUpperSize = 30;
+    const vLowerSize = 55;
+
+    const getBoundingBox = function() {
+        let { x, y } = sprite.getXY();
+        return BoundingBox(ctx, y-vUpperSize, x-hHalfSize, y+vLowerSize, x+hHalfSize);
+    }
+
+    const update = function(time) {
+        let { x, y } = sprite.getXY();
+
+        if (recoverTimer == 0 && attackStanceTimer == 0 && alive) {
+            if (direction == 1) {
+                x -= speed / 60;
+            }
+            else if (direction == 3) {
+                x += speed / 60;
+            }
+            sprite.setXY(x, y);
+        }
+
+        if (cooldownTimer > 0)
+            cooldownTimer--;
+
+        updateAnimation();
+        sprite.update(time);
+    };
+
+    return {
+        move: move,
+        stop: stop,
+        attack: attack,
+        stopAttack: stopAttack,
+        isAlive: isAlive,
+        takeDamage: takeDamage,
+        getBoundingBox: getBoundingBox,
+        draw: sprite.draw,
+        update: update
+    }
+}

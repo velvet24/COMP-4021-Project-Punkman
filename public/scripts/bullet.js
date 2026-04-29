@@ -18,7 +18,7 @@ const Bullet = function(ctx, x, y, direction, enemies){
         let {x, y} = sprite.getXY();
 
         for(const enemy of enemies){
-            if(enemy.getBoundingBox().isPointInBox(x, y)){
+            if(enemy.isAlive() && enemy.getBoundingBox().isPointInBox(x, y)){
                 enemy.takeDamage(damage);
                 return false;
             }

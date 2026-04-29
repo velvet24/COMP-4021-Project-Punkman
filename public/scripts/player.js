@@ -114,7 +114,7 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
     let falling = false;
 
     const jump = function() {
-        if (standing() && enableJump && alive){
+        if (standing() && recoverTimer == 0 && enableJump && alive){
             enableJump = false;
             velocityY = jumpVelocity;
         }
@@ -140,7 +140,7 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
     let enableShoot = true;
 
     const shoot = function() {
-        if (cooldownTimer == 0 && enableShoot && alive) {
+        if (recoverTimer == 0 && cooldownTimer == 0 && enableShoot && alive) {
             enableShoot = false;
             shootStanceTimer = 20;
             cooldownTimer = 10;
@@ -388,8 +388,8 @@ const Player = function(ctx, x, y, gameArea, obstacles, enemies, bullets) {
         stop: stop,
         jump: jump,
         resetJump: resetJump,
-        shoot: shoot,
-        stopShoot: stopShoot,
+        attack: shoot,
+        stopAttack: stopShoot,
         takeDamage: takeDamage,
         speedUp: speedUp,
         slowDown: slowDown,

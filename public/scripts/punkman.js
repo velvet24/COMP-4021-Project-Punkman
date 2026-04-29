@@ -211,7 +211,11 @@ const Punkman = (function(){
             Gem(context, 1024, 980, "purple")
         ];
 
-        const enemies = [];
+        const players = [];
+
+        const enemies = [
+            Skeleton(context, 1500, 960, players)
+        ];
         const bullets = [];
         const player = Player(context, 960, 300, gameArea, obstacles, enemies, bullets);
 
@@ -247,25 +251,27 @@ const Punkman = (function(){
             requestAnimationFrame(doFrame);
         }
 
+        let pawn = player;
+
         $(document).on("keydown", function(event) {
             switch (event.keyCode){
                 case 32:
                 case 75:
-                    player.jump();
+                    pawn.jump();
                     break;
                 case 37:
                 case 65:
-                    player.move(1);
+                    pawn.move(1);
                     break;
                 case 39:
                 case 68:
-                    player.move(3);
+                    pawn.move(3);
                     break;
                 case 74:
-                    player.shoot();
+                    pawn.attack();
                     break;
                 case 76:
-                    player.takeDamage(10);
+                    pawn.takeDamage(10);
                     break;
             }
         });
@@ -274,18 +280,18 @@ const Punkman = (function(){
             switch (event.keyCode){
                 case 32:
                 case 75:
-                    player.resetJump();
+                    pawn.resetJump();
                     break;
                 case 37:
                 case 65:
-                    player.stop(1);
+                    pawn.stop(1);
                     break;
                 case 39:
                 case 68:
-                    player.stop(3);
+                    pawn.stop(3);
                     break;
                 case 74:
-                    player.stopShoot();
+                    pawn.stopAttack();
                     break;
             }
         });
