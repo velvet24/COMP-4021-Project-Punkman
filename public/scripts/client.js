@@ -238,10 +238,6 @@ const Client = (function(){
             Wall(context, 1888, 920)
         ];
 
-        world.players = [
-            Punkman(context, 960, 300, world)
-        ];
-
         world.enemies = [
             Skeleton(context, 1500, 960, world)
         ];
@@ -252,16 +248,16 @@ const Client = (function(){
             Gem(context, 768, 976, "yellow", world),
             Gem(context, 1024, 976, "purple", world)
         ];
-        const bullets = [];
+
+        if (selectedCharacter == "rockman") {
+            world.players.push(Punkman(context, 960, 300, world));
+        }
+        else {
+            world.players.push(KnightPlayer(context, 960, 300, gameArea, world.obstacles, world.enemies));
+        }
+
         const shooterBullets = [];
         let shooterSpawnTimer = 300;
-        let player;
-        if (selectedCharacter === "rockman") {
-            player = Player(context, 960, 300, gameArea, obstacles, enemies, bullets);
-        } else {
-            player = KnightPlayer(context, 960, 300, gameArea, obstacles, enemies);
-        }
-        players.push(player);
 
         context.imageSmoothingEnabled = false;
 
@@ -277,20 +273,15 @@ const Client = (function(){
 
             for(let i=world.coins.length-1; i>=0; i--){
                 let alive = world.coins[i].update(now);
-            for (let i = enemies.length - 1; i >= 0; i--) {
-                const alive = enemies[i].update(now);
-                if (alive === false) enemies.splice(i, 1);
-            }
-            player.update(now);
-            for(let i=bullets.length-1; i>=0; i--){
-                let alive = bullets[i].update();
                 if(!alive)
                     world.coins.splice(i, 1);
             }
+
             for (let i = shooterBullets.length - 1; i >= 0; i--) {
-                const alive = shooterBullets[i].update(players);
+                const alive = shooterBullets[i].update(world.players);
                 if (!alive) shooterBullets.splice(i, 1);
             }
+
             context.clearRect(0, 0, cv.width, cv.height);
 
             world.obstacles.forEach(_ => _.draw());
@@ -298,27 +289,12 @@ const Client = (function(){
             world.enemies.forEach(_ => _.draw());
             world.players.forEach(_ => _.draw());
             world.bullets.forEach(_ => _.draw());
-
-            obstacles.forEach(_ => _.draw());
-            gems.forEach(_ => _.draw());
             
-            const playerBoundingBox = player.getBoundingBox();
-            gems.forEach((gem) => {
-                const gemXY = gem.getXY();
-                if (playerBoundingBox.isPointInBox(gemXY.x, gemXY.y)) {
-                    gem.collect();
-                    console.log("Gem collected!");
-                    collectedGems++;
-                }
-            });
-            enemies.forEach(_ => _.draw());
-            player.draw();
-            bullets.forEach(_ => _.draw());
             shooterBullets.forEach(_ => _.draw());
             shooterSpawnTimer--;
             if (shooterSpawnTimer <= 0) {
                 const randomX = 100 + Math.random() * 1720;
-                enemies.push(Shooter(context, randomX, players, shooterBullets));
+                world.enemies.push(Shooter(context, randomX, world.players, shooterBullets));
                 shooterSpawnTimer = 1200;
             }
             requestAnimationFrame(doFrame);
