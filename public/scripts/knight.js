@@ -9,8 +9,8 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
         runLeft:     { x: 1056, y: 588,   width: -96, height: 84, count: 8,  timing: 100, loop: true },
         jumpRight:   { x: 0,    y: 168,   width: 96, height: 84, count: 5,  timing: 200, loop: false },
         jumpLeft:    { x: 1056, y: 672,   width: -96, height: 84, count: 5,  timing: 200, loop: false },
-        attackRight: { x: 0,    y: 252,   width: 96, height: 84, count: 6,  timing: 50, loop: false },
-        attackLeft:  { x: 1056, y: 756,   width: -96, height: 84, count: 6,  timing: 50, loop: false },
+        attackRight: { x: 0,    y: 252,   width: 96, height: 84, count: 6,  timing: 20, loop: false },
+        attackLeft:  { x: 1056, y: 756,   width: -96, height: 84, count: 6,  timing: 20, loop: false },
         hurtRight:   { x: 0,    y: 336,   width: 96, height: 84, count: 4,  timing: 100, loop: false },
         hurtLeft:    { x: 1056, y: 840,   width: -96, height: 84, count: 4,  timing: 100, loop: false },
         deathRight:  { x: 0,    y: 420,   width: 96, height: 84, count: 12, timing: 200, loop: false },
@@ -27,10 +27,10 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
     let animationDirection = 3;
 
     const sounds = {
-        attack: new Audio("sounds/MegaBuster.wav"),
+        attack: new Audio("sounds/KnightAttack.wav"),
         land:   new Audio("sounds/MegamanLand.wav"),
-        damage: new Audio("sounds/MegamanDamage.wav"),
-        death:  new Audio("sounds/MegamanDefeat.wav")
+        damage: new Audio("sounds/KnightDamage.wav"),
+        death:  new Audio("sounds/KnightDie.wav")
     };
 
     let speed = 250;
@@ -99,9 +99,9 @@ const KnightPlayer = function(ctx, x, y, gameArea, obstacles, enemies) {
         return false;
     };
 
-    const attackRange = 60;
+    const attackRange = 200;
 
-    const ATTACK_FRAMES = 80;
+    const ATTACK_FRAMES = 40;
     let attackStanceTimer = 0;
     let cooldownTimer = 0;
     let enableAttack = true;

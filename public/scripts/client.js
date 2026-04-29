@@ -1,6 +1,7 @@
 const Punkman = (function(){
     let user = null;
     let inGame = false;
+    let selectedCharacter = "knight";
 
     const init = function(){
         socket = io();
@@ -143,6 +144,41 @@ const Punkman = (function(){
     };
 
     const initWaitPage = function(){
+            function generateCharacterIcon(sheetSrc, frameX, frameY, frameW, frameH, targetWidth) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const scale = targetWidth / Math.abs(frameW);
+                    canvas.width = targetWidth;
+                    canvas.height = frameH * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.drawImage(img, frameX, frameY, frameW, frameH, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL());
+                };
+                img.src = sheetSrc;
+            });
+        }
+
+        Promise.all([
+            generateCharacterIcon("images/knight.png", 29, 23, 32, 32, 80),
+            generateCharacterIcon("images/rockman_spritesheet.png", 0, 0, 256, 256, 80)
+        ]).then(([knightUrl, rockmanUrl]) => {
+            $("#char-knight").attr("src", knightUrl);
+            $("#char-rockman").attr("src", rockmanUrl);
+        });
+
+
+        $(".character-option").on("click", function() {
+            $(".character-option").removeClass("selected");
+            $(this).addClass("selected");
+            if ($(this).hasClass("knight-option")) {
+                selectedCharacter = "knight";
+            } else {
+                selectedCharacter = "rockman";
+            }
+        });
         $("#ready-button").on("click", function(e){
             socket.emit("ready");
             $("#ready-button").hide();
@@ -214,8 +250,12 @@ const Punkman = (function(){
             Skeleton(context, 1500, 960, players)
         ];
         const bullets = [];
-        const player = KnightPlayer(context, 960, 300, gameArea, obstacles, enemies);
-        // const player = Player(context, 960, 300, gameArea, obstacles, enemies, bullets);
+        let player;
+        if (selectedCharacter === "rockman") {
+            player = Player(context, 960, 300, gameArea, obstacles, enemies, bullets);
+        } else {
+            player = KnightPlayer(context, 960, 300, gameArea, obstacles, enemies);
+        }
         players.push(player);
 
         context.imageSmoothingEnabled = false;
