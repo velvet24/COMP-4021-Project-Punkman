@@ -1,6 +1,7 @@
 const Client = (function(){
     let user = null;
     let inGame = false;
+    let characters = [];
     let selectedCharacter = "knight";
 
     const init = function(){
@@ -144,7 +145,7 @@ const Client = (function(){
     };
 
     const initWaitPage = function(){
-            function generateCharacterIcon(sheetSrc, frameX, frameY, frameW, frameH, targetWidth) {
+        function generateCharacterIcon(sheetSrc, frameX, frameY, frameW, frameH, targetWidth) {
             return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = function() {
@@ -173,14 +174,11 @@ const Client = (function(){
         $(".character-option").on("click", function() {
             $(".character-option").removeClass("selected");
             $(this).addClass("selected");
-            if ($(this).hasClass("knight-option")) {
-                selectedCharacter = "knight";
-            } else {
-                selectedCharacter = "rockman";
-            }
+            selectedCharacter = $(this).data("character");
         });
+        
         $("#ready-button").on("click", function(e){
-            socket.emit("ready");
+            socket.emit("ready", selectedCharacter);
             $("#ready-button").hide();
             $("#game-message").text("Please wait for the other players...");
         });
@@ -188,7 +186,28 @@ const Client = (function(){
         socket.on("update_players", (players) => {
             if(!inGame)
                 return;
-            updatePlayers(players);
+
+            $(".player").hide();
+
+            let index = 1;
+            for (const id in players) {
+                const player = players[id];
+
+                let name = "You are";
+                if (id != socket.id)
+                    name = `${player["name"]} is`;
+
+                let status = "";
+                if (player["ready"])
+                    status = `${name} ready!`;
+                else
+                    status = `${name} not yet ready!`;
+
+                $("#player" + index).find(".status").text(status);
+                $("#player" + index).show();
+
+                index++;
+            }
         });
 
         socket.on("game_start", () => {
@@ -204,7 +223,6 @@ const Client = (function(){
         socket.on("game_end", (players) => {
             if(!inGame)
                 return;
-            updatePlayers(players);
 
             inGame = false;
         });
@@ -250,7 +268,7 @@ const Client = (function(){
         ];
 
         if (selectedCharacter == "rockman") {
-            world.players.push(Punkman(context, 960, 300, gameArea, world));
+            world.players.push(Rockman(context, 960, 300, gameArea, world));
         }
         else {
             world.players.push(KnightPlayer(context, 960, 300, gameArea, world));
@@ -342,30 +360,6 @@ const Client = (function(){
         });
         
         requestAnimationFrame(doFrame);
-    };
-
-    const updatePlayers = function(players){
-        $(".player").hide();
-
-        let index = 1;
-        for (const id in players) {
-            const player = players[id];
-
-            let name = "You are";
-            if (id != socket.id)
-                name = `${player["name"]} is`;
-
-            let status = "";
-            if (player["ready"])
-                status = `${name} ready!`;
-            else
-                status = `${name} not yet ready!`;
-
-            $("#player" + index).find(".status").text(status);
-            $("#player" + index).show();
-
-            index++;
-        }
     };
 
     const validate = function(){

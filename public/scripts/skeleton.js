@@ -47,7 +47,7 @@ const Skeleton = function(ctx, x, y, world) {
 
     const maxHealth = 200;
     let health = maxHealth;
-    const maxPoise = 5;
+    const maxPoise = 50;
     let poise = maxPoise;
     let recoverTimer = 0;
     let alive = true;
@@ -64,8 +64,8 @@ const Skeleton = function(ctx, x, y, world) {
 
         if (health > 0) {
             if (attackStanceTimer == 0){
-                poise--;
-                if (poise == 0) {
+                poise -= damage;
+                if (poise <= 0) {
                     recoverTimer = 72;
                     poise = maxPoise;
                 }

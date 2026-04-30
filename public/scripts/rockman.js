@@ -2,7 +2,7 @@
 // - `ctx` - A canvas context for drawing
 // - `x` - The initial x position of the player
 // - `y` - The initial y position of the player
-const Punkman = function(ctx, x, y, gameArea, world) {
+const Rockman = function(ctx, x, y, gameArea, world) {
 
     // This is the sprite sequences of the player facing different directions.
     // It contains the idling sprite sequences `idleLeft`, `idleUp`, `idleRight` and `idleDown`,
@@ -85,7 +85,7 @@ const Punkman = function(ctx, x, y, gameArea, world) {
     let alive = true;
 
     const takeDamage = function(damage) {
-        if (!alive)
+        if (!alive || recoverTimer != 0)
             return;
         
         health -= damage;

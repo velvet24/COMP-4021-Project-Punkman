@@ -128,8 +128,9 @@ io.on("connection", (socket) => {
         console.log("Current players - ", players);
     });
 
-    socket.on("ready", () => {
+    socket.on("ready", (character) => {
         players[socket.id]["ready"] = true;
+        players[socket.id]["character"] = character;
         io.emit("update_players", players);
 
         for(const id in players){
