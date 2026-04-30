@@ -110,7 +110,7 @@ class PlayerBase {
     }
 
     jump() {
-        if (this.standing() && this.recoverTimer == 0 && this.enableJump && this.alive) {
+        if (this.canJump()) {
             this.enableJump = false;
             this.velocityY = this.jumpVelocity;
         }
@@ -134,6 +134,16 @@ class PlayerBase {
 
     canAttack() {
         return this.recoverTimer == 0 && this.cooldownTimer == 0 && this.enableAttack && this.alive;
+    }
+
+    // Subclasses can override to restrict movement (e.g. lock in place while swinging a sword).
+    canMove() {
+        return this.recoverTimer == 0;
+    }
+
+    // Subclasses can override to restrict jumping (e.g. lock in place while swinging a sword).
+    canJump() {
+        return this.standing() && this.recoverTimer == 0 && this.enableJump && this.alive;
     }
 
     stopAttack() {
@@ -200,7 +210,7 @@ class PlayerBase {
             this.velocityY = 0;
         }
 
-        if (this.recoverTimer == 0) {
+        if (this.canMove()) {
             let validLocation = true;
             let hoffset = 0;
             if (this.direction == 1) {
