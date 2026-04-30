@@ -31,6 +31,7 @@ const Rockman = function(ctx, x, y, gameArea, world) {
           .useSheet("images/rockman_spritesheet.png");
 
     let isLocalPlayer = false;
+    let playerIndex = 0;
 
     const setLocalPlayer = function() {
         isLocalPlayer = true;
@@ -76,8 +77,9 @@ const Rockman = function(ctx, x, y, gameArea, world) {
     let recoverTimer = 0;
     let alive = true;
 
-    const setHealthBarName = function(name) {
-        healthBarName = name;
+    const setIndex = function(index) {
+        playerIndex = index;
+        healthBarName = `#player${index}-healthbar`;
     };
 
     const takeDamage = function(damage) {
@@ -389,7 +391,7 @@ const Rockman = function(ctx, x, y, gameArea, world) {
         speedUp: speedUp,
         slowDown: slowDown,
         setLocalPlayer: setLocalPlayer,
-        setHealthBarName: setHealthBarName,
+        setIndex: setIndex,
         getBoundingBox: getBoundingBox,
         draw: sprite.draw,
         update: update

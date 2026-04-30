@@ -26,6 +26,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, world) {
           .useSheet(sheet);
 
     let isLocalPlayer = false;
+    let playerIndex = 0;
 
     const setLocalPlayer = function() {
         isLocalPlayer = true;
@@ -62,8 +63,9 @@ const KnightPlayer = function(ctx, x, y, gameArea, world) {
     let recoverTimer = 0;
     let alive = true;
 
-    const setHealthBarName = function(name) {
-        healthBarName = name;
+    const setIndex = function(index) {
+        playerIndex = index;
+        healthBarName = `#player${index}-healthbar`;
     };
 
     const takeDamage = function(damage) {
@@ -343,7 +345,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, world) {
         speedUp: function() { speed = 350; },
         slowDown: function() { speed = 250; },
         setLocalPlayer: setLocalPlayer,
-        setHealthBarName: setHealthBarName,
+        setIndex: setIndex,
         getBoundingBox: getBoundingBox,
         draw: sprite.draw,
         update: update

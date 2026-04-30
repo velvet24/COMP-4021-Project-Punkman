@@ -280,7 +280,7 @@ const Client = (function(){
                 pawn = character;
             }
             $(`#player${index}-bar`).show();
-            character.setHealthBarName(`#player${index}-healthbar`);
+            character.setIndex(index);
             world.players.push(character);
             index++;
         }
