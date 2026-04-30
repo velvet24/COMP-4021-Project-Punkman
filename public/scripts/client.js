@@ -323,48 +323,65 @@ const Client = (function(){
         }
 
         $(document).on("keydown", function(event) {
-            switch (event.keyCode){
-                case 32:
-                case 75:
-                    pawn.jump();
-                    break;
-                case 37:
-                case 65:
-                    pawn.move(1);
-                    break;
-                case 39:
-                case 68:
-                    pawn.move(3);
-                    break;
-                case 74:
-                    pawn.attack();
-                    break;
-                case 76:
-                    pawn.takeDamage(10);
-                    break;
-                case 83:
-                    if (pawn.guard) pawn.guard();
-                    break;
-            }
+            let input = {};
+            input.event = "keydown";
+            input.key = event.keyCode;
+            input.index = pawn.getIndex() - 1;
+            socket.emit("input", input);
         });
 
         $(document).on("keyup", function(event) {
-            switch (event.keyCode){
-                case 32:
-                case 75:
-                    pawn.resetJump();
-                    break;
-                case 37:
-                case 65:
-                    pawn.stop(1);
-                    break;
-                case 39:
-                case 68:
-                    pawn.stop(3);
-                    break;
-                case 74:
-                    pawn.stopAttack();
-                    break;
+            let input = {};
+            input.event = "keyup";
+            input.key = event.keyCode;
+            input.index = pawn.getIndex() - 1;
+            socket.emit("input", input);
+        });
+
+        socket.on("input", (input) => {
+            if (input.event == "keydown") {
+                switch (input.key){
+                    case 32:
+                    case 75:
+                        world.players[input.index].jump();
+                        break;
+                    case 37:
+                    case 65:
+                        world.players[input.index].move(1);
+                        break;
+                    case 39:
+                    case 68:
+                        world.players[input.index].move(3);
+                        break;
+                    case 74:
+                        world.players[input.index].attack();
+                        break;
+                    case 76:
+                        world.players[input.index].takeDamage(10);
+                        break;
+                    case 83:
+                        world.players[input.index].guard?.();
+                        break;
+                }
+            }
+            else if (input.event == "keyup") {
+                switch (input.key){
+                    case 32:
+                    case 75:
+                        world.players[input.index].resetJump();
+                        break;
+                    case 37:
+                    case 65:
+                        world.players[input.index].stop(1);
+                        break;
+                    case 39:
+                    case 68:
+                        world.players[input.index].stop(3);
+                        break;
+                    case 74:
+                        world.players[input.index].stopAttack();
+                        break;
+                }
             }
         });
 

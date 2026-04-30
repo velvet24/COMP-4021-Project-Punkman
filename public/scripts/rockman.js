@@ -82,6 +82,10 @@ const Rockman = function(ctx, x, y, gameArea, world) {
         healthBarName = `#player${index}-healthbar`;
     };
 
+    const getIndex = function() {
+        return playerIndex;
+    }
+
     const takeDamage = function(damage) {
         if (!alive || recoverTimer != 0)
             return;
@@ -392,6 +396,7 @@ const Rockman = function(ctx, x, y, gameArea, world) {
         slowDown: slowDown,
         setLocalPlayer: setLocalPlayer,
         setIndex: setIndex,
+        getIndex: getIndex,
         getBoundingBox: getBoundingBox,
         draw: sprite.draw,
         update: update

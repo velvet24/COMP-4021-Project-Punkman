@@ -68,6 +68,10 @@ const KnightPlayer = function(ctx, x, y, gameArea, world) {
         healthBarName = `#player${index}-healthbar`;
     };
 
+    const getIndex = function() {
+        return playerIndex;
+    }
+
     const takeDamage = function(damage) {
         if (!alive) return;
         if (guardTimer > 0) return;
@@ -346,6 +350,7 @@ const KnightPlayer = function(ctx, x, y, gameArea, world) {
         slowDown: function() { speed = 250; },
         setLocalPlayer: setLocalPlayer,
         setIndex: setIndex,
+        getIndex: getIndex,
         getBoundingBox: getBoundingBox,
         draw: sprite.draw,
         update: update

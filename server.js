@@ -147,6 +147,10 @@ io.on("connection", (socket) => {
         gameStarted = true;
     });
 
+    socket.on("input", (input) => {
+        io.emit("input", input);
+    });
+
     socket.on("disconnect", () => {
         if(players[socket.id]){
             delete players[socket.id];
