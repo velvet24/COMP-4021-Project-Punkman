@@ -128,8 +128,9 @@ const Rockman = function(ctx, x, y, gameArea, world) {
 
     const standing = function() {
         let {x, y} = sprite.getXY();
+        let target = BoundingBox(ctx, y+vLowerSize-1, x-hHalfSize, y+vLowerSize+1, x+hHalfSize);
         for (const obstacle of world.obstacles) {
-            if (obstacle.getBoundingBox().isPointInBox(x, y+vLowerSize+1)) {
+            if (obstacle.getBoundingBox().intersect(target)) {
                 return true;
             }
         }
