@@ -138,12 +138,12 @@ class PlayerBase {
 
     // Subclasses can override to restrict movement (e.g. lock in place while swinging a sword).
     canMove() {
-        return this.recoverTimer == 0;
+        return this.recoverTimer == 0 && this.attackStanceTimer == 0;
     }
 
     // Subclasses can override to restrict jumping (e.g. lock in place while swinging a sword).
     canJump() {
-        return this.standing() && this.recoverTimer == 0 && this.enableJump && this.alive;
+        return this.standing() && this.recoverTimer == 0 && this.attackStanceTimer == 0 && this.enableJump && this.alive;
     }
 
     stopAttack() {
@@ -243,9 +243,9 @@ class PlayerBase {
             if (this.gameArea.isPointInBox(x, y))
                 this.sprite.setXY(x, y);
         }
-        else {
+
+        if (this.recoverTimer > 0)
             this.recoverTimer--;
-        }
 
         if (!this.standing()) {
             this.falling = true;

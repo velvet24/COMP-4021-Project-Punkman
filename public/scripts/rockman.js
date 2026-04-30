@@ -45,6 +45,14 @@ class RockmanPlayer extends PlayerBase {
         this.animationState = 7;
     }
 
+    canMove() {
+        return this.recoverTimer == 0;
+    }
+
+    canJump() {
+        return this.standing() && this.recoverTimer == 0 && this.enableJump && this.alive;
+    }
+
     attack() {
         if (this.canAttack()) {
             this.enableAttack = false;
