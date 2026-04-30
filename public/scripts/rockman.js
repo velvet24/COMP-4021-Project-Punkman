@@ -1,405 +1,182 @@
-const Rockman = function(ctx, x, y, gameArea, world) {
+class RockmanPlayer extends PlayerBase {
+    constructor(ctx, x, y, gameArea, world) {
+        const sequences = {
+            idleLeft: { x: 1024, y: 1536, width: 256, height: 256, count: 1, timing: 2000, loop: false },
+            idleRight: { x: 0, y: 0, width: 256, height: 256, count: 1, timing: 2000, loop: false },
 
-    const sequences = {
-        idleLeft:  { x: 1024, y: 1536, width: 256, height: 256, count: 1, timing: 2000, loop: false },
-        idleRight: { x: 0, y: 0, width: 256, height: 256, count: 1, timing: 2000, loop: false },
+            idleShootLeft: { x: 0, y: 1792, width: 256, height: 256, count: 1, timing: 2000, loop: false },
+            idleShootRight: { x: 1024, y: 256, width: 256, height: 256, count: 1, timing: 2000, loop: false },
 
-        idleShootLeft:  { x: 0, y: 1792, width: 256, height: 256, count: 1, timing: 2000, loop: false },
-        idleShootRight: { x: 1024, y: 256, width: 256, height: 256, count: 1, timing: 2000, loop: false },
+            moveLeft: { x: 1024, y: 1792, width: -256, height: 256, count: 4, timing: 150, loop: true },
+            moveRight: { x: 0, y: 256, width: 256, height: 256, count: 4, timing: 150, loop: true },
 
-        moveLeft:  { x: 1024, y: 1792, width: -256, height: 256, count: 4, timing: 150, loop: true },
-        moveRight: { x: 0, y: 256, width: 256, height: 256, count: 4, timing: 150, loop: true },
+            moveShootLeft: { x: 768, y: 2048, width: -256, height: 256, count: 4, timing: 150, loop: true },
+            moveShootRight: { x: 256, y: 512, width: 256, height: 256, count: 4, timing: 150, loop: true },
 
-        moveShootLeft:  { x: 768, y: 2048, width: -256, height: 256, count: 4, timing: 150, loop: true },
-        moveShootRight: { x: 256, y: 512, width: 256, height: 256, count: 4, timing: 150, loop: true },
+            jumpLeft: { x: 0, y: 1536, width: 256, height: 256, count: 1, timing: 2000, loop: false },
+            jumpRight: { x: 1024, y: 0, width: 256, height: 256, count: 1, timing: 2000, loop: false },
 
-        jumpLeft: { x: 0, y: 1536, width: 256, height: 256, count: 1, timing: 2000, loop: false },
-        jumpRight: { x: 1024, y: 0, width: 256, height: 256, count: 1, timing: 2000, loop: false },
+            jumpShootLeft: { x: 1024, y: 2048, width: 256, height: 256, count: 1, timing: 2000, loop: false },
+            jumpShootRight: { x: 0, y: 512, width: 256, height: 256, count: 1, timing: 2000, loop: false },
 
-        jumpShootLeft: { x: 1024, y: 2048, width: 256, height: 256, count: 1, timing: 2000, loop: false },
-        jumpShootRight: { x: 0, y: 512, width: 256, height: 256, count: 1, timing: 2000, loop: false },
+            recoverLeft: { x: 768, y: 2304, width: -256, height: 256, count: 2, timing: 100, loop: true },
+            recoverRight: { x: 256, y: 768, width: 256, height: 256, count: 2, timing: 100, loop: true }
+        };
 
-        recoverLeft:  { x: 768, y: 2304, width: -256, height: 256, count: 2, timing: 100, loop: true },
-        recoverRight: { x: 256, y: 768, width: 256, height: 256, count: 2, timing: 100, loop: true },
-    };
-
-    const sprite = Sprite(ctx, x, y);
-
-    sprite.setSequence(sequences.idleRight)
-          .setScale(0.5)
-          .setShadowScale({ x: 0, y: 0 })
-          .useSheet("images/rockman_spritesheet.png");
-
-    let isLocalPlayer = false;
-    let playerIndex = 0;
-
-    const setLocalPlayer = function() {
-        isLocalPlayer = true;
-    };
-
-    let direction = 0;
-
-    let animationDirection = 3;
-
-    const sounds = {
-        buster: new Audio("sounds/MegaBuster.wav"),
-        land: new Audio("sounds/MegamanLand.wav"),
-        damage: new Audio("sounds/MegamanDamage.wav"),
-        death: new Audio("sounds/MegamanDefeat.wav")
-    };
-
-    let speed = 250;
-
-    const move = function(dir) {
-        if (recoverTimer == 0) {
-            direction = dir;
-            animationDirection = dir;
-        }
-    };
-
-    const stop = function(dir) {
-        if (direction == dir) {
-            direction = 0;
-        }
-    };
-
-    const speedUp = function() {
-        speed = 350;
-    };
-
-    const slowDown = function() {
-        speed = 250;
-    };
-
-    const maxHealth = 100;
-    let health = maxHealth;
-    let healthBarName = "";
-    let recoverTimer = 0;
-    let alive = true;
-
-    const setIndex = function(index) {
-        playerIndex = index;
-        healthBarName = `#player${index}-healthbar`;
-    };
-
-    const getIndex = function() {
-        return playerIndex;
-    }
-
-    const takeDamage = function(damage) {
-        if (!alive || recoverTimer != 0)
-            return;
-        
-        health -= damage;
-
-        if (health > 0) {
-            recoverTimer = 40;
-            velocityY = 0;
-            sounds.damage.currentTime = 0;
-            sounds.damage.play();
-            let progress = health / maxHealth * 100 + '%';
-            $(healthBarName).animate({height: progress}, 500);
-        }
-        else {
-            alive = false;
-            sounds.death.currentTime = 0;
-            sounds.death.play();
-            $(healthBarName).animate({height: "0%"}, 500);
-        }
-    }
-
-    const gravity = 1;
-    const jumpVelocity = -20;
-    let velocityY = 0;
-    let enableJump = true;
-    let falling = false;
-
-    const jump = function() {
-        if (standing() && recoverTimer == 0 && enableJump && alive){
-            enableJump = false;
-            velocityY = jumpVelocity;
-        }
-    };
-
-    const resetJump = function() {
-        velocityY /= 3;
-        enableJump = true;
-    }
-
-    const standing = function() {
-        let {x, y} = sprite.getXY();
-        let target = BoundingBox(ctx, y+vLowerSize-1, x-hHalfSize, y+vLowerSize+1, x+hHalfSize);
-        for (const obstacle of world.obstacles) {
-            if (obstacle.getBoundingBox().intersect(target)) {
-                return true;
+        super(ctx, x, y, gameArea, world, {
+            initialSequence: sequences.idleRight,
+            sheet: "images/rockman_spritesheet.png",
+            scale: 0.5,
+            shadowScale: { x: 0, y: 0 },
+            sounds: {
+                land: new Audio("sounds/MegamanLand.wav"),
+                damage: new Audio("sounds/MegamanDamage.wav"),
+                death: new Audio("sounds/MegamanDefeat.wav")
+            },
+            size: {
+                hHalfSize: 25,
+                vUpperSize: 30,
+                vLowerSize: 55
             }
-        }
-        return false;
-    };
+        });
 
-    let shootStanceTimer = 0;
-    let cooldownTimer = 0;
-    let enableShoot = true;
+        this.sequences = sequences;
+        this.busterSound = new Audio("sounds/MegaBuster.wav");
+        this.animationState = 7;
+    }
 
-    const shoot = function() {
-        if (recoverTimer == 0 && cooldownTimer == 0 && enableShoot && alive) {
-            enableShoot = false;
-            shootStanceTimer = 20;
-            cooldownTimer = 10;
-            sounds.buster.currentTime = 0;
-            sounds.buster.play();
-            let {x, y} = sprite.getXY();
-            if (animationDirection == 3)
-                world.bullets.push(Bullet(ctx, x+hHalfSize, y, animationDirection, world));
+    attack() {
+        if (this.canAttack()) {
+            this.enableAttack = false;
+            this.attackStanceTimer = 20;
+            this.cooldownTimer = 10;
+            this.busterSound.currentTime = 0;
+            this.busterSound.play();
+            const { x, y } = this.sprite.getXY();
+            if (this.animationDirection == 3)
+                this.world.bullets.push(Bullet(this.ctx, x + this.hHalfSize, y, this.animationDirection, this.world));
             else
-                world.bullets.push(Bullet(ctx, x-hHalfSize, y, animationDirection, world));
+                this.world.bullets.push(Bullet(this.ctx, x - this.hHalfSize, y, this.animationDirection, this.world));
         }
-    };
-
-    const stopShoot = function () {
-        enableShoot = true;
-    };
-
-    let animationState = 7;
-
-    const updateAnimation = function() {
-        if (!alive)
-            return;
-        if (animationDirection == 1) {
-            if (recoverTimer == 0) {
-                if (standing()) {
-                    if (direction == 0) {
-                        if (shootStanceTimer == 0) {
-                            if (animationState != 0) {
-                                sprite.setSequence(sequences.idleLeft);
-                                animationState = 0;
-                            }
-                        }
-                        else {
-                            if (animationState != 1) {
-                                sprite.setSequence(sequences.idleShootLeft);
-                                animationState = 1;
-                            }
-                            shootStanceTimer--;
-                        }
-                    }
-                    else {
-                        if (shootStanceTimer == 0) {
-                            if (animationState != 2) {
-                                sprite.setSequence(sequences.moveLeft);
-                                animationState = 2;
-                            }
-                        }
-                        else {
-                            if (animationState != 3) {
-                                sprite.setSequence(sequences.moveShootLeft);
-                                animationState = 3;
-                            }
-                            shootStanceTimer--;
-                        }
-                    }
-                }
-                else {
-                    if (shootStanceTimer == 0) {
-                        if (animationState != 4) {
-                            sprite.setSequence(sequences.jumpLeft);
-                            animationState = 4;
-                        }
-                    }
-                    else {
-                        if (animationState != 5) {
-                            sprite.setSequence(sequences.jumpShootLeft);
-                            animationState = 5;
-                        }
-                        shootStanceTimer--;
-                    }
-                }
-            }
-            else if (animationState != 6) {
-                sprite.setSequence(sequences.recoverLeft);
-                animationState = 6;
-            }
-        }
-        else if (animationDirection == 3) {
-            if (recoverTimer == 0) {
-                if (standing()) {
-                    if (direction == 0) {
-                        if (shootStanceTimer == 0) {
-                            if (animationState != 7) {
-                                sprite.setSequence(sequences.idleRight);
-                                animationState = 7;
-                            }
-                        }
-                        else {
-                            if (animationState != 8) {
-                                sprite.setSequence(sequences.idleShootRight);
-                                animationState = 8;
-                            }
-                            shootStanceTimer--;
-                        }
-                    }
-                    else {
-                        if (shootStanceTimer == 0) {
-                            if (animationState != 9) {
-                                sprite.setSequence(sequences.moveRight);
-                                animationState = 9;
-                            }
-                        }
-                        else {
-                            if (animationState != 10) {
-                                sprite.setSequence(sequences.moveShootRight);
-                                animationState = 10;
-                            }
-                            shootStanceTimer--;
-                        }
-                    }
-                }
-                else {
-                    if (shootStanceTimer == 0) {
-                        if (animationState != 11) {
-                            sprite.setSequence(sequences.jumpRight);
-                            animationState = 11;
-                        }
-                    }
-                    else {
-                        if (animationState != 12) {
-                            sprite.setSequence(sequences.jumpShootRight);
-                            animationState = 12;
-                        }
-                        shootStanceTimer--;
-                    }
-                }
-            }
-            else if (animationState != 13) {
-                sprite.setSequence(sequences.recoverRight);
-                animationState = 13;
-            }
-        }
-    };
-
-    const hHalfSize = 25;
-    const vUpperSize = 30;
-    const vLowerSize = 55;
-
-    const getBoundingBox = function() {
-        let { x, y } = sprite.getXY();
-        return BoundingBox(ctx, y-vUpperSize, x-hHalfSize, y+vLowerSize, x+hHalfSize);
     }
 
-    const update = function(time) {
-        if (!alive)
+    updateAnimation() {
+        if (!this.alive)
             return;
-        let { x, y } = sprite.getXY();
 
-        if (!standing() || velocityY < 0) {
-            velocityY += gravity;
-            let validLocation = true;
-            let voffset = 0;
-            if (velocityY > 0) {
-                while (validLocation && voffset <= velocityY) {
-                    voffset++;
-                    let target = BoundingBox(ctx, y-vUpperSize+voffset, x-hHalfSize, y+vLowerSize+voffset, x+hHalfSize);
-                    for (const obstacle of world.obstacles) {
-                        if (obstacle.getBoundingBox().intersect(target)) {
-                            validLocation = false;
-                            voffset--;
-                            break;
+        if (this.animationDirection == 1) {
+            if (this.recoverTimer == 0) {
+                if (this.standing()) {
+                    if (this.direction == 0) {
+                        if (this.attackStanceTimer == 0) {
+                            if (this.animationState != 0) {
+                                this.sprite.setSequence(this.sequences.idleLeft);
+                                this.animationState = 0;
+                            }
+                        }
+                        else {
+                            if (this.animationState != 1) {
+                                this.sprite.setSequence(this.sequences.idleShootLeft);
+                                this.animationState = 1;
+                            }
+                            this.attackStanceTimer--;
+                        }
+                    }
+                    else {
+                        if (this.attackStanceTimer == 0) {
+                            if (this.animationState != 2) {
+                                this.sprite.setSequence(this.sequences.moveLeft);
+                                this.animationState = 2;
+                            }
+                        }
+                        else {
+                            if (this.animationState != 3) {
+                                this.sprite.setSequence(this.sequences.moveShootLeft);
+                                this.animationState = 3;
+                            }
+                            this.attackStanceTimer--;
                         }
                     }
                 }
-            }
-            else{
-                while (validLocation && velocityY <= voffset) {
-                    voffset--;
-                    let target = BoundingBox(ctx, y-vUpperSize+voffset, x-hHalfSize, y+vLowerSize+voffset, x+hHalfSize);
-                    for (const obstacle of world.obstacles) {
-                        if (obstacle.getBoundingBox().intersect(target)) {
-                            validLocation = false;
-                            velocityY = 0;
-                            voffset++;
-                            break;
+                else {
+                    if (this.attackStanceTimer == 0) {
+                        if (this.animationState != 4) {
+                            this.sprite.setSequence(this.sequences.jumpLeft);
+                            this.animationState = 4;
                         }
+                    }
+                    else {
+                        if (this.animationState != 5) {
+                            this.sprite.setSequence(this.sequences.jumpShootLeft);
+                            this.animationState = 5;
+                        }
+                        this.attackStanceTimer--;
                     }
                 }
             }
-            y += voffset;
-            if (gameArea.isPointInBox(x, y))
-                sprite.setXY(x, y);
+            else if (this.animationState != 6) {
+                this.sprite.setSequence(this.sequences.recoverLeft);
+                this.animationState = 6;
+            }
         }
-        else{
-            velocityY = 0;
-        }
-
-        if (recoverTimer == 0) {
-            let validLocation = true;
-            let hoffset = 0;
-            if (direction == 1) {
-                while (validLocation && -hoffset < speed / 60){
-                    hoffset--;
-                    let target = BoundingBox(ctx, y-vUpperSize, x-hHalfSize+hoffset, y+vLowerSize, x+hHalfSize+hoffset);
-                    for (const obstacle of world.obstacles) {
-                        if (obstacle.getBoundingBox().intersect(target)) {
-                            validLocation = false;
-                            hoffset++;
-                            break;
+        else if (this.animationDirection == 3) {
+            if (this.recoverTimer == 0) {
+                if (this.standing()) {
+                    if (this.direction == 0) {
+                        if (this.attackStanceTimer == 0) {
+                            if (this.animationState != 7) {
+                                this.sprite.setSequence(this.sequences.idleRight);
+                                this.animationState = 7;
+                            }
+                        }
+                        else {
+                            if (this.animationState != 8) {
+                                this.sprite.setSequence(this.sequences.idleShootRight);
+                                this.animationState = 8;
+                            }
+                            this.attackStanceTimer--;
+                        }
+                    }
+                    else {
+                        if (this.attackStanceTimer == 0) {
+                            if (this.animationState != 9) {
+                                this.sprite.setSequence(this.sequences.moveRight);
+                                this.animationState = 9;
+                            }
+                        }
+                        else {
+                            if (this.animationState != 10) {
+                                this.sprite.setSequence(this.sequences.moveShootRight);
+                                this.animationState = 10;
+                            }
+                            this.attackStanceTimer--;
                         }
                     }
                 }
-            }
-            else if (direction == 3) {
-                while (validLocation && hoffset < speed / 60){
-                    hoffset++;
-                    let target = BoundingBox(ctx, y-vUpperSize, x-hHalfSize+hoffset, y+vLowerSize, x+hHalfSize+hoffset);
-                    for (const obstacle of world.obstacles) {
-                        if (obstacle.getBoundingBox().intersect(target)) {
-                            validLocation = false;
-                            hoffset--;
-                            break;
+                else {
+                    if (this.attackStanceTimer == 0) {
+                        if (this.animationState != 11) {
+                            this.sprite.setSequence(this.sequences.jumpRight);
+                            this.animationState = 11;
                         }
+                    }
+                    else {
+                        if (this.animationState != 12) {
+                            this.sprite.setSequence(this.sequences.jumpShootRight);
+                            this.animationState = 12;
+                        }
+                        this.attackStanceTimer--;
                     }
                 }
             }
-            x += hoffset;
-            if (gameArea.isPointInBox(x, y))
-                sprite.setXY(x, y);
+            else if (this.animationState != 13) {
+                this.sprite.setSequence(this.sequences.recoverRight);
+                this.animationState = 13;
+            }
         }
-        else {
-            recoverTimer--;
-        }
+    }
+}
 
-        if (!standing()) {
-            falling = true;
-        }
-        else if (falling) {
-            falling = false;
-            sounds.land.currentTime = 0;
-            sounds.land.play();
-        }
-        else {
-            falling = false;
-        }
-
-        if(cooldownTimer > 0)
-            cooldownTimer--;
-        updateAnimation();
-        sprite.update(time);
-    };
-
-    return {
-        move: move,
-        stop: stop,
-        jump: jump,
-        resetJump: resetJump,
-        attack: shoot,
-        stopAttack: stopShoot,
-        takeDamage: takeDamage,
-        speedUp: speedUp,
-        slowDown: slowDown,
-        setLocalPlayer: setLocalPlayer,
-        setIndex: setIndex,
-        getIndex: getIndex,
-        getBoundingBox: getBoundingBox,
-        draw: sprite.draw,
-        update: update
-    };
+const Rockman = function(ctx, x, y, gameArea, world) {
+    return new RockmanPlayer(ctx, x, y, gameArea, world);
 };
