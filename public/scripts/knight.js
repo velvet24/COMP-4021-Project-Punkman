@@ -25,6 +25,12 @@ const KnightPlayer = function(ctx, x, y, gameArea, world) {
           .setShadowScale({ x: 0, y: 0 })
           .useSheet(sheet);
 
+    let isLocalPlayer = false;
+
+    const setLocalPlayer = function() {
+        isLocalPlayer = true;
+    };
+
     let direction = 0;
     let animationDirection = 3;
 
@@ -52,8 +58,13 @@ const KnightPlayer = function(ctx, x, y, gameArea, world) {
 
     const maxHealth = 100;
     let health = maxHealth;
+    let healthBarName = "";
     let recoverTimer = 0;
     let alive = true;
+
+    const setHealthBarName = function(name) {
+        healthBarName = name;
+    };
 
     const takeDamage = function(damage) {
         if (!alive) return;
@@ -65,12 +76,12 @@ const KnightPlayer = function(ctx, x, y, gameArea, world) {
             sounds.damage.currentTime = 0;
             sounds.damage.play();
             let progress = health / maxHealth * 100 + '%';
-            $("#player1-healthbar").animate({height: progress}, 500);
+            $(healthBarName).animate({height: progress}, 500);
         } else {
             alive = false;
             sounds.death.currentTime = 0;
             sounds.death.play();
-            $("#player1-healthbar").animate({height: "0%"}, 500);
+            $(healthBarName).animate({height: "0%"}, 500);
         }
     };
 
@@ -331,6 +342,8 @@ const KnightPlayer = function(ctx, x, y, gameArea, world) {
         takeDamage: takeDamage,
         speedUp: function() { speed = 350; },
         slowDown: function() { speed = 250; },
+        setLocalPlayer: setLocalPlayer,
+        setHealthBarName: setHealthBarName,
         getBoundingBox: getBoundingBox,
         draw: sprite.draw,
         update: update

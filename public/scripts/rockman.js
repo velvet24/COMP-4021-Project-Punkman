@@ -1,12 +1,5 @@
-// This function defines the Player module.
-// - `ctx` - A canvas context for drawing
-// - `x` - The initial x position of the player
-// - `y` - The initial y position of the player
 const Rockman = function(ctx, x, y, gameArea, world) {
 
-    // This is the sprite sequences of the player facing different directions.
-    // It contains the idling sprite sequences `idleLeft`, `idleUp`, `idleRight` and `idleDown`,
-    // and the moving sprite sequences `moveLeft`, `moveUp`, `moveRight` and `moveDown`.
     const sequences = {
         idleLeft:  { x: 1024, y: 1536, width: 256, height: 256, count: 1, timing: 2000, loop: false },
         idleRight: { x: 0, y: 0, width: 256, height: 256, count: 1, timing: 2000, loop: false },
@@ -30,21 +23,19 @@ const Rockman = function(ctx, x, y, gameArea, world) {
         recoverRight: { x: 256, y: 768, width: 256, height: 256, count: 2, timing: 100, loop: true },
     };
 
-    // This is the sprite object of the player created from the Sprite module.
     const sprite = Sprite(ctx, x, y);
 
-    // The sprite object is configured for the player sprite here.
     sprite.setSequence(sequences.idleRight)
           .setScale(0.5)
           .setShadowScale({ x: 0, y: 0 })
           .useSheet("images/rockman_spritesheet.png");
 
-    // This is the moving direction, which can be a number from 0 to 4:
-    // - `0` - not moving
-    // - `1` - moving to the left
-    // - `2` - moving up
-    // - `3` - moving to the right
-    // - `4` - moving down
+    let isLocalPlayer = false;
+
+    const setLocalPlayer = function() {
+        isLocalPlayer = true;
+    };
+
     let direction = 0;
 
     let animationDirection = 3;
@@ -81,8 +72,13 @@ const Rockman = function(ctx, x, y, gameArea, world) {
 
     const maxHealth = 100;
     let health = maxHealth;
+    let healthBarName = "";
     let recoverTimer = 0;
     let alive = true;
+
+    const setHealthBarName = function(name) {
+        healthBarName = name;
+    };
 
     const takeDamage = function(damage) {
         if (!alive || recoverTimer != 0)
@@ -96,13 +92,13 @@ const Rockman = function(ctx, x, y, gameArea, world) {
             sounds.damage.currentTime = 0;
             sounds.damage.play();
             let progress = health / maxHealth * 100 + '%';
-            $("#player1-healthbar").animate({height: progress}, 500);
+            $(healthBarName).animate({height: progress}, 500);
         }
         else {
             alive = false;
             sounds.death.currentTime = 0;
             sounds.death.play();
-            $("#player1-healthbar").animate({height: "0%"}, 500);
+            $(healthBarName).animate({height: "0%"}, 500);
         }
     }
 
@@ -392,6 +388,8 @@ const Rockman = function(ctx, x, y, gameArea, world) {
         takeDamage: takeDamage,
         speedUp: speedUp,
         slowDown: slowDown,
+        setLocalPlayer: setLocalPlayer,
+        setHealthBarName: setHealthBarName,
         getBoundingBox: getBoundingBox,
         draw: sprite.draw,
         update: update

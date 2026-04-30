@@ -2,7 +2,7 @@ const Client = (function(){
     let user = null;
     let inGame = false;
     let characters = [];
-    let selectedCharacter = "knight";
+    let selectedCharacter = "Knight";
 
     const init = function(){
         socket = io();
@@ -210,23 +210,16 @@ const Client = (function(){
             }
         });
 
-        socket.on("game_start", () => {
+        socket.on("game_start", (players) => {
             if (!inGame) return;
             $("#wait-page").hide();
             $("#lobby").hide();
             $("#main-page").show();
-            initMainPage();
+            initMainPage(players);
         });
     };
 
-    const initMainPage = function(){
-        socket.on("game_end", (players) => {
-            if(!inGame)
-                return;
-
-            inGame = false;
-        });
-
+    const initMainPage = function(players){
         const cv = $("canvas").get(0);
         const context = cv.getContext("2d");
         const gameArea = BoundingBox(context, 0, 0, 1080, 1920);
@@ -267,11 +260,29 @@ const Client = (function(){
             Gem(context, 1024, 976, "purple", world)
         ];
 
-        if (selectedCharacter == "rockman") {
-            world.players.push(Rockman(context, 960, 300, gameArea, world));
-        }
-        else {
-            world.players.push(KnightPlayer(context, 960, 300, gameArea, world));
+        let pawn;
+
+        let index = 1;
+
+        for (const id in players) {
+            let character;
+            switch (players[id].character) {
+                case "Rockman":
+                    character = Rockman(context, 960+index*100, 300, gameArea, world);
+                    break;
+                case "Knight":
+                    character = KnightPlayer(context, 960+index*100, 300, gameArea, world);
+                    break;
+            }
+
+            if (id == socket.id) {
+                character.setLocalPlayer();
+                pawn = character;
+            }
+            $(`#player${index}-bar`).show();
+            character.setHealthBarName(`#player${index}-healthbar`);
+            world.players.push(character);
+            index++;
         }
 
         let shooterSpawnTimer = 300;
@@ -310,8 +321,6 @@ const Client = (function(){
             }
             requestAnimationFrame(doFrame);
         }
-
-        let pawn = world.players[0];
 
         $(document).on("keydown", function(event) {
             switch (event.keyCode){
@@ -357,6 +366,13 @@ const Client = (function(){
                     pawn.stopAttack();
                     break;
             }
+        });
+
+        socket.on("game_end", (players) => {
+            if(!inGame)
+                return;
+
+            inGame = false;
         });
         
         requestAnimationFrame(doFrame);

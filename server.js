@@ -143,7 +143,7 @@ io.on("connection", (socket) => {
             players[id].inGame = true;
         }
 
-        io.emit("game_start");
+        io.emit("game_start", players);
         gameStarted = true;
     });
 
