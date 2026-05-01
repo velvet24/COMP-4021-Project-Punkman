@@ -253,6 +253,8 @@ const Client = (function(){
 
         world.enemies = [
             Skeleton(context, 1500, 960, "skeleton", world),
+            Skeleton(context, 1200, 960, "skeleton", world),
+            Skeleton(context, 500, 960, "skeleton", world),
             Boss(context, 960, 650, "boss", world)
         ];
 

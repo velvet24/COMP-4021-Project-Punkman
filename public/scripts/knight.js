@@ -25,8 +25,9 @@ class KnightPlayer extends PlayerBase {
             shadowScale: { x: 0, y: 0 },
             sounds: {
                 attack: new Audio("sounds/KnightAttack.wav"),
-                land:   new Audio("sounds/MegamanLand.wav"),
-                damage: new Audio("sounds/KnightDamage.mp3"),
+                parry:  new Audio("sounds/hero_parry.wav"),
+                land:   new Audio("sounds/hero_land_soft.wav"),
+                damage: new Audio("sounds/hero_damage.wav"),
                 death:  new Audio("sounds/KnightDie.wav")
             },
             size: {
@@ -71,7 +72,11 @@ class KnightPlayer extends PlayerBase {
     }
     
     takeDamage(damage) {
-        if (this.isGuarding) return;
+        if (this.isGuarding) {
+            this.sounds.parry.currentTime = 0;
+            this.sounds.parry.play();
+            return;
+        }
         super.takeDamage(damage);
     }
 
