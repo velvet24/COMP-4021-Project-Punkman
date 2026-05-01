@@ -45,9 +45,7 @@ class KnightPlayer extends PlayerBase {
         this.enableAttack = true;
         this.damageApplied = false;
 
-        this.guardTimer = 0;
-        this.guardCooldownTimer = 0;
-        this.GUARD_DURATION = 100;
+        this.isGuarding = false;
         this.enableGuard = true;
 
         this.animationState = "";
@@ -55,12 +53,12 @@ class KnightPlayer extends PlayerBase {
     }
 
     canMove() {
-        return this.recoverTimer == 0 && this.guardTimer == 0 && this.attackStanceTimer == 0;
+        return this.recoverTimer == 0 && !this.isGuarding && this.attackStanceTimer == 0;
     }
 
     canJump() {
         return this.standing() && this.recoverTimer == 0 &&
-               this.attackStanceTimer == 0 && this.guardTimer == 0 &&
+               this.attackStanceTimer == 0 && !this.isGuarding &&
                this.enableJump && this.alive;
     }
 
@@ -73,22 +71,21 @@ class KnightPlayer extends PlayerBase {
     }
     
     takeDamage(damage) {
-        if (this.guardTimer > 0) return;
+        if (this.isGuarding) return;
         super.takeDamage(damage);
     }
 
     guard() {
-        if (this.recoverTimer == 0 && this.guardTimer == 0 &&
-            this.guardCooldownTimer == 0 && this.attackStanceTimer == 0 && this.alive && this.enableGuard) {
+        if (this.recoverTimer == 0 && this.attackStanceTimer == 0 && this.alive && this.enableGuard) {
             this.enableGuard = false;
-            this.guardTimer = this.GUARD_DURATION;
+            this.isGuarding = true;
             this.velocityY = 0;
             this.direction = 0;
         }
     }
 
     stopGuard() {
-        this.guardTimer = 0;
+        this.isGuarding = false;
         this.enableGuard = true;
     }
 
@@ -118,14 +115,6 @@ class KnightPlayer extends PlayerBase {
             return;
         }
 
-        if (this.guardTimer > 0) {
-            this.guardTimer--;
-            if (this.guardTimer == 0) {
-                this.guardCooldownTimer = this.GUARD_COOLDOWN;
-            }
-        }
-        if (this.guardCooldownTimer > 0) this.guardCooldownTimer--;
-
         super.update(time);
     }
 
@@ -150,7 +139,7 @@ class KnightPlayer extends PlayerBase {
             this.attackStanceTimer--;
         }
 
-        if (this.guardTimer > 0) {
+        if (this.isGuarding) {
             const seqName = (this.animationDirection == 1) ? "guardLeft" : "guardRight";
             if (this.animationState !== seqName) {
                 this.sprite.setSequence(this.sequences[seqName]);
