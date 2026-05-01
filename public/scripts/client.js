@@ -252,7 +252,8 @@ const Client = (function(){
         ];
 
         world.enemies = [
-            Skeleton(context, 1500, 960, "skeleton", world)
+            Skeleton(context, 1500, 960, "skeleton", world),
+            Boss(context, 960, 650, "boss", world)
         ];
 
         world.coins = [
@@ -329,6 +330,11 @@ const Client = (function(){
                         world.coins.splice(i, 1);
                 }
 
+                for(let i = world.cloudStrikes.length - 1; i >= 0; i--){
+                    const alive = world.cloudStrikes[i].update(simulationNow);
+                    if(!alive) world.cloudStrikes.splice(i, 1);
+                }
+
                 shooterSpawnTimer--;
                 if (shooterSpawnTimer <= 0) {
                     const randomX = 100 + Math.random() * 1720;
@@ -351,6 +357,7 @@ const Client = (function(){
             world.enemies.forEach(_ => _.draw());
             world.players.forEach(_ => _.draw());
             world.bullets.forEach(_ => _.draw());
+            world.cloudStrikes.forEach(_ => _.draw());
 
             requestAnimationFrame(doFrame);
         }
