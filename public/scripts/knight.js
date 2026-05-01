@@ -28,7 +28,7 @@ class KnightPlayer extends PlayerBase {
                 parry:  new Audio("sounds/hero_parry.wav"),
                 land:   new Audio("sounds/hero_land_soft.wav"),
                 damage: new Audio("sounds/hero_damage.wav"),
-                death:  new Audio("sounds/KnightDie.wav")
+                death:  new Audio("sounds/KnightDeath.wav")
             },
             size: {
                 hHalfSize: 25,
@@ -74,7 +74,7 @@ class KnightPlayer extends PlayerBase {
     takeDamage(damage) {
         if (this.isGuarding) {
             this.sounds.parry.currentTime = 0;
-            this.sounds.parry.play();
+            this.sounds.parry.play().catch(() => {});
             return;
         }
         super.takeDamage(damage);
@@ -136,7 +136,7 @@ class KnightPlayer extends PlayerBase {
         if (wasAttacking) {
             if (this.attackStanceTimer == this.meleeDamageFrame) {
                 this.sounds.attack.currentTime = 0;
-                this.sounds.attack.play();
+                this.sounds.attack.play().catch(() => {});
                 this.applyMeleeDamage();
             }
             this.attackStanceTimer--;

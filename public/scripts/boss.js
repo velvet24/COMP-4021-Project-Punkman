@@ -21,7 +21,8 @@ class BossEnemy extends EnemyBase {
             shadowScale: { x: 0, y: 0 },
             initialSequence: sequences.idleRight,
             sounds: {
-                attack: new Audio("sounds/Attack.mp3"),
+                attack: new Audio("sounds/bossAttack.mp3"),
+                cast: new Audio("sounds/bossCast.mp3"),
                 damage: new Audio("sounds/bossDamage.mp3"),
                 death:  new Audio("sounds/bossDie.mp3")
             },
@@ -33,6 +34,10 @@ class BossEnemy extends EnemyBase {
             attackCooldown: 216,
             damageFrame: 36,
             damageAmount: 25,
+            hasRangeAttack: true,
+            rangeAttackDuration: 54,
+            rangeAttackCooldown: 600,
+            castingFrame: 30,
             size: { hHalfSize: 100, vUpperSize: 34, vLowerSize: 186 },
             patrol: { xl: 400, xr: 1600 }
         });
@@ -40,97 +45,44 @@ class BossEnemy extends EnemyBase {
         this.sequences = sequences;
         this.animationState = "idleRight";
 
-        this.castCooldown = 0;
-        this.castMaxCooldown = 600;
-        this.isCasting = false;
-        this.castDuration = 60;
-        this.castDamageFrame = 50;
-        this.castSound = new Audio("sounds/bossCast.mp3");
-
-        this.lastAnimDir = this.animationDirection;
-        this.dirShiftAmount = -100;
     }
 
     getAnimationState() {
         const dir = this.animationDirection == -1 ? "Left" : "Right";
         if (!this.alive) return `death${dir}`;
         if (this.recoverTimer > 0) return `hit${dir}`;
-        if (this.isCasting) return `cast${dir}`;
+        if (this.usingRangeAttack) return `cast${dir}`;
         if (this.attackStanceTimer > 0) return `attack${dir}`;
         if (this.direction != 0) return `walk${dir}`;
         return `idle${dir}`;
     }
 
-    cast() {
-        if (this.recoverTimer > 0 || this.attackStanceTimer > 0 ||
-            this.castCooldown > 0 || !this.alive) return;
+    rangeAttack() {
+        if (this.recoverTimer > 0 || this.attackStanceTimer > 0 || !this.alive) return;
         if (this.world.players.length === 0) return;
 
-        this.isCasting = true;
-        this.attackStanceTimer = this.castDuration;
-        this.castCooldown = this.castMaxCooldown;
+        if (this.rangeAttackCooldown > 0)
+            this.rangeAttackCooldownTimer = this.rangeAttackCooldown;
+
+        this.usingRangeAttack = true;
+        this.attackStanceTimer = this.rangeAttackDuration;
         this.animationDirection = this.animationDirection || 1;
-        this.castSound.currentTime = 0;
-        this.castSound.play().catch(() => {});
+        this.sounds.cast.currentTime = 0;
+        this.sounds.cast.play().catch(() => {});
+    }
+
+    applyRangeAttack() {
+        const alivePlayers = this.world.players.filter(p => p.alive);
+        if (alivePlayers.length == 0) return;
+
+        const target = alivePlayers[0];
+        this.world.cloudStrikes.push(
+            CloudStrike(this.ctx, target, this.world)
+        );
     }
 
     update(time) {
-        if (!this.alive) {
-            this.sprite.update(time);
-            return;
-        }
-
-        if (!this.isCasting && this.attackStanceTimer == 0) {
-            const { x, y } = this.sprite.getXY();
-            if (this.recoverTimer == 0) {
-                if (this.detectPlayer(this.direction, this.range)) {
-                    this.attack();
-                } else {
-                    const forward  = this.direction == 1 ? this.patrolXR - x : x - this.patrolXL;
-                    const backward = this.direction == 1 ? x - this.patrolXL : this.patrolXR - x;
-                    if (!this.detectPlayer(this.direction, forward) && this.detectPlayer(-this.direction, backward)) {
-                        this.move(-this.direction);
-                    } else {
-                        const newX = x + this.speed / 60 * this.direction;
-                        if (newX > this.patrolXL && newX < this.patrolXR)
-                            this.sprite.setXY(newX, y);
-                        else
-                            this.move(-this.direction);
-                    }
-                }
-            }
-        }
-
-        if (this.cooldownTimer > 0) this.cooldownTimer--;
-        if (this.attackStanceTimer > 0) {
-            if (!this.isCasting && this.attackStanceTimer == this.damageFrame) {
-                this.detectPlayer(this.direction, this.range, true);
-            }
-            if (this.isCasting && this.attackStanceTimer == this.castDamageFrame) {
-                const alivePlayers = this.world.players.filter(p => p.alive);
-                if (alivePlayers.length > 0) {
-                    const target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
-                    this.world.cloudStrikes.push(
-                        CloudStrike(this.ctx, target, this.world)
-                    );
-                }
-            }
-            this.attackStanceTimer--;
-            if (this.isCasting && this.attackStanceTimer <= 0) {
-                this.isCasting = false;
-            }
-        }
-        if (this.recoverTimer > 0) this.recoverTimer--;
-        if (this.castCooldown > 0) this.castCooldown--;
-
-        if (this.recoverTimer == 0 && this.attackStanceTimer == 0 && !this.isCasting && this.alive) {
-            if (!this.detectPlayer(this.direction, this.range) && this.castCooldown <= 0) {
-                this.cast();
-            }
-        }
-
-        this.updateAnimation();
-        this.sprite.update(time);
+        super.update(time);
     }
 }
 

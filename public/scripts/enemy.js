@@ -40,6 +40,13 @@ class EnemyBase {
         this.cooldownTimer = 0;
         this.enableAttack = true;
 
+        this.hasRangeAttack = !!config.hasRangeAttack;
+        this.usingRangeAttack = !!config.usingRangeAttack;
+        this.rangeAttackDuration = config.rangeAttackDuration || 60;
+        this.rangeAttackCooldown = config.rangeAttackCooldown || 0;
+        this.rangeAttackCooldownTimer = 0;
+        this.castingFrame = config.castingFrame !== undefined ? config.castingFrame : Math.floor(this.attackDuration / 2);
+
         this.hHalfSize = (config.size && config.size.hHalfSize) || 30;
         this.vUpperSize = (config.size && config.size.vUpperSize) || 30;
         this.vLowerSize = (config.size && config.size.vLowerSize) || 55;
@@ -81,14 +88,14 @@ class EnemyBase {
             }
             if (this.sounds.damage) {
                 this.sounds.damage.currentTime = 0;
-                this.sounds.damage.play();
+                this.sounds.damage.play().catch(() => {});
             }
         }
         else {
             this.alive = false;
             if (this.sounds.death) {
                 this.sounds.death.currentTime = 0;
-                this.sounds.death.play();
+                this.sounds.death.play().catch(() => {});
             }
             const seqName = this.animationDirection == -1 ? "deathLeft" : "deathRight";
             this.sprite.setSequence(this.sequences[seqName]);
@@ -103,6 +110,12 @@ class EnemyBase {
             this.cooldownTimer = this.attackCooldown;
         }
     }
+
+    rangeAttack() {
+        return false;
+    }
+
+    applyRangeAttack() {}
 
     stopAttack() {
         this.enableAttack = true;
@@ -124,7 +137,7 @@ class EnemyBase {
                 if (applyDamage) {
                     if (this.sounds.attack) {
                         this.sounds.attack.currentTime = 0;
-                        this.sounds.attack.play();
+                        this.sounds.attack.play().catch(() => {});
                     }
                     player.takeDamage(this.damageAmount);
                 }
@@ -158,7 +171,10 @@ class EnemyBase {
                 const forward  = this.direction == 1 ? this.patrolXR - x : x - this.patrolXL;
                 const backward = this.direction == 1 ? x - this.patrolXL : this.patrolXR - x;
 
-                if (!this.detectPlayer(this.direction, forward) && this.detectPlayer(-this.direction, backward)) {
+                if (this.detectPlayer(this.direction, forward) && this.hasRangeAttack && this.rangeAttackCooldownTimer == 0) {
+                    this.rangeAttack();
+                }
+                else if (this.detectPlayer(-this.direction, backward)) {
                     this.move(-this.direction);
                 }
                 else {
@@ -171,17 +187,26 @@ class EnemyBase {
             }
         }
 
+        if (this.recoverTimer > 0)
+            this.recoverTimer--;
+
         if (this.cooldownTimer > 0)
             this.cooldownTimer--;
 
-        if (this.attackStanceTimer == this.damageFrame)
+        if (this.rangeAttackCooldownTimer > 0)
+            this.rangeAttackCooldownTimer--;
+
+        if (this.attackStanceTimer == this.damageFrame && !this.usingRangeAttack)
             this.detectPlayer(this.direction, this.range, true);
 
-        if (this.attackStanceTimer > 0)
-            this.attackStanceTimer--;
+        if (this.attackStanceTimer == this.castingFrame && this.usingRangeAttack)
+            this.applyRangeAttack();
 
-        if (this.recoverTimer > 0)
-            this.recoverTimer--;
+        if (this.attackStanceTimer > 0) {
+            this.attackStanceTimer--;
+            if (this.attackStanceTimer == 0)
+                this.usingRangeAttack = false;
+        }
 
         this.updateAnimation();
         this.sprite.update(time);

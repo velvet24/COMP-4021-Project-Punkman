@@ -99,7 +99,7 @@ class PlayerBase {
             this.velocityY = 0;
             if (this.sounds.damage) {
                 this.sounds.damage.currentTime = 0;
-                this.sounds.damage.play();
+                this.sounds.damage.play().catch(() => {});
             }
             const progress = this.health / this.maxHealth * 100 + '%';
             $(this.healthBarName).animate({ height: progress }, 500);
@@ -108,7 +108,7 @@ class PlayerBase {
             this.alive = false;
             if (this.sounds.death) {
                 this.sounds.death.currentTime = 0;
-                this.sounds.death.play();
+                this.sounds.death.play().catch(() => {});
             }
             $(this.healthBarName).animate({ height: "0%" }, 500);
         }
@@ -259,7 +259,7 @@ class PlayerBase {
             this.falling = false;
             if (this.sounds.land) {
                 this.sounds.land.currentTime = 0;
-                this.sounds.land.play();
+                this.sounds.land.play().catch(() => {});
             }
         }
         else {
