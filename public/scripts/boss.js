@@ -1,22 +1,22 @@
 class BossEnemy extends EnemyBase {
     constructor(ctx, x, y, id, world) {
         const sequences = {
-            idleLeft:   { x: 0,    y: 279,   width: 140, height: 93, count: 8, timing: 150, loop: true },
-            idleRight:  { x: 1260, y: 837,   width: -140, height: 93, count: 8, timing: 150, loop: true },
-            walkLeft:   { x: 0,    y: 465,  width: 140, height: 93, count: 8, timing: 100, loop: true },
-            walkRight:  { x: 1260, y: 1023,  width: -140, height: 93, count: 8, timing: 100, loop: true },
-            attackLeft: { x: 0,    y: 0, width: 140, height: 93, count: 10, timing: 120, loop: false },
-            attackRight:{ x: 1260, y: 558, width: -140, height: 93, count: 10, timing: 120, loop: false },
-            castLeft:   { x: 0,    y: 93, width: 140, height: 93, count: 9,  timing: 100, loop: false },
-            castRight:  { x: 1260, y: 651, width: -140, height: 93, count: 9,  timing: 100, loop: false },
-            hitLeft:    { x: 0,    y: 372, width: 140, height: 93, count: 3,  timing: 100, loop: false },
-            hitRight:   { x: 1260, y: 930, width: -140, height: 93, count: 3,  timing: 100, loop: false },
-            deathLeft:  { x: 0,    y: 186, width: 140, height: 93, count: 10, timing: 150, loop: false },
-            deathRight: { x: 1260, y: 744, width: -140, height: 93, count: 10, timing: 150, loop: false }
+            idleLeft:   { x: 0,    y: 279,   width: 208, height: 93, count: 8, timing: 150, loop: true },
+            idleRight:  { x: 1872, y: 837,   width: -208, height: 93, count: 8, timing: 150, loop: true },
+            walkLeft:   { x: 0,    y: 465,  width: 208, height: 93, count: 8, timing: 100, loop: true },
+            walkRight:  { x: 1872, y: 1023,  width: -208, height: 93, count: 8, timing: 100, loop: true },
+            attackLeft: { x: 0,    y: 0, width: 208, height: 93, count: 10, timing: 120, loop: false },
+            attackRight:{ x: 1872, y: 558, width: -208, height: 93, count: 10, timing: 120, loop: false },
+            castLeft:   { x: 0,    y: 93, width: 208, height: 93, count: 9,  timing: 100, loop: false },
+            castRight:  { x: 1872, y: 651, width: -208, height: 93, count: 9,  timing: 100, loop: false },
+            hitLeft:    { x: 0,    y: 372, width: 208, height: 93, count: 3,  timing: 100, loop: false },
+            hitRight:   { x: 1872, y: 930, width: -208, height: 93, count: 3,  timing: 100, loop: false },
+            deathLeft:  { x: 0,    y: 186, width: 208, height: 93, count: 10, timing: 150, loop: false },
+            deathRight: { x: 1872, y: 744, width: -208, height: 93, count: 10, timing: 150, loop: false }
         };
 
         super(ctx, x, y, id, world, {
-            sheet: "images/boss.png",
+            sheet: "images/boss_spritesheet.png",
             scale: 4,
             shadowScale: { x: 0, y: 0 },
             initialSequence: sequences.idleRight,
@@ -29,11 +29,11 @@ class BossEnemy extends EnemyBase {
             maxHealth: 800,
             maxPoise: 200,
             range: 200,
-            attackDuration: 100,
-            attackCooldown: 80,
-            damageFrame: 50,
-            damageAmount: 40,
-            size: { hHalfSize: 45, vUpperSize: 45, vLowerSize: 75 },
+            attackDuration: 72,
+            attackCooldown: 216,
+            damageFrame: 36,
+            damageAmount: 25,
+            size: { hHalfSize: 100, vUpperSize: 34, vLowerSize: 186 },
             patrol: { xl: 400, xr: 1600 }
         });
 
@@ -49,18 +49,6 @@ class BossEnemy extends EnemyBase {
 
         this.lastAnimDir = this.animationDirection;
         this.dirShiftAmount = -100;
-    }
-
-    adjustDirectionOffset() {
-        if (this.animationDirection !== this.lastAnimDir) {
-            const { x, y } = this.sprite.getXY();
-            if (this.animationDirection === 1) {
-                this.sprite.setXY(x - this.dirShiftAmount, y);
-            } else {
-                this.sprite.setXY(x + this.dirShiftAmount, y);
-            }
-            this.lastAnimDir = this.animationDirection;
-        }
     }
 
     getAnimationState() {
@@ -141,7 +129,6 @@ class BossEnemy extends EnemyBase {
             }
         }
 
-        this.adjustDirectionOffset();
         this.updateAnimation();
         this.sprite.update(time);
     }

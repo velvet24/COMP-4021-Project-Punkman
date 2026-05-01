@@ -116,8 +116,8 @@ class EnemyBase {
     detectPlayer(direction, range, applyDamage = false) {
         const { x, y } = this.sprite.getXY();
         const detector = direction == -1
-            ? BoundingBox(this.ctx, y - range / 2, x - range, y + range / 2, x)
-            : BoundingBox(this.ctx, y - range / 2, x, y + range / 2, x + range);
+            ? BoundingBox(this.ctx, y - this.vUpperSize, x - range, y + this.vLowerSize, x)
+            : BoundingBox(this.ctx, y - this.vUpperSize, x, y + this.vLowerSize, x + range);
 
         for (const player of this.world.players) {
             if (detector.intersect(player.getBoundingBox())) {
