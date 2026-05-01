@@ -95,6 +95,7 @@ class PlayerBase {
 
         if (this.health > 0) {
             this.recoverTimer = this.recoverDuration;
+            this.attackStanceTimer = 0;
             this.velocityY = 0;
             if (this.sounds.damage) {
                 this.sounds.damage.currentTime = 0;

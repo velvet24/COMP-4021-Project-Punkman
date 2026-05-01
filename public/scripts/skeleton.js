@@ -1,261 +1,115 @@
-const Skeleton = function(ctx, x, y, id, world) {
+class SkeletonEnemy extends EnemyBase {
+    constructor(ctx, x, y, id, world) {
+        const sequences = {
+            idleLeft:    { x: 731, y: 296, width: -43, height: 37, count: 11, timing: 150, loop: true },
+            idleRight:   { x: 0,   y: 111, width:  43, height: 37, count: 11, timing: 150, loop: true },
 
-    const sequences = {
-        idleLeft:  { x: 731, y: 296, width: -43, height: 37, count: 11, timing: 150, loop: true },
-        idleRight: { x: 0, y: 111, width: 43, height: 37, count: 11, timing: 150, loop: true },
+            walkLeft:    { x: 731, y: 333, width: -43, height: 37, count: 13, timing: 150, loop: true },
+            walkRight:   { x: 0,   y: 148, width:  43, height: 37, count: 13, timing: 150, loop: true },
 
-        walkLeft:  { x: 731, y: 333, width: -43, height: 37, count: 13, timing: 150, loop: true },
-        walkRight: { x: 0, y: 148, width: 43, height: 37, count: 13, timing: 150, loop: true },
+            attackLeft:  { x: 731, y: 185, width: -43, height: 37, count: 18, timing: 150, loop: true },
+            attackRight: { x: 0,   y: 0,   width:  43, height: 37, count: 18, timing: 150, loop: true },
 
-        attackLeft:  { x: 731, y: 185, width: -43, height: 37, count: 18, timing: 150, loop: true },
-        attackRight: { x: 0, y: 0, width: 43, height: 37, count: 18, timing: 150, loop: true },
+            hitLeft:     { x: 731, y: 259, width: -43, height: 37, count:  8, timing: 150, loop: false },
+            hitRight:    { x: 0,   y: 74,  width:  43, height: 37, count:  8, timing: 150, loop: false },
 
-        hitLeft:  { x: 731, y: 259, width: -43, height: 37, count: 8, timing: 150, loop: false },
-        hitRight: { x: 0, y: 74, width: 43, height: 37, count: 8, timing: 150, loop: false },
+            deathLeft:   { x: 731, y: 222, width: -43, height: 37, count: 15, timing: 150, loop: false },
+            deathRight:  { x: 0,   y: 37,  width:  43, height: 37, count: 15, timing: 150, loop: false },
+        };
 
-        deathLeft:  { x: 731, y: 222, width: -43, height: 37, count: 15, timing: 150, loop: false },
-        deathRight: { x: 0, y: 37, width: 43, height: 37, count: 15, timing: 150, loop: false },
-    };
+        super(ctx, x, y, id, world, {
+            sheet: "images/skeleton_spritesheet.png",
+            scale: 3,
+            shadowScale: { x: 0, y: 0 },
+            initialSequence: sequences.idleRight,
+            sounds: {
+                attack: new Audio("sounds/SwordSwing.mp3"),
+                damage: new Audio("sounds/EnemyDamage.wav"),
+                death:  new Audio("sounds/Explosion.wav")
+            },
+            speed: 100,
+            maxHealth: 200,
+            maxPoise: 50,
+            range: 50,
+            attackDuration: 162,
+            attackCooldown: 162,
+            damageFrame: 90,
+            damageAmount: 25,
+            size: { hHalfSize: 30, vUpperSize: 30, vLowerSize: 55 },
+            patrol: { xl: 300, xr: 1500 }
+        });
 
-    const sprite = Sprite(ctx, x, y);
-
-    sprite.setSequence(sequences.idleRight).setScale(3).setShadowScale({x: 0, y: 0}).useSheet("images/skeleton_spritesheet.png");
-
-    let direction = 1;
-    let animationDirection = 1;
-
-    const sounds = {
-        attack: new Audio("sounds/SwordSwing.mp3"),
-        damage: new Audio("sounds/EnemyDamage.wav"),
-        death: new Audio("sounds/Explosion.wav")
-    };
-
-    let speed = 100;
-
-    const move = function(dir) {
-        if (recoverTimer == 0 && attackStanceTimer == 0) {
-            direction = dir;
-            animationDirection = dir;
-        }
-    };
-
-    const stop = function(dir) {
-        if (direction == dir) {
-            direction = 0;
-        }
-    };
-
-    const maxHealth = 200;
-    let health = maxHealth;
-    const maxPoise = 50;
-    let poise = maxPoise;
-    let recoverTimer = 0;
-    let alive = true;
-
-    const isAlive = function() {
-        return alive;
+        this.sequences = sequences;
+        this.animationState = 4;
     }
 
-    const takeDamage = function(damage, poiseDamage, isLocalPlayer) {
-        if (!alive)
+    updateAnimation() {
+        if (!this.alive)
             return;
-        
-        health -= damage;
 
-        if (health > 0) {
-            if (recoverTimer == 0) {
-                poise -= poiseDamage;
-                if (poise <= 0) {
-                    if (attackStanceTimer != 0)
-                        attackStanceTimer = 0;
-                    recoverTimer = 72;
-                    poise = maxPoise;
-                }
-            }
-            sounds.damage.currentTime = 0;
-            sounds.damage.play();
-        }
-        else {
-            alive = false;
-            sounds.death.currentTime = 0;
-            sounds.death.play();
-            if (animationDirection == -1)
-                sprite.setSequence(sequences.deathLeft);
-            else
-                sprite.setSequence(sequences.deathRight);
-
-            if (isLocalPlayer)
-                world.socket.emit("enemy_dead", id);
-        }
-    }
-
-    const range = 50;
-    let attackStanceTimer = 0;
-    let cooldownTimer = 0;
-    let enableAttack = true;
-
-    const attack = function() {
-        if (recoverTimer == 0 && cooldownTimer == 0 && enableAttack && alive) {
-            attackStanceTimer = 162;
-            cooldownTimer = 162;
-        }
-    };
-
-    const stopAttack = function () {
-        enableAttack = true;
-    };
-
-    let animationState = 4;
-
-    const updateAnimation = function() {
-        if (!alive)
-            return;
-        if (animationDirection == -1) {
-            if (recoverTimer == 0) {
-                if (attackStanceTimer == 0) {
-                    if (direction == 0) {
-                        if (animationState != 0) {
-                            sprite.setSequence(sequences.idleLeft);
-                            animationState = 0;
+        if (this.animationDirection == -1) {
+            if (this.recoverTimer == 0) {
+                if (this.attackStanceTimer == 0) {
+                    if (this.direction == 0) {
+                        if (this.animationState != 0) {
+                            this.sprite.setSequence(this.sequences.idleLeft);
+                            this.animationState = 0;
                         }
                     }
                     else {
-                        if (animationState != 1) {
-                            sprite.setSequence(sequences.walkLeft);
-                            animationState = 1;
+                        if (this.animationState != 1) {
+                            this.sprite.setSequence(this.sequences.walkLeft);
+                            this.animationState = 1;
                         }
                     }
                 }
                 else {
-                    if (animationState != 2) {
-                        sprite.setSequence(sequences.attackLeft);
-                        animationState = 2;
+                    if (this.animationState != 2) {
+                        this.sprite.setSequence(this.sequences.attackLeft);
+                        this.animationState = 2;
                     }
-                    attackStanceTimer--;
                 }
             }
             else {
-                if (animationState != 3) {
-                    sprite.setSequence(sequences.hitLeft);
-                    animationState = 3;
+                if (this.animationState != 3) {
+                    this.sprite.setSequence(this.sequences.hitLeft);
+                    this.animationState = 3;
                 }
-                recoverTimer--;
             }
         }
-        else if (animationDirection == 1) {
-            if (recoverTimer == 0) {
-                if (attackStanceTimer == 0) {
-                    if (direction == 0) {
-                        if (animationState != 4) {
-                            sprite.setSequence(sequences.idleRight);
-                            animationState = 4;
+        else if (this.animationDirection == 1) {
+            if (this.recoverTimer == 0) {
+                if (this.attackStanceTimer == 0) {
+                    if (this.direction == 0) {
+                        if (this.animationState != 4) {
+                            this.sprite.setSequence(this.sequences.idleRight);
+                            this.animationState = 4;
                         }
                     }
                     else {
-                        if (animationState != 5) {
-                            sprite.setSequence(sequences.walkRight);
-                            animationState = 5;
+                        if (this.animationState != 5) {
+                            this.sprite.setSequence(this.sequences.walkRight);
+                            this.animationState = 5;
                         }
                     }
                 }
                 else {
-                    if (animationState != 6) {
-                        sprite.setSequence(sequences.attackRight);
-                        animationState = 6;
+                    if (this.animationState != 6) {
+                        this.sprite.setSequence(this.sequences.attackRight);
+                        this.animationState = 6;
                     }
-                    attackStanceTimer--;
                 }
             }
             else {
-                if (animationState != 7) {
-                    sprite.setSequence(sequences.hitRight);
-                    animationState = 7;
-                }
-                recoverTimer--;
-            }
-        }
-    };
-
-    const hHalfSize = 30;
-    const vUpperSize = 30;
-    const vLowerSize = 55;
-
-    const getBoundingBox = function() {
-        let { x, y } = sprite.getXY();
-        return BoundingBox(ctx, y-vUpperSize, x-hHalfSize, y+vLowerSize, x+hHalfSize);
-    }
-
-    const xl = 300;
-    const xr = 1500;
-
-    const detectPlayer = function(direction, range, applyDamage=false) {
-        let { x, y } = sprite.getXY();
-        let detector = BoundingBox(ctx, y-range/2, x, y+range/2, x+range);
-        if (direction == -1)
-            detector = BoundingBox(ctx, y-range/2, x-range, y+range/2, x);
-        for (const player of world.players) {
-            if (detector.intersect(player.getBoundingBox())){
-                if (applyDamage) {
-                    sounds.attack.currentTime = 0;
-                    sounds.attack.play();
-                    player.takeDamage(25);
-                }
-                return true;
-            }
-        }
-    }
-
-    const update = function(time) {
-        let { x, y } = sprite.getXY();
-
-        if (recoverTimer == 0 && attackStanceTimer == 0 && alive) {
-            if (detectPlayer(direction, range)) {
-                attack();
-            }
-            else {
-                let forward, backward;
-                if (direction == 1) {
-                    forward = xr - x;
-                    backward = x - xl;
-                }
-                else {
-                    forward = x - xl;
-                    backward = xr - x;
-                }
-
-                if (!detectPlayer(direction, forward) && detectPlayer(direction * -1, backward)) {
-                    move(direction * -1);
-                }
-                else {
-                    let newX = x + speed / 60 * direction;
-                    if (newX > xl && newX < xr)
-                        sprite.setXY(newX, y);
-                    else
-                        move(direction * -1);
+                if (this.animationState != 7) {
+                    this.sprite.setSequence(this.sequences.hitRight);
+                    this.animationState = 7;
                 }
             }
         }
-
-        if (cooldownTimer > 0)
-            cooldownTimer--;
-
-        if (attackStanceTimer == 90) {
-            detectPlayer(direction, range, true);
-        }
-
-        updateAnimation();
-        sprite.update(time);
-    };
-
-    return {
-        move: move,
-        stop: stop,
-        attack: attack,
-        stopAttack: stopAttack,
-        isAlive: isAlive,
-        takeDamage: takeDamage,
-        getBoundingBox: getBoundingBox,
-        draw: sprite.draw,
-        update: update
     }
 }
+
+const Skeleton = function(ctx, x, y, id, world) {
+    return new SkeletonEnemy(ctx, x, y, id, world);
+};
