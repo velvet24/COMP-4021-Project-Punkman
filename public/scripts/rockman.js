@@ -61,7 +61,7 @@ class RockmanPlayer extends PlayerBase {
             this.busterSound.currentTime = 0;
             this.busterSound.play();
             const { x, y } = this.sprite.getXY();
-            if (this.animationDirection == 3)
+            if (this.animationDirection == 1)
                 this.world.bullets.push(Bullet(this.ctx, x + this.hHalfSize, y, this.animationDirection, this.isLocalPlayer, this.world));
             else
                 this.world.bullets.push(Bullet(this.ctx, x - this.hHalfSize, y, this.animationDirection, this.isLocalPlayer, this.world));
@@ -72,7 +72,7 @@ class RockmanPlayer extends PlayerBase {
         if (!this.alive)
             return;
 
-        if (this.animationDirection == 1) {
+        if (this.animationDirection == -1) {
             if (this.recoverTimer == 0) {
                 if (this.standing()) {
                     if (this.direction == 0) {
@@ -127,7 +127,7 @@ class RockmanPlayer extends PlayerBase {
                 this.animationState = 6;
             }
         }
-        else if (this.animationDirection == 3) {
+        else if (this.animationDirection == 1) {
             if (this.recoverTimer == 0) {
                 if (this.standing()) {
                     if (this.direction == 0) {

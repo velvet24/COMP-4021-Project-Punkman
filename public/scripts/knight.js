@@ -92,7 +92,7 @@ class KnightPlayer extends PlayerBase {
     applyMeleeDamage() {
         let { x, y } = this.sprite.getXY();
         let detector;
-        if (this.animationDirection == 3) {
+        if (this.animationDirection == 1) {
             detector = BoundingBox(this.ctx, y - 30, x, y + 30, x + this.attackRange);
         } else {
             detector = BoundingBox(this.ctx, y - 30, x - this.attackRange, y + 30, x);
@@ -119,7 +119,7 @@ class KnightPlayer extends PlayerBase {
     updateAnimation() {
         if (!this.alive) {
             if (!this.deathPlayed) {
-                const seqName = (this.animationDirection == 1) ? "deathLeft" : "deathRight";
+                const seqName = (this.animationDirection == -1) ? "deathLeft" : "deathRight";
                 this.sprite.setSequence(this.sequences[seqName]);
                 this.deathPlayed = true;
                 this.animationState = seqName;
@@ -138,7 +138,7 @@ class KnightPlayer extends PlayerBase {
         }
 
         if (this.isGuarding) {
-            const seqName = (this.animationDirection == 1) ? "guardLeft" : "guardRight";
+            const seqName = (this.animationDirection == -1) ? "guardLeft" : "guardRight";
             if (this.animationState !== seqName) {
                 this.sprite.setSequence(this.sequences[seqName]);
                 this.animationState = seqName;
@@ -148,15 +148,15 @@ class KnightPlayer extends PlayerBase {
 
         let targetState;
         if (this.recoverTimer > 0) {
-            targetState = (this.animationDirection == 1) ? "hurtLeft" : "hurtRight";
+            targetState = (this.animationDirection == -1) ? "hurtLeft" : "hurtRight";
         } else if (wasAttacking) {
-            targetState = (this.animationDirection == 1) ? "attackLeft" : "attackRight";
+            targetState = (this.animationDirection == -1) ? "attackLeft" : "attackRight";
         } else if (!this.standing()) {
-            targetState = (this.animationDirection == 1) ? "jumpLeft" : "jumpRight";
+            targetState = (this.animationDirection == -1) ? "jumpLeft" : "jumpRight";
         } else if (this.direction != 0) {
-            targetState = (this.animationDirection == 1) ? "runLeft" : "runRight";
+            targetState = (this.animationDirection == -1) ? "runLeft" : "runRight";
         } else {
-            targetState = (this.animationDirection == 1) ? "idleLeft" : "idleRight";
+            targetState = (this.animationDirection == -1) ? "idleLeft" : "idleRight";
         }
 
         if (this.animationState !== targetState) {

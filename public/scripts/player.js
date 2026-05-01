@@ -14,7 +14,7 @@ class PlayerBase {
         this.playerIndex = 0;
 
         this.direction = 0;
-        this.animationDirection = 3;
+        this.animationDirection = 1;
 
         this.baseSpeed = config.baseSpeed || 250;
         this.boostedSpeed = config.boostedSpeed || 350;
@@ -217,7 +217,7 @@ class PlayerBase {
         if (this.canMove()) {
             let validLocation = true;
             let hoffset = 0;
-            if (this.direction == 1) {
+            if (this.direction == -1) {
                 while (validLocation && -hoffset < this.speed / 60) {
                     hoffset--;
                     const target = BoundingBox(this.ctx, y - this.vUpperSize, x - this.hHalfSize + hoffset, y + this.vLowerSize, x + this.hHalfSize + hoffset);
@@ -230,7 +230,7 @@ class PlayerBase {
                     }
                 }
             }
-            else if (this.direction == 3) {
+            else if (this.direction == 1) {
                 while (validLocation && hoffset < this.speed / 60) {
                     hoffset++;
                     const target = BoundingBox(this.ctx, y - this.vUpperSize, x - this.hHalfSize + hoffset, y + this.vLowerSize, x + this.hHalfSize + hoffset);

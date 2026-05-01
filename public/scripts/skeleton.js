@@ -79,7 +79,7 @@ const Skeleton = function(ctx, x, y, id, world) {
             alive = false;
             sounds.death.currentTime = 0;
             sounds.death.play();
-            if (animationDirection == 1)
+            if (animationDirection == -1)
                 sprite.setSequence(sequences.deathLeft);
             else
                 sprite.setSequence(sequences.deathRight);

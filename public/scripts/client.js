@@ -380,11 +380,11 @@ const Client = (function(){
                         break;
                     case 37:
                     case 65:
-                        world.players[input.index].move(1);
+                        world.players[input.index].move(-1);
                         break;
                     case 39:
                     case 68:
-                        world.players[input.index].move(3);
+                        world.players[input.index].move(1);
                         break;
                     case 74:
                         world.players[input.index].attack();
@@ -405,11 +405,11 @@ const Client = (function(){
                         break;
                     case 37:
                     case 65:
-                        world.players[input.index].stop(1);
+                        world.players[input.index].stop(-1);
                         break;
                     case 39:
                     case 68:
-                        world.players[input.index].stop(3);
+                        world.players[input.index].stop(1);
                         break;
                     case 74:
                         world.players[input.index].stopAttack();
