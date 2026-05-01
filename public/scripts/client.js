@@ -252,14 +252,14 @@ const Client = (function(){
         ];
 
         world.enemies = [
-            Skeleton(context, 1500, 960, world)
+            Skeleton(context, 1500, 960, "skeleton", world)
         ];
 
         world.coins = [
-            Gem(context, 256, 976, "green", world),
-            Gem(context, 512, 976, "red", world),
-            Gem(context, 768, 976, "yellow", world),
-            Gem(context, 1024, 976, "purple", world)
+            Gem(context, 256, 976, "green", "gem0", world),
+            Gem(context, 512, 976, "red", "gem1", world),
+            Gem(context, 768, 976, "yellow", "gem2", world),
+            Gem(context, 1024, 976, "purple", "gem3", world)
         ];
 
         let pawn;

@@ -1,4 +1,4 @@
-const Skeleton = function(ctx, x, y, world) {
+const Skeleton = function(ctx, x, y, id, world) {
 
     const sequences = {
         idleLeft:  { x: 731, y: 296, width: -43, height: 37, count: 11, timing: 150, loop: true },
@@ -82,7 +82,8 @@ const Skeleton = function(ctx, x, y, world) {
             else
                 sprite.setSequence(sequences.deathRight);
 
-            world.socket.emit("enemy_dead", isLocalPlayer);
+            if (isLocalPlayer)
+                world.socket.emit("enemy_dead", id);
         }
     }
 

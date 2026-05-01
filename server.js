@@ -151,12 +151,12 @@ io.on("connection", (socket) => {
         io.emit("input", input);
     });
 
-    socket.on("enemy_dead", (isLocalPlayer) => {
-        console.log("Enemy killed by " + players[socket.id]["name"]);
+    socket.on("enemy_dead", (enemy_id) => {
+        console.log(enemy_id + " killed by " + players[socket.id]["name"]);
     });
 
-    socket.on("coin_collected", (isLocalPlayer) => {
-        console.log("Coin collected by " + players[socket.id]["name"]);
+    socket.on("coin_collected", (coin_id) => {
+        console.log(coin_id + " collected by " + players[socket.id]["name"]);
     });
 
     socket.on("disconnect", () => {
