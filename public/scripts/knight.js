@@ -8,14 +8,14 @@ class KnightPlayer extends PlayerBase {
             runLeft:     { x: 1056, y: 588,   width: -96, height: 84, count: 8,  timing: 100, loop: true },
             jumpRight:   { x: 0,    y: 168,   width: 96, height: 84, count: 5,  timing: 200, loop: false },
             jumpLeft:    { x: 1056, y: 672,   width: -96, height: 84, count: 5,  timing: 200, loop: false },
-            attackRight: { x: 0,    y: 252,   width: 96, height: 84, count: 6,  timing: 20, loop: false },
-            attackLeft:  { x: 1056, y: 756,   width: -96, height: 84, count: 6,  timing: 20, loop: false },
+            attackRight: { x: 0,    y: 252,   width: 96, height: 84, count: 6,  timing: 100, loop: true },
+            attackLeft:  { x: 1056, y: 756,   width: -96, height: 84, count: 6,  timing: 100, loop: true },
             hurtRight:   { x: 0,    y: 336,   width: 96, height: 84, count: 4,  timing: 100, loop: false },
             hurtLeft:    { x: 1056, y: 840,   width: -96, height: 84, count: 4,  timing: 100, loop: false },
             deathRight:  { x: 0,    y: 420,   width: 96, height: 84, count: 12, timing: 200, loop: false },
             deathLeft:   { x: 1056, y: 924,   width: -96, height: 84, count: 12, timing: 200, loop: false },
-            guardRight:  { x: 0,    y: 1008,  width: 96, height: 84, count: 5,  timing: 85, loop: true },
-            guardLeft:   { x: 1056, y: 1090,  width: -96, height: 84, count: 5,  timing: 85, loop: true }
+            guardRight:  { x: 0,    y: 1008,  width: 96, height: 84, count: 6,  timing: 100, loop: false },
+            guardLeft:   { x: 1056, y: 1090,  width: -96, height: 84, count: 6,  timing: 100, loop: false }
         };
 
         super(ctx, x, y, gameArea, world, {
@@ -39,8 +39,8 @@ class KnightPlayer extends PlayerBase {
         this.sequences = sequences;
         this.attackRange = 200;
 
-        this.ATTACK_FRAMES = 40;
-        this.meleeDamageFrame = Math.floor(this.ATTACK_FRAMES / 2);
+        this.ATTACK_FRAMES = 36;
+        this.meleeDamageFrame = 6;
 
         this.enableAttack = true;
         this.damageApplied = false;
@@ -48,7 +48,7 @@ class KnightPlayer extends PlayerBase {
         this.guardTimer = 0;
         this.guardCooldownTimer = 0;
         this.GUARD_DURATION = 100;
-        this.GUARD_COOLDOWN = 400;
+        this.enableGuard = true;
 
         this.animationState = "";
         this.deathPlayed = false;
@@ -66,12 +66,9 @@ class KnightPlayer extends PlayerBase {
 
     attack() {
         if (this.canAttack()) {
-            this.enableAttack = false;
             this.attackStanceTimer = this.ATTACK_FRAMES;
             this.cooldownTimer = this.ATTACK_FRAMES;
             this.damageApplied = false;
-            this.sounds.attack.currentTime = 0;
-            this.sounds.attack.play();
         }
     }
     
@@ -82,11 +79,17 @@ class KnightPlayer extends PlayerBase {
 
     guard() {
         if (this.recoverTimer == 0 && this.guardTimer == 0 &&
-            this.guardCooldownTimer == 0 && this.attackStanceTimer == 0 && this.alive) {
+            this.guardCooldownTimer == 0 && this.attackStanceTimer == 0 && this.alive && this.enableGuard) {
+            this.enableGuard = false;
             this.guardTimer = this.GUARD_DURATION;
             this.velocityY = 0;
             this.direction = 0;
         }
+    }
+
+    stopGuard() {
+        this.guardTimer = 0;
+        this.enableGuard = true;
     }
 
     applyMeleeDamage() {
@@ -140,12 +143,11 @@ class KnightPlayer extends PlayerBase {
         const wasAttacking = this.attackStanceTimer > 0;
         if (wasAttacking) {
             if (this.attackStanceTimer == this.meleeDamageFrame) {
+                this.sounds.attack.currentTime = 0;
+                this.sounds.attack.play();
                 this.applyMeleeDamage();
             }
             this.attackStanceTimer--;
-            if (this.attackStanceTimer == 0) {
-                this.enableAttack = true;
-            }
         }
 
         if (this.guardTimer > 0) {

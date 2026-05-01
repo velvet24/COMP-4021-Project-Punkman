@@ -383,6 +383,8 @@ const Client = (function(){
                     case 74:
                         world.players[input.index].stopAttack();
                         break;
+                    case 83:
+                        world.players[input.index].stopGuard?.();
                 }
             }
         });
