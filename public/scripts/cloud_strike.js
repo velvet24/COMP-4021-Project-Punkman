@@ -1,24 +1,17 @@
 const CloudStrike = function(ctx, targetPlayer, world) {
-    const SEQUENCE = {
-        x: 0, y: 0,
-        width: 140, height: 93,
-        count: 16,
-        timing: 80,
-        loop: false
-    };
+    const SEQUENCE = { x: 0, y: 0, width: 140, height: 93, count: 16, timing: 80, loop: false };
 
     const DAMAGE_FRAME = 8;
     const DAMAGE_TIME = DAMAGE_FRAME * SEQUENCE.timing;
     const TOTAL_TIME = SEQUENCE.count * SEQUENCE.timing;
 
-
     const targetBox = targetPlayer.getBoundingBox();
     const strikeX = (targetBox.getLeft() + targetBox.getRight()) / 2;
-    const strikeY = targetBox.getTop() - 20;
+    const strikeY = targetBox.getBottom() - 186;
 
     const sprite = Sprite(ctx, strikeX, strikeY);
     sprite.setSequence(SEQUENCE)
-          .setScale(2)
+          .setScale(4)
           .setShadowScale({ x: 0, y: 0 })
           .useSheet("images/thunder.png");
 
@@ -36,8 +29,8 @@ const CloudStrike = function(ctx, targetPlayer, world) {
         sprite.update(time);
 
         if (!damageDone && elapsed >= DAMAGE_TIME) {
-            const aoeRange = 60;
-            const aoeBox = BoundingBox(ctx, strikeY - aoeRange, strikeX - aoeRange, strikeY + aoeRange, strikeX + aoeRange);
+            const aoeRange = 50;
+            const aoeBox = BoundingBox(ctx, strikeY - 186, strikeX - aoeRange, strikeY + 186, strikeX + aoeRange);
 
             for (const player of world.players) {
                 if (player.alive && player.getBoundingBox().intersect(aoeBox)) {

@@ -21,7 +21,6 @@ class BossEnemy extends EnemyBase {
             shadowScale: { x: 0, y: 0 },
             initialSequence: sequences.idleRight,
             sounds: {
-                attack: new Audio("sounds/bossAttack.mp3"),
                 cast: new Audio("sounds/bossCast.mp3"),
                 damage: new Audio("sounds/bossDamage.mp3"),
                 death:  new Audio("sounds/bossDie.mp3")
@@ -29,14 +28,14 @@ class BossEnemy extends EnemyBase {
             speed: 100,
             maxHealth: 800,
             maxPoise: 200,
-            range: 200,
+            range: 300,
             attackDuration: 72,
             attackCooldown: 216,
             damageFrame: 36,
             damageAmount: 25,
             hasRangeAttack: true,
             rangeAttackDuration: 54,
-            rangeAttackCooldown: 600,
+            rangeAttackCooldown: 300,
             castingFrame: 30,
             size: { hHalfSize: 100, vUpperSize: 34, vLowerSize: 186 },
             patrol: { xl: 400, xr: 1600 }

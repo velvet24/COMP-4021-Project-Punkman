@@ -32,7 +32,7 @@ class SkeletonEnemy extends EnemyBase {
             maxPoise: 50,
             range: 50,
             attackDuration: 162,
-            attackCooldown: 162,
+            attackCooldown: 324,
             damageFrame: 90,
             damageAmount: 25,
             size: { hHalfSize: 30, vUpperSize: 30, vLowerSize: 55 },
