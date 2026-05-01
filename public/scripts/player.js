@@ -67,7 +67,7 @@ class PlayerBase {
     }
 
     move(dir) {
-        if (this.recoverTimer == 0) {
+        if (this.canMove()) {
             this.direction = dir;
             this.animationDirection = dir;
         }

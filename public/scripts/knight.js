@@ -21,7 +21,7 @@ class KnightPlayer extends PlayerBase {
         super(ctx, x, y, gameArea, world, {
             initialSequence: sequences.idleRight,
             sheet: "images/knight.png",
-            scale: 4,
+            scale: 3,
             shadowScale: { x: 0, y: 0 },
             sounds: {
                 attack: new Audio("sounds/KnightAttack.wav"),
@@ -54,31 +54,14 @@ class KnightPlayer extends PlayerBase {
         this.deathPlayed = false;
     }
 
-    move(dir) {
-        if (this.recoverTimer == 0 && this.guardTimer == 0) {
-            this.direction = dir;
-            this.animationDirection = dir;
-        }
-    }
-
-    stop(dir) {
-        if (this.direction == dir) {
-            this.direction = 0;
-        }
-    }
-
     canMove() {
-        return this.recoverTimer == 0 && this.guardTimer == 0;
+        return this.recoverTimer == 0 && this.guardTimer == 0 && this.attackStanceTimer == 0;
     }
 
     canJump() {
         return this.standing() && this.recoverTimer == 0 &&
                this.attackStanceTimer == 0 && this.guardTimer == 0 &&
                this.enableJump && this.alive;
-    }
-
-    canAttack() {
-        return super.canAttack();
     }
 
     attack() {
