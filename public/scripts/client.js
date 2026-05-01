@@ -289,22 +289,59 @@ const Client = (function(){
 
         let shooterSpawnTimer = 300;
 
+        const FIXED_STEP_MS = 1000 / 60;
+        const MAX_CATCHUP_STEPS = 8;
+        let lastFrameTime = 0;
+        let accumulator = 0;
+        let simulationNow = 0;
+
         context.imageSmoothingEnabled = false;
 
         function doFrame(now) {
-            world.players.forEach(_ => _.update(now));
-            world.enemies.forEach(_ => _.update(now));
-
-            for(let i=world.bullets.length-1; i>=0; i--){
-                let alive = world.bullets[i].update();
-                if(!alive)
-                    world.bullets.splice(i, 1);
+            if (lastFrameTime == 0) {
+                lastFrameTime = now;
+                simulationNow = now;
             }
 
-            for(let i=world.coins.length-1; i>=0; i--){
-                let alive = world.coins[i].update(now);
-                if(!alive)
-                    world.coins.splice(i, 1);
+            let frameTime = now - lastFrameTime;
+            if (frameTime > 250)
+                frameTime = 250;
+            lastFrameTime = now;
+
+            accumulator += frameTime;
+
+            let catchupSteps = 0;
+            while (accumulator >= FIXED_STEP_MS && catchupSteps < MAX_CATCHUP_STEPS) {
+                simulationNow += FIXED_STEP_MS;
+
+                world.players.forEach(_ => _.update(simulationNow));
+                world.enemies.forEach(_ => _.update(simulationNow));
+
+                for(let i=world.bullets.length-1; i>=0; i--){
+                    let alive = world.bullets[i].update();
+                    if(!alive)
+                        world.bullets.splice(i, 1);
+                }
+
+                for(let i=world.coins.length-1; i>=0; i--){
+                    let alive = world.coins[i].update(simulationNow);
+                    if(!alive)
+                        world.coins.splice(i, 1);
+                }
+
+                shooterSpawnTimer--;
+                if (shooterSpawnTimer <= 0) {
+                    const randomX = 100 + Math.random() * 1720;
+                    world.enemies.push(Shooter(context, randomX, world));
+                    shooterSpawnTimer = 1200;
+                }
+
+                accumulator -= FIXED_STEP_MS;
+                catchupSteps++;
+            }
+
+            if (catchupSteps == MAX_CATCHUP_STEPS) {
+                accumulator = 0;
             }
 
             context.clearRect(0, 0, cv.width, cv.height);
@@ -314,13 +351,7 @@ const Client = (function(){
             world.enemies.forEach(_ => _.draw());
             world.players.forEach(_ => _.draw());
             world.bullets.forEach(_ => _.draw());
-            
-            shooterSpawnTimer--;
-            if (shooterSpawnTimer <= 0) {
-                const randomX = 100 + Math.random() * 1720;
-                world.enemies.push(Shooter(context, randomX, world));
-                shooterSpawnTimer = 1200;
-            }
+
             requestAnimationFrame(doFrame);
         }
 
