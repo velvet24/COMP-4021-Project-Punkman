@@ -1,358 +1,199 @@
-const KnightPlayer = function(ctx, x, y, gameArea, world) {
+// knight.js
+class KnightPlayer extends PlayerBase {
+    constructor(ctx, x, y, gameArea, world) {
+        const sequences = {
+            idleRight:   { x: 0,    y: 0,     width: 96, height: 84, count: 7,  timing: 200, loop: true },
+            idleLeft:    { x: 1056, y: 504,   width: -96, height: 84, count: 7,  timing: 200, loop: true },
+            runRight:    { x: 0,    y: 84,    width: 96, height: 84, count: 8,  timing: 100, loop: true },
+            runLeft:     { x: 1056, y: 588,   width: -96, height: 84, count: 8,  timing: 100, loop: true },
+            jumpRight:   { x: 0,    y: 168,   width: 96, height: 84, count: 5,  timing: 200, loop: false },
+            jumpLeft:    { x: 1056, y: 672,   width: -96, height: 84, count: 5,  timing: 200, loop: false },
+            attackRight: { x: 0,    y: 252,   width: 96, height: 84, count: 6,  timing: 20, loop: false },
+            attackLeft:  { x: 1056, y: 756,   width: -96, height: 84, count: 6,  timing: 20, loop: false },
+            hurtRight:   { x: 0,    y: 336,   width: 96, height: 84, count: 4,  timing: 100, loop: false },
+            hurtLeft:    { x: 1056, y: 840,   width: -96, height: 84, count: 4,  timing: 100, loop: false },
+            deathRight:  { x: 0,    y: 420,   width: 96, height: 84, count: 12, timing: 200, loop: false },
+            deathLeft:   { x: 1056, y: 924,   width: -96, height: 84, count: 12, timing: 200, loop: false },
+            guardRight:  { x: 0,    y: 1008,  width: 96, height: 84, count: 5,  timing: 85, loop: true },
+            guardLeft:   { x: 1056, y: 1090,  width: -96, height: 84, count: 5,  timing: 85, loop: true }
+        };
 
-    const sheet = "images/knight.png";
+        super(ctx, x, y, gameArea, world, {
+            initialSequence: sequences.idleRight,
+            sheet: "images/knight.png",
+            scale: 4,
+            shadowScale: { x: 0, y: 0 },
+            sounds: {
+                attack: new Audio("sounds/KnightAttack.wav"),
+                land:   new Audio("sounds/MegamanLand.wav"),
+                damage: new Audio("sounds/KnightDamage.mp3"),
+                death:  new Audio("sounds/KnightDie.wav")
+            },
+            size: {
+                hHalfSize: 25,
+                vUpperSize: 30,
+                vLowerSize: 55
+            }
+        });
 
-    const sequences = {
-        idleRight:   { x: 0,    y: 0,     width: 96, height: 84, count: 7,  timing: 200, loop: true },
-        idleLeft:    { x: 1056, y: 504,   width: -96, height: 84, count: 7,  timing: 200, loop: true },
-        runRight:    { x: 0,    y: 84,    width: 96, height: 84, count: 8,  timing: 100, loop: true },
-        runLeft:     { x: 1056, y: 588,   width: -96, height: 84, count: 8,  timing: 100, loop: true },
-        jumpRight:   { x: 0,    y: 168,   width: 96, height: 84, count: 5,  timing: 200, loop: false },
-        jumpLeft:    { x: 1056, y: 672,   width: -96, height: 84, count: 5,  timing: 200, loop: false },
-        attackRight: { x: 0,    y: 252,   width: 96, height: 84, count: 6,  timing: 20, loop: false },
-        attackLeft:  { x: 1056, y: 756,   width: -96, height: 84, count: 6,  timing: 20, loop: false },
-        hurtRight:   { x: 0,    y: 336,   width: 96, height: 84, count: 4,  timing: 100, loop: false },
-        hurtLeft:    { x: 1056, y: 840,   width: -96, height: 84, count: 4,  timing: 100, loop: false },
-        deathRight:  { x: 0,    y: 420,   width: 96, height: 84, count: 12, timing: 200, loop: false },
-        deathLeft:   { x: 1056, y: 924,   width: -96, height: 84, count: 12, timing: 200, loop: false },
-        guardRight:  { x: 0,    y: 1008,   width: 96, height: 84, count: 5,  timing: 85, loop: true },
-        guardLeft:   { x: 1056, y: 1090,   width: -96, height: 84, count: 5,  timing: 85, loop: true }
-    };
+        this.sequences = sequences;
+        this.attackRange = 200;
 
-    const sprite = Sprite(ctx, x, y);
-    sprite.setSequence(sequences.idleRight)
-          .setScale(4)
-          .setShadowScale({ x: 0, y: 0 })
-          .useSheet(sheet);
+        this.ATTACK_FRAMES = 40;
+        this.meleeDamageFrame = Math.floor(this.ATTACK_FRAMES / 2);
 
-    let isLocalPlayer = false;
-    let playerIndex = 0;
+        this.enableAttack = true;
+        this.damageApplied = false;
 
-    const setLocalPlayer = function() {
-        isLocalPlayer = true;
-    };
+        this.guardTimer = 0;
+        this.guardCooldownTimer = 0;
+        this.GUARD_DURATION = 100;
+        this.GUARD_COOLDOWN = 400;
 
-    let direction = 0;
-    let animationDirection = 3;
-
-    const sounds = {
-        attack: new Audio("sounds/KnightAttack.wav"),
-        land:   new Audio("sounds/MegamanLand.wav"),
-        damage: new Audio("sounds/KnightDamage.wav"),
-        death:  new Audio("sounds/KnightDie.wav")
-    };
-
-    let speed = 250;
-
-    const move = function(dir) {
-        if (recoverTimer == 0 && guardTimer == 0) {
-            direction = dir;
-            animationDirection = dir;
-        }
-    };
-
-    const stop = function(dir) {
-        if (direction == dir) {
-            direction = 0;
-        }
-    };
-
-    const maxHealth = 100;
-    let health = maxHealth;
-    let healthBarName = "";
-    let recoverTimer = 0;
-    let alive = true;
-
-    const setIndex = function(index) {
-        playerIndex = index;
-        healthBarName = `#player${index}-healthbar`;
-    };
-
-    const getIndex = function() {
-        return playerIndex;
+        this.animationState = "";
+        this.deathPlayed = false;
     }
 
-    const takeDamage = function(damage) {
-        if (!alive) return;
-        if (guardTimer > 0) return;
-        health -= damage;
-        if (health > 0) {
-            recoverTimer = 40;
-            velocityY = 0;
-            sounds.damage.currentTime = 0;
-            sounds.damage.play();
-            let progress = health / maxHealth * 100 + '%';
-            $(healthBarName).animate({height: progress}, 500);
-        } else {
-            alive = false;
-            sounds.death.currentTime = 0;
-            sounds.death.play();
-            $(healthBarName).animate({height: "0%"}, 500);
+    move(dir) {
+        if (this.recoverTimer == 0 && this.guardTimer == 0) {
+            this.direction = dir;
+            this.animationDirection = dir;
         }
-    };
+    }
 
-    const gravity = 1;
-    const jumpVelocity = -20;
-    let velocityY = 0;
-    let enableJump = true;
-    let falling = false;
-
-    let guardTimer = 0;
-    let guardCooldownTimer = 0;
-    const GUARD_DURATION = 100;
-    const GUARD_COOLDOWN = 400;
-
-    const jump = function() {
-        if (standing() && recoverTimer == 0 && enableJump && alive && attackStanceTimer == 0 && guardTimer == 0) {
-            enableJump = false;
-            velocityY = jumpVelocity;
+    stop(dir) {
+        if (this.direction == dir) {
+            this.direction = 0;
         }
-    };
+    }
 
-    const resetJump = function() {
-        velocityY /= 3;
-        enableJump = true;
-    };
+    canMove() {
+        return this.recoverTimer == 0 && this.guardTimer == 0;
+    }
 
-    const standing = function() {
-        let {x, y} = sprite.getXY();
-        for (const obstacle of world.obstacles) {
-            if (obstacle.getBoundingBox().isPointInBox(x, y + vLowerSize + 1)) {
-                return true;
-            }
+    canJump() {
+        return this.standing() && this.recoverTimer == 0 &&
+               this.attackStanceTimer == 0 && this.guardTimer == 0 &&
+               this.enableJump && this.alive;
+    }
+
+    canAttack() {
+        return super.canAttack();
+    }
+
+    attack() {
+        if (this.canAttack()) {
+            this.enableAttack = false;
+            this.attackStanceTimer = this.ATTACK_FRAMES;
+            this.cooldownTimer = this.ATTACK_FRAMES;
+            this.damageApplied = false;
+            this.sounds.attack.currentTime = 0;
+            this.sounds.attack.play();
         }
-        return false;
-    };
+    }
+    
+    takeDamage(damage) {
+        if (this.guardTimer > 0) return;
+        super.takeDamage(damage);
+    }
 
-    const attackRange = 200;
-
-    const ATTACK_FRAMES = 40;
-    let attackStanceTimer = 0;
-    let cooldownTimer = 0;
-    let enableAttack = true;
-    let damageApplied = false;
-
-    const attack = function() {
-        if (recoverTimer == 0 && cooldownTimer == 0 && enableAttack && alive && guardTimer == 0 && guardCooldownTimer == 0) {
-            enableAttack = false;
-            attackStanceTimer = ATTACK_FRAMES;
-            cooldownTimer = ATTACK_FRAMES;
-            damageApplied = false;
-            sounds.attack.currentTime = 0;
-            sounds.attack.play();
+    guard() {
+        if (this.recoverTimer == 0 && this.guardTimer == 0 &&
+            this.guardCooldownTimer == 0 && this.attackStanceTimer == 0 && this.alive) {
+            this.guardTimer = this.GUARD_DURATION;
+            this.velocityY = 0;
+            this.direction = 0;
         }
-    };
+    }
 
-    const stopAttack = function() {
-        enableAttack = true;
-    };
-
-    const guard = function() {
-        if (recoverTimer == 0 && guardTimer == 0 && guardCooldownTimer == 0 && attackStanceTimer == 0 && alive) {
-            guardTimer = GUARD_DURATION;
-            velocityY = 0;
-            direction = 0;
-        }
-    };
-
-    const hHalfSize = 25;
-    const vUpperSize = 30;
-    const vLowerSize = 55;
-
-    const getBoundingBox = function() {
-        let { x, y } = sprite.getXY();
-        return BoundingBox(ctx, y - vUpperSize, x - hHalfSize, y + vLowerSize, x + hHalfSize);
-    };
-
-    const applyMeleeDamage = function() {
-        if (damageApplied) return;
-        let { x, y } = sprite.getXY();
+    applyMeleeDamage() {
+        if (this.damageApplied) return;
+        let { x, y } = this.sprite.getXY();
         let detector;
-        if (animationDirection == 3) {
-            detector = BoundingBox(ctx, y - 30, x, y + 30, x + attackRange);
+        if (this.animationDirection == 3) {
+            detector = BoundingBox(this.ctx, y - 30, x, y + 30, x + this.attackRange);
         } else {
-            detector = BoundingBox(ctx, y - 30, x - attackRange, y + 30, x);
+            detector = BoundingBox(this.ctx, y - 30, x - this.attackRange, y + 30, x);
         }
-        for (const enemy of world.enemies) {
-            if (enemy.isAlive && enemy.isAlive() && enemy.getBoundingBox && enemy.getBoundingBox().intersect(detector)) {
+        for (const enemy of this.world.enemies) {
+            if (enemy.isAlive && enemy.isAlive() && enemy.getBoundingBox &&
+                enemy.getBoundingBox().intersect(detector)) {
                 enemy.takeDamage(30);
-                damageApplied = true;
+                this.damageApplied = true;
                 break;
             }
         }
-    };
+    }
 
-    let deathPlayed = false;
+    update(time) {
+        if (!this.alive) {
+            this.updateAnimation();
+            this.sprite.update(time);
+            return;
+        }
 
-    let animationState = "";
-    const updateAnimation = function() {
-        if (!alive) {
-            if (!deathPlayed) {
-                const seqName = (animationDirection == 1) ? "deathLeft" : "deathRight";
-                sprite.setSequence(sequences[seqName]);
-                deathPlayed = true;
-                animationState = seqName;
+        if (this.guardTimer > 0) {
+            this.guardTimer--;
+            if (this.guardTimer == 0) {
+                this.guardCooldownTimer = this.GUARD_COOLDOWN;
+            }
+        }
+        if (this.guardCooldownTimer > 0) this.guardCooldownTimer--;
+
+        super.update(time);
+    }
+
+    updateAnimation() {
+        if (!this.alive) {
+            if (!this.deathPlayed) {
+                const seqName = (this.animationDirection == 1) ? "deathLeft" : "deathRight";
+                this.sprite.setSequence(this.sequences[seqName]);
+                this.deathPlayed = true;
+                this.animationState = seqName;
             }
             return;
         }
 
-        if (guardTimer > 0) {
-            const seqName = (animationDirection == 1) ? "guardLeft" : "guardRight";
-            if (animationState !== seqName) {
-                sprite.setSequence(sequences[seqName]);
-                animationState = seqName;
+        const wasAttacking = this.attackStanceTimer > 0;
+        if (wasAttacking) {
+            if (this.attackStanceTimer == this.meleeDamageFrame) {
+                this.applyMeleeDamage();
+            }
+            this.attackStanceTimer--;
+            if (this.attackStanceTimer == 0) {
+                this.enableAttack = true;
+            }
+        }
+
+        if (this.guardTimer > 0) {
+            const seqName = (this.animationDirection == 1) ? "guardLeft" : "guardRight";
+            if (this.animationState !== seqName) {
+                this.sprite.setSequence(this.sequences[seqName]);
+                this.animationState = seqName;
             }
             return;
         }
 
         let targetState;
-        if (recoverTimer > 0) {
-            targetState = (animationDirection == 1) ? "hurtLeft" : "hurtRight";
-        } else if (attackStanceTimer > 0) {
-            targetState = (animationDirection == 1) ? "attackLeft" : "attackRight";
-        } else if (!standing()) {
-            targetState = (animationDirection == 1) ? "jumpLeft" : "jumpRight";
-        } else if (direction != 0) {
-            targetState = (animationDirection == 1) ? "runLeft" : "runRight";
+        if (this.recoverTimer > 0) {
+            targetState = (this.animationDirection == 1) ? "hurtLeft" : "hurtRight";
+        } else if (wasAttacking) {
+            targetState = (this.animationDirection == 1) ? "attackLeft" : "attackRight";
+        } else if (!this.standing()) {
+            targetState = (this.animationDirection == 1) ? "jumpLeft" : "jumpRight";
+        } else if (this.direction != 0) {
+            targetState = (this.animationDirection == 1) ? "runLeft" : "runRight";
         } else {
-            targetState = (animationDirection == 1) ? "idleLeft" : "idleRight";
+            targetState = (this.animationDirection == 1) ? "idleLeft" : "idleRight";
         }
 
-        if (animationState !== targetState) {
-            animationState = targetState;
-            sprite.setSequence(sequences[targetState]);
+        if (this.animationState !== targetState) {
+            this.animationState = targetState;
+            this.sprite.setSequence(this.sequences[targetState]);
         }
-    };
+    }
+}
 
-    const update = function(time) {
-        if (!alive) {
-            updateAnimation();
-            sprite.update(time);
-            return;
-        }
-
-        let { x, y } = sprite.getXY();
-
-        if (guardTimer > 0) {
-            guardTimer--;
-            if (guardTimer == 0) {
-                guardCooldownTimer = GUARD_COOLDOWN;
-            }
-            direction = 0;
-        }
-        if (guardCooldownTimer > 0) guardCooldownTimer--;
-
-        if (!standing() || velocityY < 0) {
-            velocityY += gravity;
-            let validLocation = true;
-            let voffset = 0;
-            if (velocityY > 0) {
-                while (validLocation && voffset <= velocityY) {
-                    voffset++;
-                    let target = BoundingBox(ctx, y - vUpperSize + voffset, x - hHalfSize, y + vLowerSize + voffset, x + hHalfSize);
-                    for (const obstacle of world.obstacles) {
-                        if (obstacle.getBoundingBox().intersect(target)) {
-                            validLocation = false;
-                            voffset--;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                while (validLocation && velocityY <= voffset) {
-                    voffset--;
-                    let target = BoundingBox(ctx, y - vUpperSize + voffset, x - hHalfSize, y + vLowerSize + voffset, x + hHalfSize);
-                    for (const obstacle of world.obstacles) {
-                        if (obstacle.getBoundingBox().intersect(target)) {
-                            validLocation = false;
-                            velocityY = 0;
-                            voffset++;
-                            break;
-                        }
-                    }
-                }
-            }
-            y += voffset;
-            if (gameArea.isPointInBox(x, y)) sprite.setXY(x, y);
-        } else {
-            velocityY = 0;
-        }
-
-        if (recoverTimer == 0 && attackStanceTimer == 0 && guardTimer == 0) {
-            let validLocation = true;
-            let hoffset = 0;
-            if (direction == 1) {
-                while (validLocation && -hoffset < speed / 60) {
-                    hoffset--;
-                    let target = BoundingBox(ctx, y - vUpperSize, x - hHalfSize + hoffset, y + vLowerSize, x + hHalfSize + hoffset);
-                    for (const obstacle of world.obstacles) {
-                        if (obstacle.getBoundingBox().intersect(target)) {
-                            validLocation = false;
-                            hoffset++;
-                            break;
-                        }
-                    }
-                }
-            } else if (direction == 3) {
-                while (validLocation && hoffset < speed / 60) {
-                    hoffset++;
-                    let target = BoundingBox(ctx, y - vUpperSize, x - hHalfSize + hoffset, y + vLowerSize, x + hHalfSize + hoffset);
-                    for (const obstacle of world.obstacles) {
-                        if (obstacle.getBoundingBox().intersect(target)) {
-                            validLocation = false;
-                            hoffset--;
-                            break;
-                        }
-                    }
-                }
-            }
-            x += hoffset;
-            if (gameArea.isPointInBox(x, y)) sprite.setXY(x, y);
-        } else if (recoverTimer > 0) {
-            recoverTimer--;
-        }
-
-        if (!standing()) {
-            falling = true;
-        } else if (falling) {
-            falling = false;
-            sounds.land.currentTime = 0;
-            sounds.land.play();
-        } else {
-            falling = false;
-        }
-
-        if (attackStanceTimer > 0) {
-            if (attackStanceTimer == Math.floor(ATTACK_FRAMES / 2)) {
-                applyMeleeDamage();
-            }
-            attackStanceTimer--;
-            if (attackStanceTimer == 0) {
-                enableAttack = true;
-            }
-        }
-        if (cooldownTimer > 0) cooldownTimer--;
-
-        updateAnimation();
-        sprite.update(time);
-    };
-
-    return {
-        move: move,
-        stop: stop,
-        jump: jump,
-        resetJump: resetJump,
-        attack: attack,
-        stopAttack: stopAttack,
-        guard: guard,
-        takeDamage: takeDamage,
-        speedUp: function() { speed = 350; },
-        slowDown: function() { speed = 250; },
-        setLocalPlayer: setLocalPlayer,
-        setIndex: setIndex,
-        getIndex: getIndex,
-        getBoundingBox: getBoundingBox,
-        draw: sprite.draw,
-        update: update
-    };
+const Knight = function(ctx, x, y, gameArea, world) {
+    return new KnightPlayer(ctx, x, y, gameArea, world);
 };

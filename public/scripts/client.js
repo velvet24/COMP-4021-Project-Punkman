@@ -271,7 +271,7 @@ const Client = (function(){
                     character = Rockman(context, 960+index*100, 300, gameArea, world);
                     break;
                 case "Knight":
-                    character = KnightPlayer(context, 960+index*100, 300, gameArea, world);
+                    character = Knight(context, 960+index*100, 300, gameArea, world);
                     break;
             }
 
