@@ -230,6 +230,8 @@ const Client = (function(){
 
         const world = World();
 
+        world.socket = socket;
+
         world.obstacles = [
             Floor(context, 128, 1048),
             Floor(context, 384, 1048),

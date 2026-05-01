@@ -53,6 +53,10 @@ class PlayerBase {
         this.isLocalPlayer = true;
     }
 
+    getLocalPlayer() {
+        return this.isLocalPlayer;
+    }
+
     setIndex(index) {
         this.playerIndex = index;
         this.healthBarName = `#player${index}-healthbar`;

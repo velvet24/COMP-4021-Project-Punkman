@@ -56,7 +56,7 @@ const Skeleton = function(ctx, x, y, world) {
         return alive;
     }
 
-    const takeDamage = function(damage) {
+    const takeDamage = function(damage, isLocalPlayer) {
         if (!alive)
             return;
         
@@ -81,6 +81,8 @@ const Skeleton = function(ctx, x, y, world) {
                 sprite.setSequence(sequences.deathLeft);
             else
                 sprite.setSequence(sequences.deathRight);
+
+            world.socket.emit("enemy_dead", isLocalPlayer);
         }
     }
 

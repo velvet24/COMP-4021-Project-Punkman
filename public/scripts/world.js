@@ -5,5 +5,7 @@ const World = function() {
     const coins = [];
     const obstacles = [];
 
-    return {players, enemies, bullets, coins, obstacles};
+    let socket;
+
+    return {players, enemies, bullets, coins, obstacles, socket};
 };

@@ -31,6 +31,7 @@ const Gem = function(ctx, x, y, color, world) {
             if (player.getBoundingBox().isPointInBox(x, y)) {
                 sound.currentTime = 0;
                 sound.play();
+                world.socket.emit("coin_collected", player.getLocalPlayer());
                 return false;
             }
         }

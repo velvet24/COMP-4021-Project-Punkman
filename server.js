@@ -151,6 +151,14 @@ io.on("connection", (socket) => {
         io.emit("input", input);
     });
 
+    socket.on("enemy_dead", (isLocalPlayer) => {
+        console.log("Enemy killed by " + players[socket.id]["name"]);
+    });
+
+    socket.on("coin_collected", (isLocalPlayer) => {
+        console.log("Coin collected by " + players[socket.id]["name"]);
+    });
+
     socket.on("disconnect", () => {
         if(players[socket.id]){
             delete players[socket.id];
