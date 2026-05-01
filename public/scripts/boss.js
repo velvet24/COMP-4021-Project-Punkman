@@ -53,7 +53,7 @@ class BossEnemy extends EnemyBase {
         if (this.recoverTimer > 0) return `hit${dir}`;
         if (this.usingRangeAttack) return `cast${dir}`;
         if (this.attackStanceTimer > 0) return `attack${dir}`;
-        if (this.direction != 0) return `walk${dir}`;
+        if (this.isMoving) return `walk${dir}`;
         return `idle${dir}`;
     }
 

@@ -12,6 +12,7 @@ class EnemyBase {
 
         this.direction = config.initialDirection || 1;
         this.animationDirection = this.direction;
+        this.isMoving = false;
 
         this.sounds = {
             attack: null,
@@ -162,6 +163,7 @@ class EnemyBase {
 
     update(time) {
         const { x, y } = this.sprite.getXY();
+        this.isMoving = false;
 
         if (this.recoverTimer == 0 && this.attackStanceTimer == 0 && this.alive) {
             if (this.detectPlayer(this.direction, this.range) && this.enableAttack) {
@@ -180,8 +182,10 @@ class EnemyBase {
                 }
                 else {
                     const newX = x + this.speed / 60 * this.direction;
-                    if (newX > this.patrolXL && newX < this.patrolXR)
+                    if (newX > this.patrolXL && newX < this.patrolXR) {
                         this.sprite.setXY(newX, y);
+                        this.isMoving = true;
+                    }
                     else
                         this.move(-this.direction);
                 }

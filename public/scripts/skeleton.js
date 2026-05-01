@@ -49,7 +49,7 @@ class SkeletonEnemy extends EnemyBase {
             return `hit${dir}`;
         if (this.attackStanceTimer > 0)
             return `attack${dir}`;
-        if (this.direction != 0)
+        if (this.isMoving)
             return `walk${dir}`;
         return `idle${dir}`;
     }
