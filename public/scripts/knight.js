@@ -37,7 +37,7 @@ class KnightPlayer extends PlayerBase {
         });
 
         this.sequences = sequences;
-        this.attackRange = 200;
+        this.attackRange = 150;
 
         this.ATTACK_FRAMES = 36;
         this.meleeDamageFrame = 6;
@@ -90,7 +90,6 @@ class KnightPlayer extends PlayerBase {
     }
 
     applyMeleeDamage() {
-        if (this.damageApplied) return;
         let { x, y } = this.sprite.getXY();
         let detector;
         if (this.animationDirection == 3) {
@@ -101,8 +100,7 @@ class KnightPlayer extends PlayerBase {
         for (const enemy of this.world.enemies) {
             if (enemy.isAlive && enemy.isAlive() && enemy.getBoundingBox &&
                 enemy.getBoundingBox().intersect(detector)) {
-                enemy.takeDamage(30);
-                this.damageApplied = true;
+                enemy.takeDamage(50, 50, this.isLocalPlayer);
                 break;
             }
         }

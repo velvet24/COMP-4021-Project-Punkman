@@ -21,8 +21,8 @@ const Skeleton = function(ctx, x, y, id, world) {
 
     sprite.setSequence(sequences.idleRight).setScale(3).setShadowScale({x: 0, y: 0}).useSheet("images/skeleton_spritesheet.png");
 
-    let direction = 3;
-    let animationDirection = 3;
+    let direction = 1;
+    let animationDirection = 1;
 
     const sounds = {
         attack: new Audio("sounds/SwordSwing.mp3"),
@@ -30,7 +30,7 @@ const Skeleton = function(ctx, x, y, id, world) {
         death: new Audio("sounds/Explosion.wav")
     };
 
-    let speed = 150;
+    let speed = 100;
 
     const move = function(dir) {
         if (recoverTimer == 0 && attackStanceTimer == 0) {
@@ -56,16 +56,18 @@ const Skeleton = function(ctx, x, y, id, world) {
         return alive;
     }
 
-    const takeDamage = function(damage, isLocalPlayer) {
+    const takeDamage = function(damage, poiseDamage, isLocalPlayer) {
         if (!alive)
             return;
         
         health -= damage;
 
         if (health > 0) {
-            if (attackStanceTimer == 0){
-                poise -= damage;
+            if (recoverTimer == 0) {
+                poise -= poiseDamage;
                 if (poise <= 0) {
+                    if (attackStanceTimer != 0)
+                        attackStanceTimer = 0;
                     recoverTimer = 72;
                     poise = maxPoise;
                 }
@@ -108,7 +110,7 @@ const Skeleton = function(ctx, x, y, id, world) {
     const updateAnimation = function() {
         if (!alive)
             return;
-        if (animationDirection == 1) {
+        if (animationDirection == -1) {
             if (recoverTimer == 0) {
                 if (attackStanceTimer == 0) {
                     if (direction == 0) {
@@ -140,7 +142,7 @@ const Skeleton = function(ctx, x, y, id, world) {
                 recoverTimer--;
             }
         }
-        else if (animationDirection == 3) {
+        else if (animationDirection == 1) {
             if (recoverTimer == 0) {
                 if (attackStanceTimer == 0) {
                     if (direction == 0) {
@@ -183,11 +185,14 @@ const Skeleton = function(ctx, x, y, id, world) {
         return BoundingBox(ctx, y-vUpperSize, x-hHalfSize, y+vLowerSize, x+hHalfSize);
     }
 
-    const detectPlayer = function(applyDamage=false) {
+    const xl = 300;
+    const xr = 1500;
+
+    const detectPlayer = function(direction, range, applyDamage=false) {
         let { x, y } = sprite.getXY();
-        let detector = BoundingBox(ctx, y-range, x, y+range, x+range*2);
-        if (direction == 1)
-            detector = BoundingBox(ctx, y-range, x-range*2, y+range, x);
+        let detector = BoundingBox(ctx, y-range/2, x, y+range/2, x+range);
+        if (direction == -1)
+            detector = BoundingBox(ctx, y-range/2, x-range, y+range/2, x);
         for (const player of world.players) {
             if (detector.intersect(player.getBoundingBox())){
                 if (applyDamage) {
@@ -200,30 +205,34 @@ const Skeleton = function(ctx, x, y, id, world) {
         }
     }
 
-    const xl = 300;
-    const xr = 1500;
-
     const update = function(time) {
         let { x, y } = sprite.getXY();
 
         if (recoverTimer == 0 && attackStanceTimer == 0 && alive) {
-            if (detectPlayer()) {
+            if (detectPlayer(direction, range)) {
                 attack();
             }
             else {
+                let forward, backward;
                 if (direction == 1) {
-                    if (x - speed / 60 < xl)
-                        move(3);
-                    else
-                        x -= speed / 60;
+                    forward = xr - x;
+                    backward = x - xl;
                 }
-                else if (direction == 3) {
-                    if (x + speed / 60 > xr)
-                        move(1);
-                    else
-                        x += speed / 60;
+                else {
+                    forward = x - xl;
+                    backward = xr - x;
                 }
-                sprite.setXY(x, y);
+
+                if (!detectPlayer(direction, forward) && detectPlayer(direction * -1, backward)) {
+                    move(direction * -1);
+                }
+                else {
+                    let newX = x + speed / 60 * direction;
+                    if (newX > xl && newX < xr)
+                        sprite.setXY(newX, y);
+                    else
+                        move(direction * -1);
+                }
             }
         }
 
@@ -231,7 +240,7 @@ const Skeleton = function(ctx, x, y, id, world) {
             cooldownTimer--;
 
         if (attackStanceTimer == 90) {
-            detectPlayer(true);
+            detectPlayer(direction, range, true);
         }
 
         updateAnimation();
