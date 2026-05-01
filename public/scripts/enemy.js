@@ -134,9 +134,17 @@ class EnemyBase {
         return false;
     }
 
-    // Virtual — subclasses must implement animation selection logic.
     updateAnimation() {
-        throw new Error("updateAnimation() must be implemented by subclass");
+        if (!this.alive) return;
+        const target = this.getAnimationState();
+        if (target && this.animationState !== target) {
+            this.animationState = target;
+            this.sprite.setSequence(this.sequences[target]);
+        }
+    }
+
+    getAnimationState() {
+        throw new Error("getAnimationState() must be implemented by subclass");
     }
 
     update(time) {

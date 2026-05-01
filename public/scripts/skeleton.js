@@ -40,73 +40,18 @@ class SkeletonEnemy extends EnemyBase {
         });
 
         this.sequences = sequences;
-        this.animationState = 4;
+        this.animationState = "idleRight";
     }
 
-    updateAnimation() {
-        if (!this.alive)
-            return;
-
-        if (this.animationDirection == -1) {
-            if (this.recoverTimer == 0) {
-                if (this.attackStanceTimer == 0) {
-                    if (this.direction == 0) {
-                        if (this.animationState != 0) {
-                            this.sprite.setSequence(this.sequences.idleLeft);
-                            this.animationState = 0;
-                        }
-                    }
-                    else {
-                        if (this.animationState != 1) {
-                            this.sprite.setSequence(this.sequences.walkLeft);
-                            this.animationState = 1;
-                        }
-                    }
-                }
-                else {
-                    if (this.animationState != 2) {
-                        this.sprite.setSequence(this.sequences.attackLeft);
-                        this.animationState = 2;
-                    }
-                }
-            }
-            else {
-                if (this.animationState != 3) {
-                    this.sprite.setSequence(this.sequences.hitLeft);
-                    this.animationState = 3;
-                }
-            }
-        }
-        else if (this.animationDirection == 1) {
-            if (this.recoverTimer == 0) {
-                if (this.attackStanceTimer == 0) {
-                    if (this.direction == 0) {
-                        if (this.animationState != 4) {
-                            this.sprite.setSequence(this.sequences.idleRight);
-                            this.animationState = 4;
-                        }
-                    }
-                    else {
-                        if (this.animationState != 5) {
-                            this.sprite.setSequence(this.sequences.walkRight);
-                            this.animationState = 5;
-                        }
-                    }
-                }
-                else {
-                    if (this.animationState != 6) {
-                        this.sprite.setSequence(this.sequences.attackRight);
-                        this.animationState = 6;
-                    }
-                }
-            }
-            else {
-                if (this.animationState != 7) {
-                    this.sprite.setSequence(this.sequences.hitRight);
-                    this.animationState = 7;
-                }
-            }
-        }
+    getAnimationState() {
+        const dir = this.animationDirection == -1 ? "Left" : "Right";
+        if (this.recoverTimer > 0)
+            return `hit${dir}`;
+        if (this.attackStanceTimer > 0)
+            return `attack${dir}`;
+        if (this.direction != 0)
+            return `walk${dir}`;
+        return `idle${dir}`;
     }
 }
 
