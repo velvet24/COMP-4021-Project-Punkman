@@ -73,8 +73,8 @@ class KnightPlayer extends PlayerBase {
     
     takeDamage(damage) {
         if (this.isGuarding) {
-            sounds.parry.currentTime = 0;
-            sounds.parry.play();
+            this.sounds.parry.currentTime = 0;
+            this.sounds.parry.play();
             return;
         }
         super.takeDamage(damage);
