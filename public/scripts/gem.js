@@ -3,7 +3,7 @@
 // - `x` - The initial x position of the gem
 // - `y` - The initial y position of the gem
 // - `color` - The colour of the gem
-const Gem = function(ctx, x, y, color, world) {
+const Gem = function(ctx, x, y, color, id, world) {
 
     // This is the sprite sequences of the gem of four colours
     // `green`, `red`, `yellow` and `purple`.
@@ -31,6 +31,8 @@ const Gem = function(ctx, x, y, color, world) {
             if (player.getBoundingBox().isPointInBox(x, y)) {
                 sound.currentTime = 0;
                 sound.play();
+                if (player.getLocalPlayer())
+                    world.socket.emit("coin_collected", id);
                 return false;
             }
         }
