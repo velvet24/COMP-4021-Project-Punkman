@@ -105,14 +105,14 @@ class EnemyBase {
     }
 
     attack() {
-        if (this.recoverTimer == 0 && this.cooldownTimer == 0 && this.enableAttack && this.alive) {
-            this.attackStanceTimer = this.attackDuration;
-            this.cooldownTimer = this.attackCooldown;
-        }
+        this.attackStanceTimer = this.attackDuration;
+        this.cooldownTimer = this.attackCooldown;
     }
 
-    rangeAttack() {
-        return false;
+    rangeAttack() {}
+
+    applyAttack() {
+        this.detectPlayer(this.direction, this.range, true);
     }
 
     applyRangeAttack() {}
@@ -164,8 +164,9 @@ class EnemyBase {
         const { x, y } = this.sprite.getXY();
 
         if (this.recoverTimer == 0 && this.attackStanceTimer == 0 && this.alive) {
-            if (this.detectPlayer(this.direction, this.range)) {
-                this.attack();
+            if (this.detectPlayer(this.direction, this.range) && this.enableAttack) {
+                if (this.cooldownTimer == 0)
+                    this.attack();
             }
             else {
                 const forward  = this.direction == 1 ? this.patrolXR - x : x - this.patrolXL;
@@ -197,7 +198,7 @@ class EnemyBase {
             this.rangeAttackCooldownTimer--;
 
         if (this.attackStanceTimer == this.damageFrame && !this.usingRangeAttack)
-            this.detectPlayer(this.direction, this.range, true);
+            this.applyAttack();
 
         if (this.attackStanceTimer == this.castingFrame && this.usingRangeAttack)
             this.applyRangeAttack();
