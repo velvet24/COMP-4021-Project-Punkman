@@ -12,14 +12,15 @@ class BossEnemy extends EnemyBase {
             hitLeft:    { x: 0,    y: 372, width: 208, height: 93, count: 3,  timing: 100, loop: false },
             hitRight:   { x: 1872, y: 930, width: -208, height: 93, count: 3,  timing: 100, loop: false },
             deathLeft:  { x: 0,    y: 186, width: 208, height: 93, count: 10, timing: 150, loop: false },
-            deathRight: { x: 1872, y: 744, width: -208, height: 93, count: 10, timing: 150, loop: false }
+            deathRight: { x: 1872, y: 744, width: -208, height: 93, count: 10, timing: 150, loop: false },
+            spawn:      { x: 0,    y: 744, width: 208, height: 93, count: 10, timing: 150, loop: false }
         };
 
         super(ctx, x, y, id, world, {
             sheet: "images/boss_spritesheet.png",
             scale: 4,
             shadowScale: { x: 0, y: 0 },
-            initialSequence: sequences.idleRight,
+            initialSequence: sequences.spawn,
             sounds: {
                 cast: new Audio("sounds/bossCast.mp3"),
                 damage: new Audio("sounds/bossDamage.mp3"),
@@ -38,11 +39,12 @@ class BossEnemy extends EnemyBase {
             rangeAttackCooldown: 300,
             castingFrame: 30,
             size: { hHalfSize: 100, vUpperSize: 34, vLowerSize: 186 },
-            patrol: { xl: 400, xr: 1600 }
+            patrol: { xl: 200, xr: 1400 }
         });
 
         this.sequences = sequences;
         this.animationState = "idleRight";
+        this.spawnTimer = 90;
 
     }
 
@@ -77,7 +79,12 @@ class BossEnemy extends EnemyBase {
     }
 
     update(time) {
-        super.update(time);
+        if (this.spawnTimer == 0) {
+            super.update(time);
+        } else {
+            this.spawnTimer--;
+            this.sprite.update(time);
+        }
     }
 }
 

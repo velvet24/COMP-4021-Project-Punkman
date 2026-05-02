@@ -255,7 +255,7 @@ const Client = (function(){
             Skeleton(context, 1500, 960, "skeleton", world),
             Skeleton(context, 1200, 960, "skeleton", world),
             Skeleton(context, 500, 960, "skeleton", world),
-            Boss(context, 960, 638, "boss", world)
+            Boss(context, 300, 638, "boss", world)
         ];
 
         world.coins = [
