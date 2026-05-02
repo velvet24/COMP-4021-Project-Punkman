@@ -291,6 +291,7 @@ const Client = (function(){
         }
 
         let shooterSpawnTimer = 300;
+        let spawnX = 200;
 
         const FIXED_STEP_MS = 1000 / 60;
         const MAX_CATCHUP_STEPS = 8;
@@ -334,8 +335,10 @@ const Client = (function(){
 
                 shooterSpawnTimer--;
                 if (shooterSpawnTimer <= 0) {
-                    const randomX = 100 + Math.random() * 1720;
-                    world.enemies.push(Shooter(context, randomX, world));
+                    spawnX += 500;
+                    if (spawnX > 1900)
+                        spawnX -= 1900;
+                    world.enemies.push(Shooter(context, spawnX, world));
                     shooterSpawnTimer = 1200;
                 }
 

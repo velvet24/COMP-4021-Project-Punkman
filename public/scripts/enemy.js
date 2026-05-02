@@ -27,6 +27,7 @@ class EnemyBase {
         this.health = this.maxHealth;
         this.maxPoise = config.maxPoise || 50;
         this.poise = this.maxPoise;
+        this.recoverTime = config.recoverTime !== undefined ? config.recoverTime : 72;
         this.recoverTimer = 0;
         this.alive = true;
 
@@ -83,7 +84,7 @@ class EnemyBase {
                 this.poise -= poiseDamage || 0;
                 if (this.poise <= 0) {
                     this.attackStanceTimer = 0;
-                    this.recoverTimer = 72;
+                    this.recoverTimer = this.recoverTime;
                     this.poise = this.maxPoise;
                 }
             }
@@ -177,7 +178,7 @@ class EnemyBase {
                 if (this.detectPlayer(this.direction, forward) && this.hasRangeAttack && this.rangeAttackCooldownTimer == 0) {
                     this.rangeAttack();
                 }
-                else if (this.detectPlayer(-this.direction, backward)) {
+                else if (!this.detectPlayer(this.direction, forward) && this.detectPlayer(-this.direction, backward)) {
                     this.move(-this.direction);
                 }
                 else {

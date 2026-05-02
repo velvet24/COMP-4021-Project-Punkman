@@ -9,8 +9,8 @@ class BossEnemy extends EnemyBase {
             attackRight:{ x: 1872, y: 558, width: -208, height: 93, count: 10, timing: 120, loop: false },
             castLeft:   { x: 0,    y: 93, width: 208, height: 93, count: 9,  timing: 100, loop: false },
             castRight:  { x: 1872, y: 651, width: -208, height: 93, count: 9,  timing: 100, loop: false },
-            hitLeft:    { x: 0,    y: 372, width: 208, height: 93, count: 3,  timing: 100, loop: false },
-            hitRight:   { x: 1872, y: 930, width: -208, height: 93, count: 3,  timing: 100, loop: false },
+            hitLeft:    { x: 0,    y: 372, width: 208, height: 93, count: 3,  timing: 200, loop: false },
+            hitRight:   { x: 1872, y: 930, width: -208, height: 93, count: 3,  timing: 200, loop: false },
             deathLeft:  { x: 0,    y: 186, width: 208, height: 93, count: 10, timing: 150, loop: false },
             deathRight: { x: 1872, y: 744, width: -208, height: 93, count: 10, timing: 150, loop: false },
             spawn:      { x: 0,    y: 744, width: 208, height: 93, count: 10, timing: 150, loop: false }
@@ -29,6 +29,7 @@ class BossEnemy extends EnemyBase {
             speed: 100,
             maxHealth: 800,
             maxPoise: 200,
+            recoverTime: 36,
             range: 300,
             attackDuration: 72,
             attackCooldown: 216,
