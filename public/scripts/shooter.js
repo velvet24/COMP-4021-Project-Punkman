@@ -26,7 +26,7 @@ const Shooter = function(ctx, x, world) {
     let shootCooldown = 0;
     let burstLeft = 0;
     let burstTimer = 0;
-    let direction = 3;
+    let direction = 1;
     let animationState = "attackRight";
 
     const getClosestPlayer = function() {
@@ -52,11 +52,11 @@ const Shooter = function(ctx, x, world) {
     const updateAnimation = function() {
         const closest = getClosestPlayer();
         if (closest && closest.x < x) {
-            direction = 1;
+            direction = -1;
         } else {
-            direction = 3;
+            direction = 1;
         }
-        const targetState = direction === 1 ? "attackLeft" : "attackRight";
+        const targetState = direction === -1 ? "attackLeft" : "attackRight";
         if (animationState !== targetState) {
             animationState = targetState;
             sprite.setSequence(sequences[targetState]);

@@ -321,7 +321,7 @@ const Client = (function(){
                 world.enemies.forEach(_ => _.update(simulationNow));
 
                 for(let i=world.bullets.length-1; i>=0; i--){
-                    let alive = world.bullets[i].update();
+                    let alive = world.bullets[i].update(simulationNow);
                     if(!alive)
                         world.bullets.splice(i, 1);
                 }
@@ -330,11 +330,6 @@ const Client = (function(){
                     let alive = world.coins[i].update(simulationNow);
                     if(!alive)
                         world.coins.splice(i, 1);
-                }
-
-                for(let i = world.cloudStrikes.length - 1; i >= 0; i--){
-                    const alive = world.cloudStrikes[i].update(simulationNow);
-                    if(!alive) world.cloudStrikes.splice(i, 1);
                 }
 
                 shooterSpawnTimer--;
@@ -359,7 +354,6 @@ const Client = (function(){
             world.enemies.forEach(_ => _.draw());
             world.players.forEach(_ => _.draw());
             world.bullets.forEach(_ => _.draw());
-            world.cloudStrikes.forEach(_ => _.draw());
 
             requestAnimationFrame(doFrame);
         }

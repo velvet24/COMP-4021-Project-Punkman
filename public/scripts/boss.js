@@ -57,15 +57,11 @@ class BossEnemy extends EnemyBase {
     }
 
     rangeAttack() {
-        if (this.recoverTimer > 0 || this.attackStanceTimer > 0 || !this.alive) return;
-        if (this.world.players.length === 0) return;
-
         if (this.rangeAttackCooldown > 0)
             this.rangeAttackCooldownTimer = this.rangeAttackCooldown;
 
         this.usingRangeAttack = true;
         this.attackStanceTimer = this.rangeAttackDuration;
-        this.animationDirection = this.animationDirection || 1;
         this.sounds.cast.currentTime = 0;
         this.sounds.cast.play().catch(() => {});
     }
@@ -75,7 +71,7 @@ class BossEnemy extends EnemyBase {
         if (alivePlayers.length == 0) return;
 
         const target = alivePlayers[0];
-        this.world.cloudStrikes.push(
+        this.world.bullets.push(
             CloudStrike(this.ctx, target, this.world)
         );
     }

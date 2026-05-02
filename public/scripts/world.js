@@ -4,9 +4,8 @@ const World = function() {
     const bullets = [];
     const coins = [];
     const obstacles = [];
-    const cloudStrikes = []; 
 
     let socket;
 
-    return { players, enemies, bullets, coins, obstacles, cloudStrikes, socket };
+    return { players, enemies, bullets, coins, obstacles, socket };
 };
