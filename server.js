@@ -131,6 +131,13 @@ io.on("connection", (socket) => {
     socket.on("ready", (character) => {
         players[socket.id]["ready"] = true;
         players[socket.id]["character"] = character;
+        players[socket.id]["coin_collected"] = 0;
+        players[socket.id]["enemies_killed"] = {
+            "skeleton": 0,
+            "boss": 0,
+        };
+        players[socket.id]["score"] = 0;
+        players[socket.id]["alive"] = true;
         io.emit("update_players", players);
 
         for(const id in players){
@@ -153,10 +160,40 @@ io.on("connection", (socket) => {
 
     socket.on("enemy_dead", (enemy_id) => {
         console.log(enemy_id + " killed by " + players[socket.id]["name"]);
+        if(enemy_id.startsWith("skeleton")){
+            players[socket.id]["enemies_killed"]["skeleton"]++;
+            players[socket.id]["score"] += 20;
+        }
+        else if(enemy_id.startsWith("boss")){
+            players[socket.id]["enemies_killed"]["boss"]++;
+            players[socket.id]["score"] += 50;
+        }
     });
 
     socket.on("coin_collected", (coin_id) => {
         console.log(coin_id + " collected by " + players[socket.id]["name"]);
+        players[socket.id]["coin_collected"]++;
+        players[socket.id]["score"] += 10;
+    });
+
+    socket.on("player_died", () => {
+        console.log(players[socket.id]["name"] + " died.");
+        players[socket.id]["alive"] = false;
+
+        let allDead = true;
+        for(const id in players){
+            if(players[id].alive){
+                allDead = false;
+                break;
+            }
+        }
+        if(allDead){
+            io.emit("game_end", players);
+            for(const id in players){
+                delete players[id];
+            }
+            gameStarted = false;
+        }
     });
 
     socket.on("disconnect", () => {

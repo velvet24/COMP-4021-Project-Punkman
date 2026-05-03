@@ -431,6 +431,65 @@ const Client = (function(){
                 return;
 
             inGame = false;
+
+            $("#main-page").hide();
+            $("#lobby").show();
+            $("#end-page").show();
+            const rankedPlayers = Object.entries(players).map(([id, player]) => {
+                const enemies = player.enemies_killed || {};
+                const skeletonKills = Number(enemies.skeleton ?? 0);
+                const bossKills = Number(enemies.boss ?? 0);
+                const totalKills = skeletonKills + bossKills;
+                return {
+                    id,
+                    name: player.name || "Unknown",
+                    coins: Number(player.coin_collected ?? 0),
+                    score: Number(player.score ?? 0),
+                    skeletonKills,
+                    bossKills,
+                    totalKills,
+                    isLocal: id === socket.id
+                };
+            });
+
+            rankedPlayers.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                if (b.coins !== a.coins) return b.coins - a.coins;
+                return b.totalKills - a.totalKills;
+            });
+
+            const formatNumber = (value) => Number(value).toLocaleString("en-US");
+
+            const leaderboardRows = rankedPlayers.map((player, index) => {
+                const rowClass = player.isLocal ? "leaderboard-row is-local" : "leaderboard-row";
+                return `
+                    <div class="${rowClass}" style="--row-delay:${index * 70}ms">
+                        <div class="cell rank">${index + 1}</div>
+                        <div class="cell name">${player.name}${player.isLocal ? " <span class=\"you-badge\">You</span>" : ""}</div>
+                        <div class="cell kills">
+                            <div class="kills-total">${formatNumber(player.totalKills)} kills</div>
+                            <div class="kills-breakdown">Skeleton ${formatNumber(player.skeletonKills)} | Boss ${formatNumber(player.bossKills)}</div>
+                        </div>
+                        <div class="cell coins">${formatNumber(player.coins)}</div>
+                        <div class="cell score">${formatNumber(player.score)}</div>
+                    </div>
+                `;
+            }).join("");
+
+            const leaderboardHtml = `
+                <div class="leaderboard">
+                    <div class="leaderboard-row leaderboard-head">
+                        <div class="cell rank">#</div>
+                        <div class="cell name">Player</div>
+                        <div class="cell kills">Kills</div>
+                        <div class="cell coins">Coins</div>
+                        <div class="cell score">Score</div>
+                    </div>
+                    ${leaderboardRows}
+                </div>
+            `;
+
+            $("#game-results").html(leaderboardHtml);
         });
         
         requestAnimationFrame(doFrame);

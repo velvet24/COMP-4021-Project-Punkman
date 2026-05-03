@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
 * {
     font-family: "Helvetica", sans-serif;
 }
@@ -189,4 +191,224 @@ canvas {
     margin-top: 8px;
     font-size: 18px;
     font-weight: bold;
+}
+
+/* End Page */
+
+#end-page {
+    width: 100%;
+    height: 100%;
+    background: black;
+    position: relative;
+    overflow: hidden;
+    font-family: "Space Grotesk", "Helvetica", sans-serif;
+}
+
+#end-page::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 45%, rgba(0, 0, 0, 0.6));
+    pointer-events: none;
+}
+
+.end-page-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.end-card {
+    width: min(1100px, 92vw);
+    padding: 32px 40px 40px;
+    animation: endCardIn 600ms ease both;
+}
+
+.end-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+#end-page .title {
+    font-family: "Bebas Neue", "Space Grotesk", sans-serif;
+    letter-spacing: 2px;
+    font-size: clamp(48px, 6vw, 88px);
+    padding: 0;
+    color: #f8f3ff;
+}
+
+#end-page .subtitle {
+    font-size: clamp(18px, 2.4vw, 28px);
+    font-weight: 500;
+    color: rgba(244, 234, 255, 0.8);
+    padding: 0;
+}
+
+.game-results {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.leaderboard {
+    display: grid;
+    gap: 8px;
+}
+
+.leaderboard-row {
+    display: grid;
+    grid-template-columns: 80px 1.3fr 1.4fr 0.6fr 0.7fr;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: #f4f1ff;
+    animation: leaderboardRowIn 480ms ease both;
+    animation-delay: var(--row-delay, 0ms);
+}
+
+.leaderboard-row.leaderboard-head {
+    background: rgba(255, 255, 255, 0.08);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.72);
+    animation: none;
+}
+
+.leaderboard-row.is-local {
+    background: rgb(102 245 255 / 15%);
+    color: #66feff;
+    border: 1px solid rgb(102 245 255 / 60%);
+}
+
+.cell.rank {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #66feff;
+}
+
+.cell.name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.you-badge {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgb(102 245 255 / 30%);
+    color: #66feff;
+    border: 1px solid rgb(102 245 255 / 60%);
+}
+
+.cell.kills {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kills-total {
+    font-weight: 600;
+    color: #f2d3ff;
+}
+
+.kills-breakdown {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.cell.coins,
+.cell.score {
+    font-weight: 600;
+    text-align: right;
+}
+
+.cell.score {
+    font-size: 1.1rem;
+    color: #9df0ff;
+}
+
+.end-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.end-actions button {
+    background: #51c3da;
+    border: none;
+    color: #1f141f;
+    padding: 14px 28px;
+    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.end-actions button:hover {
+    transform: translateY(-2px);
+}
+
+@keyframes endCardIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes leaderboardRowIn {
+    from {
+        opacity: 0;
+        transform: translateX(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 900px) {
+    .end-card {
+        padding: 28px 22px 32px;
+    }
+
+    .leaderboard-row {
+        grid-template-columns: 52px 1fr;
+        grid-auto-rows: auto;
+        row-gap: 8px;
+    }
+
+    .leaderboard-row .cell.kills,
+    .leaderboard-row .cell.coins,
+    .leaderboard-row .cell.score {
+        grid-column: 2 / -1;
+        text-align: left;
+    }
+
+    .leaderboard-row.leaderboard-head {
+        display: none;
+    }
+
+    .cell.rank {
+        font-size: 1.1rem;
+    }
 }
