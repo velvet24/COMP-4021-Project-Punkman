@@ -140,7 +140,9 @@ class PlayerBase {
             }
             $(this.healthBarName).animate({ height: "0%" }, 500);
             if (this.isLocalPlayer) {
-                this.world.socket.emit("player_died");
+                setTimeout(() => {
+                    this.world.socket.emit("player_died");
+                }, 3000);
             }
         }
     }
@@ -207,12 +209,16 @@ class PlayerBase {
 
         let { x, y } = this.sprite.getXY();
 
+        if (x > 2000 || y > 1100) return;
+
         if (this.world.flag?.getBoundingBox().isPointInBox(x, y) && this.acceptInput) {
             this.acceptInput = false;
             this.move(1);
 
             if (this.isLocalPlayer) {
-                this.world.socket.emit("reach_check_point");
+                setTimeout(() => {
+                    this.world.socket.emit("reach_check_point");
+                }, 1500);
             }
         }
 
