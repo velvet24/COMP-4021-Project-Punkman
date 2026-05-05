@@ -20,8 +20,9 @@
         <div id="start-page" style="display: none">
             <div class="row">
                 <div class="col">
-                    <div class="title">Punkman</div>
-                    <div class="row">
+                    <img class="start-logo" src="images/titlelogo.jpg" alt="Punkman logo">
+                    <img class="start-title" src="images/titletext.jpg" alt="Punkman">
+                    <div class="row start-actions">
                         <button id="start-signin-button">Sign In</button>
                         <button id="start-register-button">Register</button>
                     </div>
@@ -72,12 +73,13 @@
                         <span id="user-avatar">avatar</span>
                         <span id="user-name">name</span>!
                     </div>
+                    <img class="keyboard-hint" src="images/keyboard.svg" alt="Keyboard controls">
                     <div class="col">
-                        <form id="signout-form" class="col">
-                            <button id="signout-button" type="submit">Sign Out</button>
-                        </form>
                         <form id="join-form" class="col">
                             <button id="join-button">Join</button>
+                        </form>
+                        <form id="signout-form" class="col">
+                            <button id="signout-button" type="submit">Sign Out</button>
                         </form>
                         <div id="join-message" class="message"></div>
                     </div>
