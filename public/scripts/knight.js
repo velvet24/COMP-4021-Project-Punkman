@@ -28,7 +28,7 @@ class KnightPlayer extends PlayerBase {
                 parry:  new Audio("sounds/hero_parry.wav"),
                 land:   new Audio("sounds/hero_land_soft.wav"),
                 damage: new Audio("sounds/hero_damage.wav"),
-                death:  new Audio("sounds/KnightDeath.wav")
+                death:  new Audio("sounds/MegamanDefeat.wav")
             },
             size: {
                 hHalfSize: 25,

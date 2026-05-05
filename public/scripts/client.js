@@ -381,22 +381,17 @@ const Client = (function(){
             if (input.event == "keydown") {
                 switch (input.key){
                     case 32:
-                    case 75:
+                    case 87:
                         world.players[input.index].jump();
                         break;
-                    case 37:
                     case 65:
                         world.players[input.index].move(-1);
                         break;
-                    case 39:
                     case 68:
                         world.players[input.index].move(1);
                         break;
                     case 74:
                         world.players[input.index].attack();
-                        break;
-                    case 76:
-                        world.players[input.index].takeDamage(10);
                         break;
                     case 83:
                         world.players[input.index].guard?.();
@@ -406,14 +401,12 @@ const Client = (function(){
             else if (input.event == "keyup") {
                 switch (input.key){
                     case 32:
-                    case 75:
+                    case 87:
                         world.players[input.index].resetJump();
                         break;
-                    case 37:
                     case 65:
                         world.players[input.index].stop(-1);
                         break;
-                    case 39:
                     case 68:
                         world.players[input.index].stop(1);
                         break;

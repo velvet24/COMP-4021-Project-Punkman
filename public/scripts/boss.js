@@ -17,13 +17,13 @@ class BossEnemy extends EnemyBase {
         };
 
         super(ctx, x, y, id, world, {
-            sheet: "images/boss_spritesheet.png",
+            sheet: "images/death_bringer_spritesheet.png",
             scale: 4,
             shadowScale: { x: 0, y: 0 },
             initialSequence: sequences.spawn,
             sounds: {
                 cast: new Audio("sounds/bossCast.mp3"),
-                damage: new Audio("sounds/bossDamage.mp3"),
+                damage: new Audio("sounds/EnemyDamage.wav"),
                 death:  new Audio("sounds/bossDie.mp3")
             },
             speed: 100,

@@ -111,7 +111,7 @@ class PlayerBase {
                 this.sounds.death.play().catch(() => {});
             }
             $(this.healthBarName).animate({ height: "0%" }, 500);
-            if (this.getLocalPlayer()) {
+            if (this.isLocalPlayer) {
                 this.world.socket.emit("player_died");
             }
         }
