@@ -40,7 +40,7 @@ class BossEnemy extends EnemyBase {
             rangeAttackCooldown: 300,
             castingFrame: 30,
             size: { hHalfSize: 100, vUpperSize: 34, vLowerSize: 186 },
-            patrol: { xl: 200, xr: 1400 }
+            patrol: { xl: 350, xr: 1750 }
         });
 
         this.sequences = sequences;

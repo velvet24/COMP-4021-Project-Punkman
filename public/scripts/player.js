@@ -17,7 +17,7 @@ class PlayerBase {
         this.animationDirection = 1;
 
         this.baseSpeed = config.baseSpeed || 250;
-        this.boostedSpeed = config.boostedSpeed || 350;
+        this.boostedSpeed = config.boostedSpeed || 750;
         this.speed = this.baseSpeed;
 
         this.maxHealth = config.maxHealth || 100;
@@ -47,6 +47,9 @@ class PlayerBase {
             death: null,
             ...(config.sounds || {})
         };
+
+        this.acceptInput = true;
+        this.cheatMode = false;
     }
 
     setLocalPlayer() {
@@ -55,6 +58,18 @@ class PlayerBase {
 
     getLocalPlayer() {
         return this.isLocalPlayer;
+    }
+
+    enableCheatMode() {
+        this.cheatMode = true;
+    }
+
+    disableCheatMode() {
+        this.cheatMode = false;
+    }
+
+    getAcceptInput() {
+        return this.acceptInput;
     }
 
     setIndex(index) {
@@ -88,6 +103,13 @@ class PlayerBase {
     }
 
     takeDamage(damage) {
+        if (this.cheatMode) {
+            if (this.sounds.parry) {
+                this.sounds.parry.currentTime = 0;
+                this.sounds.parry.play().catch(() => {});
+            }
+            return;
+        }
         if (!this.alive || this.recoverTimer != 0)
             return;
 
@@ -179,6 +201,11 @@ class PlayerBase {
 
         let { x, y } = this.sprite.getXY();
 
+        if (this.world.flag.getBoundingBox().isPointInBox(x, y)) {
+            this.acceptInput = false;
+            this.move(1);
+        }
+
         if (!this.standing() || this.velocityY < 0) {
             this.velocityY += this.gravity;
             let validLocation = true;
@@ -248,7 +275,7 @@ class PlayerBase {
                 }
             }
             x += hoffset;
-            if (this.gameArea.isPointInBox(x, y))
+            if (this.gameArea.isPointInBox(x, y) || !this.acceptInput)
                 this.sprite.setXY(x, y);
         }
 

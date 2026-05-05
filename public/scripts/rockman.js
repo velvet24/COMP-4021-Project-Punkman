@@ -29,6 +29,8 @@ class RockmanPlayer extends PlayerBase {
             scale: 0.5,
             shadowScale: { x: 0, y: 0 },
             sounds: {
+                buster: new Audio("sounds/MegaBuster.wav"),
+                parry: new Audio("sounds/hero_parry.wav"),
                 land: new Audio("sounds/MegamanLand.wav"),
                 damage: new Audio("sounds/MegamanDamage.wav"),
                 death: new Audio("sounds/MegamanDefeat.wav")
@@ -41,7 +43,6 @@ class RockmanPlayer extends PlayerBase {
         });
 
         this.sequences = sequences;
-        this.busterSound = new Audio("sounds/MegaBuster.wav");
         this.animationState = 7;
     }
 
@@ -58,8 +59,8 @@ class RockmanPlayer extends PlayerBase {
             this.enableAttack = false;
             this.attackStanceTimer = 20;
             this.cooldownTimer = 10;
-            this.busterSound.currentTime = 0;
-            this.busterSound.play().catch(() => {});
+            this.sounds.buster.currentTime = 0;
+            this.sounds.buster.play().catch(() => {});
             const { x, y } = this.sprite.getXY();
             if (this.animationDirection == 1)
                 this.world.bullets.push(Bullet(this.ctx, x + this.hHalfSize, y, this.animationDirection, this.isLocalPlayer, this.world));

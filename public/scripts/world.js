@@ -5,8 +5,6 @@ const World = function() {
     const coins = [];
     const obstacles = [];
 
-    let socket;
-
     let shooterAlive = true;
 
     const isShooterAlive = function() {return shooterAlive;}
@@ -14,7 +12,7 @@ const World = function() {
     const killShooter = function() {shooterAlive = false;}
 
     return { 
-        players, enemies, bullets, coins, obstacles, socket, 
+        players, enemies, bullets, coins, obstacles,
         isShooterAlive, killShooter 
     };
 };

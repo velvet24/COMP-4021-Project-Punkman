@@ -225,7 +225,8 @@ const Client = (function(){
         const gameArea = BoundingBox(context, 0, 0, 1080, 1920);
         
         const sounds = {
-            background: new Audio("sounds/FlashManStage.mp3")
+            background: new Audio("sounds/FlashManStage.mp3"),
+            cheat: new Audio("sounds/1up.wav")
         };
 
         const world = World();
@@ -279,10 +280,10 @@ const Client = (function(){
         ];
 
         world.enemies = [
-            Skeleton(context, 1500, 960, "skeleton", world),
-            Skeleton(context, 1200, 960, "skeleton", world),
             Skeleton(context, 500, 960, "skeleton", world),
-            Boss(context, 300, 638, "boss", world)
+            Skeleton(context, 750, 960, "skeleton", world),
+            Skeleton(context, 1000, 960, "skeleton", world),
+            Boss(context, 350, 638, "boss", world)
         ];
 
         world.coins = [
@@ -291,6 +292,8 @@ const Client = (function(){
             Gem(context, 768, 976, "yellow", "gem2", world),
             Gem(context, 1024, 976, "purple", "gem3", world)
         ];
+
+        world.flag = ArrowSign(context, 1850, 175);
 
         let pawn;
 
@@ -378,6 +381,8 @@ const Client = (function(){
             }
 
             context.clearRect(0, 0, cv.width, cv.height);
+            
+            world.flag.draw();
 
             world.obstacles.forEach(_ => _.draw());
             world.coins.forEach(_ => _.draw());
@@ -386,6 +391,14 @@ const Client = (function(){
             world.bullets.forEach(_ => _.draw());
 
             requestAnimationFrame(doFrame);
+        }
+
+        function cheatMode() {
+            sounds.cheat.play();
+            for (const player of world.players) {
+                player.enableCheatMode();
+                player.speedUp();
+            }
         }
 
         $(document).on("keydown", function(event) {
@@ -405,6 +418,9 @@ const Client = (function(){
         });
 
         socket.on("input", (input) => {
+            if (!world.players[input.index].getAcceptInput())
+                return;
+            
             if (input.event == "keydown") {
                 switch (input.key){
                     case 32:
@@ -423,6 +439,9 @@ const Client = (function(){
                     case 75:
                     case 83:
                         world.players[input.index].guard?.();
+                        break;
+                    case 76:
+                        cheatMode();
                         break;
                 }
             }

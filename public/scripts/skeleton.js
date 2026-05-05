@@ -36,7 +36,7 @@ class SkeletonEnemy extends EnemyBase {
             damageFrame: 90,
             damageAmount: 25,
             size: { hHalfSize: 30, vUpperSize: 30, vLowerSize: 55 },
-            patrol: { xl: 300, xr: 1500 }
+            patrol: { xl: 300, xr: 1800 }
         });
 
         this.sequences = sequences;
