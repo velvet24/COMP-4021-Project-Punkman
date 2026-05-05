@@ -167,6 +167,7 @@ io.on("connection", (socket) => {
         else if(enemy_id.startsWith("boss")){
             players[socket.id]["enemies_killed"]["boss"]++;
             players[socket.id]["score"] += 50;
+            io.emit("game_end", players);
         }
     });
 
@@ -180,20 +181,36 @@ io.on("connection", (socket) => {
         console.log(players[socket.id]["name"] + " died.");
         players[socket.id]["alive"] = false;
 
-        let allDead = true;
+        let allAlive = true;
         for(const id in players){
-            if(players[id].alive){
-                allDead = false;
+            if(!players[id].alive){
+                allAlive = false;
                 break;
             }
         }
-        if(allDead){
+        if(!allAlive){
             io.emit("game_end", players);
             for(const id in players){
                 delete players[id];
             }
             gameStarted = false;
         }
+    });
+
+    socket.on("reach_check_point", () => {
+        console.log(players[socket.id]["name"] + " reached check point");
+        players[socket.id]["next"] = true;
+        
+        for(const id in players) {
+            if(!players[id].next)
+                return;
+        }
+
+        for(const id in players) {
+            players[id].next = false;
+        }
+
+        io.emit("next_level");
     });
 
     socket.on("disconnect", () => {

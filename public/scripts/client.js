@@ -283,7 +283,7 @@ const Client = (function(){
             Skeleton(context, 500, 960, "skeleton", world),
             Skeleton(context, 750, 960, "skeleton", world),
             Skeleton(context, 1000, 960, "skeleton", world),
-            Boss(context, 350, 638, "boss", world)
+            Boss(context, 350, 638, "death_bringer", world)
         ];
 
         world.coins = [
@@ -330,6 +330,8 @@ const Client = (function(){
         let simulationNow = 0;
 
         context.imageSmoothingEnabled = false;
+
+        let rafId = null;
 
         function doFrame(now) {
             if (lastFrameTime == 0) {
@@ -382,7 +384,7 @@ const Client = (function(){
 
             context.clearRect(0, 0, cv.width, cv.height);
             
-            world.flag.draw();
+            world.flag?.draw();
 
             world.obstacles.forEach(_ => _.draw());
             world.coins.forEach(_ => _.draw());
@@ -390,15 +392,29 @@ const Client = (function(){
             world.players.forEach(_ => _.draw());
             world.bullets.forEach(_ => _.draw());
 
-            requestAnimationFrame(doFrame);
+            rafId = requestAnimationFrame(doFrame);
         }
 
+        let cheatModeEnabled = false;
+
         function cheatMode() {
+            sounds.cheat.currentTime = 0;
             sounds.cheat.play();
-            for (const player of world.players) {
-                player.enableCheatMode();
-                player.speedUp();
+            if (cheatModeEnabled) {
+                for (const player of world.players) {
+                    player.disableCheatMode();
+                    player.slowDown();
+                }
+                cheatModeEnabled = false;
             }
+            else {
+                for (const player of world.players) {
+                    player.enableCheatMode();
+                    player.speedUp();
+                }
+                cheatModeEnabled = true;
+            }
+
         }
 
         $(document).on("keydown", function(event) {
@@ -463,8 +479,89 @@ const Client = (function(){
                     case 75:
                     case 83:
                         world.players[input.index].stopGuard?.();
+                        break;
                 }
             }
+        });
+
+        socket.on("next_level", () => {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+
+            const FADE_DURATION = 600;
+            let fadeStart = null;
+
+            function reinitWorld() {
+                world.obstacles = [
+                    Floor(context, 128, 1048),
+                    Floor(context, 384, 1048),
+                    Floor(context, 640, 1048),
+                    Floor(context, 896, 1048),
+                    Floor(context, 1152, 1048),
+                    Floor(context, 1408, 1048),
+                    Floor(context, 1664, 1048),
+                    Floor(context, 1920, 1048),
+                ];
+                world.enemies = [
+                    Boss(context, 350, 830, "boss", world)
+                ];
+                world.coins = [];
+                world.bullets = [];
+                world.flag = null;
+                shooterSpawnTimer = 300;
+                spawnX = 200;
+
+                let idx = 1;
+                for (const player of world.players) {
+                    player.setLocation(idx * 100, 960);
+                    idx++;
+                }
+
+                lastFrameTime = 0;
+                accumulator = 0;
+            }
+
+            function drawCurrentState() {
+                context.clearRect(0, 0, cv.width, cv.height);
+                world.flag?.draw();
+                world.obstacles.forEach(_ => _.draw());
+                world.coins.forEach(_ => _.draw());
+                world.enemies.forEach(_ => _.draw());
+                world.players.forEach(_ => _.draw());
+                world.bullets.forEach(_ => _.draw());
+            }
+
+            function fadeOut(now) {
+                if (!fadeStart) fadeStart = now;
+                const alpha = Math.min((now - fadeStart) / FADE_DURATION, 1);
+                drawCurrentState();
+                context.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+                context.fillRect(0, 0, cv.width, cv.height);
+
+                if (alpha < 1) {
+                    requestAnimationFrame(fadeOut);
+                } else {
+                    reinitWorld();
+                    fadeStart = null;
+                    requestAnimationFrame(fadeIn);
+                }
+            }
+
+            function fadeIn(now) {
+                if (!fadeStart) fadeStart = now;
+                const alpha = 1 - Math.min((now - fadeStart) / FADE_DURATION, 1);
+                drawCurrentState();
+                context.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+                context.fillRect(0, 0, cv.width, cv.height);
+
+                if (alpha > 0) {
+                    requestAnimationFrame(fadeIn);
+                } else {
+                    rafId = requestAnimationFrame(doFrame);
+                }
+            }
+
+            requestAnimationFrame(fadeOut);
         });
 
         socket.on("game_end", (players) => {
@@ -532,8 +629,8 @@ const Client = (function(){
 
             $("#game-results").html(leaderboardHtml);
         });
-        
-        requestAnimationFrame(doFrame);
+
+        rafId = requestAnimationFrame(doFrame);
     };
 
     const validate = function(){

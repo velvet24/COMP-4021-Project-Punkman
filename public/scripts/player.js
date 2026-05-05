@@ -94,6 +94,12 @@ class PlayerBase {
         }
     }
 
+    setLocation(x, y) {
+        this.acceptInput = true;
+        this.direction = 0;
+        this.sprite.setXY(x, y);
+    }
+
     speedUp() {
         this.speed = this.boostedSpeed;
     }
@@ -201,9 +207,13 @@ class PlayerBase {
 
         let { x, y } = this.sprite.getXY();
 
-        if (this.world.flag.getBoundingBox().isPointInBox(x, y)) {
+        if (this.world.flag?.getBoundingBox().isPointInBox(x, y) && this.acceptInput) {
             this.acceptInput = false;
             this.move(1);
+
+            if (this.isLocalPlayer) {
+                this.world.socket.emit("reach_check_point");
+            }
         }
 
         if (!this.standing() || this.velocityY < 0) {

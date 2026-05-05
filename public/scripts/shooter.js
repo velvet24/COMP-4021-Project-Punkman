@@ -116,10 +116,13 @@ const Shooter = function(ctx, x, world) {
         return true;
     };
 
-    const takeDamage = function(damage) {
+    const takeDamage = function(damage, poiseDamage, isLocalPlayer) {
         world.killShooter();
         state = "leave";
         sound.play();
+        if (isLocalPlayer) {
+            world.socket.emit("enemy_dead", "shooter");
+        }
     }
 
     return {
