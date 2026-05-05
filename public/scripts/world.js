@@ -7,5 +7,14 @@ const World = function() {
 
     let socket;
 
-    return { players, enemies, bullets, coins, obstacles, socket };
+    let shooterAlive = true;
+
+    const isShooterAlive = function() {return shooterAlive;}
+
+    const killShooter = function() {shooterAlive = false;}
+
+    return { 
+        players, enemies, bullets, coins, obstacles, socket, 
+        isShooterAlive, killShooter 
+    };
 };

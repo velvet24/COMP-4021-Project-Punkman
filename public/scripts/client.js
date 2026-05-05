@@ -233,6 +233,15 @@ const Client = (function(){
         world.socket = socket;
 
         world.obstacles = [
+            Wall(context, 0, 728),
+            Wall(context, 0, 536),
+            Wall(context, 0, 344),
+            Wall(context, 0, 152),
+            Wall(context, 1920, 920),
+            Wall(context, 1920, 728),
+            Wall(context, 1920, 536),
+            Wall(context, 1920, 344),
+
             Floor(context, 128, 1048),
             Floor(context, 384, 1048),
             Floor(context, 640, 1048),
@@ -241,14 +250,32 @@ const Client = (function(){
             Floor(context, 1408, 1048),
             Floor(context, 1664, 1048),
             Floor(context, 1920, 1048),
+
             Floor(context, 128, 856),
             Floor(context, 384, 856),
             Floor(context, 640, 856),
             Floor(context, 896, 856),
             Floor(context, 1152, 856),
             Floor(context, 1408, 856),
-            Wall(context, 32, 920),
-            Wall(context, 1888, 920)
+            Floor(context, 1664, 856),
+
+            Floor(context, 128, 664),
+
+            Floor(context, 384, 472),
+            Floor(context, 640, 472),
+            Floor(context, 896, 472),
+            Floor(context, 1152, 472),
+            Floor(context, 1408, 472),
+            Floor(context, 1664, 472),
+            Floor(context, 1920, 472),
+
+            Floor(context, 128, 280),
+            Floor(context, 384, 280),
+            Floor(context, 640, 280),
+            Floor(context, 896, 280),
+            Floor(context, 1408, 280),
+            Floor(context, 1664, 280),
+            Floor(context, 1920, 280),
         ];
 
         world.enemies = [
@@ -273,10 +300,10 @@ const Client = (function(){
             let character;
             switch (players[id].character) {
                 case "Rockman":
-                    character = Rockman(context, 960+index*100, 300, gameArea, world);
+                    character = Rockman(context, index*100, 960, gameArea, world);
                     break;
                 case "Knight":
-                    character = Knight(context, 960+index*100, 300, gameArea, world);
+                    character = Knight(context, index*100, 960, gameArea, world);
                     break;
             }
 
@@ -334,7 +361,7 @@ const Client = (function(){
                 }
 
                 shooterSpawnTimer--;
-                if (shooterSpawnTimer <= 0) {
+                if (shooterSpawnTimer == 0 && world.isShooterAlive()) {
                     spawnX += 500;
                     if (spawnX > 1900)
                         spawnX -= 1900;
@@ -393,6 +420,7 @@ const Client = (function(){
                     case 74:
                         world.players[input.index].attack();
                         break;
+                    case 75:
                     case 83:
                         world.players[input.index].guard?.();
                         break;
@@ -413,6 +441,7 @@ const Client = (function(){
                     case 74:
                         world.players[input.index].stopAttack();
                         break;
+                    case 75:
                     case 83:
                         world.players[input.index].stopGuard?.();
                 }

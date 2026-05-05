@@ -29,6 +29,8 @@ const Shooter = function(ctx, x, world) {
     let direction = 1;
     let animationState = "attackRight";
 
+    const sound = new Audio("sounds/Explosion.wav");
+
     const getClosestPlayer = function() {
         let minDist = Infinity;
         let closest = null;
@@ -114,9 +116,15 @@ const Shooter = function(ctx, x, world) {
         return true;
     };
 
+    const takeDamage = function(damage) {
+        world.killShooter();
+        state = "leave";
+        sound.play();
+    }
+
     return {
         isAlive: function() { return state !== "leave"; },
-        takeDamage: function(dmg) {},
+        takeDamage: takeDamage,
         getBoundingBox: sprite.getBoundingBox,
         draw: sprite.draw,
         update: update
