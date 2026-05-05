@@ -7,6 +7,9 @@
 body {
     margin: 0;
     padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
 
 button {
@@ -233,6 +236,24 @@ img.sign {
 
 #main-page {
     position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+#game-area {
+    position: relative;
+    width: min(100vw, calc(100vh * 16 / 9));
+    aspect-ratio: 16 / 9;
+}
+
+#game-area canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 canvas {
