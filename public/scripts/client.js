@@ -280,10 +280,20 @@ const Client = (function(){
         ];
 
         world.enemies = [
-            Skeleton(context, 500, 960, "skeleton", world),
-            Skeleton(context, 750, 960, "skeleton", world),
-            Skeleton(context, 1000, 960, "skeleton", world),
-            Boss(context, 350, 638, "death_bringer", world)
+            Skeleton(context, 500, 942, "skeleton", world),
+            Goblin(context, 850, 938, "skeleton", world),
+            Mushroom(context, 1200, 938, "skeleton", world),
+            
+            Boss(context, 350, 638, "death_bringer", world),
+
+            Skeleton(context, 400, 366, "skeleton", world),
+            Goblin(context, 700, 362, "skeleton", world),
+            Mushroom(context, 1000, 362, "skeleton", world),
+            Bat(context, 1300, 362, "skeleton", world),
+
+            Bat(context, 300, 170, "skeleton", world),
+            Bat(context, 900, 170, "skeleton", world),
+            Bat(context, 1500, 170, "skeleton", world),
         ];
 
         world.coins = [

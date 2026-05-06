@@ -19,7 +19,7 @@ class SkeletonEnemy extends EnemyBase {
 
         super(ctx, x, y, id, world, {
             sheet: "images/skeleton_spritesheet.png",
-            scale: 3,
+            scale: 4,
             shadowScale: { x: 0, y: 0 },
             initialSequence: sequences.idleRight,
             sounds: {
@@ -35,7 +35,7 @@ class SkeletonEnemy extends EnemyBase {
             attackCooldown: 324,
             damageFrame: 90,
             damageAmount: 25,
-            size: { hHalfSize: 30, vUpperSize: 30, vLowerSize: 55 },
+            size: { hHalfSize: 44, vUpperSize: 54, vLowerSize: 74 },
             patrol: { xl: 300, xr: 1800 }
         });
 
