@@ -133,8 +133,9 @@ io.on("connection", (socket) => {
         players[socket.id]["character"] = character;
         players[socket.id]["coin_collected"] = 0;
         players[socket.id]["enemies_killed"] = {
-            "skeleton": 0,
-            "boss": 0,
+            "witch": 0,
+            "bringer": 0,
+            "enemy": 0
         };
         players[socket.id]["score"] = 0;
         players[socket.id]["alive"] = true;
@@ -160,14 +161,18 @@ io.on("connection", (socket) => {
 
     socket.on("enemy_dead", (enemy_id) => {
         console.log(enemy_id + " killed by " + players[socket.id]["name"]);
-        if(enemy_id.startsWith("skeleton")){
-            players[socket.id]["enemies_killed"]["skeleton"]++;
-            players[socket.id]["score"] += 20;
-        }
-        else if(enemy_id.startsWith("boss")){
-            players[socket.id]["enemies_killed"]["boss"]++;
+        if(enemy_id.startsWith("witch")){
+            players[socket.id]["enemies_killed"]["witch"]++;
             players[socket.id]["score"] += 50;
             io.emit("game_end", players);
+        }
+        else if(enemy_id.startsWith("death_bringer")){
+            players[socket.id]["enemies_killed"]["bringer"]++;
+            players[socket.id]["score"] += 30;
+        }
+        else {
+            players[socket.id]["enemies_killed"]["enemy"]++;
+            players[socket.id]["score"] += 10;
         }
     });
 
@@ -178,23 +183,11 @@ io.on("connection", (socket) => {
     });
 
     socket.on("player_died", () => {
-        console.log(players[socket.id]["name"] + " died.");
-        players[socket.id]["alive"] = false;
-
-        let allAlive = true;
+        io.emit("game_end", players);
         for(const id in players){
-            if(!players[id].alive){
-                allAlive = false;
-                break;
-            }
+            delete players[id];
         }
-        if(!allAlive){
-            io.emit("game_end", players);
-            for(const id in players){
-                delete players[id];
-            }
-            gameStarted = false;
-        }
+        gameStarted = false;
     });
 
     socket.on("reach_check_point", () => {

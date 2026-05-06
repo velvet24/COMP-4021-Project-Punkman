@@ -13,7 +13,7 @@ class BossEnemy extends EnemyBase {
             hitRight:   { x: 1872, y: 930, width: -208, height: 93, count: 3,  timing: 200, loop: false },
             deathLeft:  { x: 0,    y: 186, width: 208, height: 93, count: 10, timing: 150, loop: false },
             deathRight: { x: 1872, y: 744, width: -208, height: 93, count: 10, timing: 150, loop: false },
-            spawn:      { x: 0,    y: 744, width: 208, height: 93, count: 10, timing: 150, loop: false }
+            spawn:      { x: 1872,    y: 186, width: -208, height: 93, count: 10, timing: 150, loop: false }
         };
 
         super(ctx, x, y, id, world, {
@@ -40,11 +40,12 @@ class BossEnemy extends EnemyBase {
             rangeAttackCooldown: 300,
             castingFrame: 30,
             size: { hHalfSize: 100, vUpperSize: 34, vLowerSize: 186 },
-            patrol: { xl: 350, xr: 1750 }
+            patrol: { xl: 350, xr: 1750 },
+            initialDirection: -1
         });
 
         this.sequences = sequences;
-        this.animationState = "idleRight";
+        this.animationState = "idleLeft";
         this.spawnTimer = 90;
 
     }

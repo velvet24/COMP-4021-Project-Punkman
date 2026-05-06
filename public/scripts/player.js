@@ -150,9 +150,7 @@ class PlayerBase {
             }
             $(this.healthBarName).animate({ height: "0%" }, 500);
             if (this.isLocalPlayer) {
-                setTimeout(() => {
-                    this.world.socket.emit("player_died");
-                }, 3000);
+                this.world.socket.emit("player_died");
             }
         }
     }
@@ -334,7 +332,7 @@ class PlayerBase {
         if (this.shieldActive) {
             const { x, y } = this.sprite.getXY();
             const size = this.sprite.getDisplaySize();
-            const radius = Math.max(size.width, size.height) * 0.5;
+            const radius = this.vLowerSize;
             this.ctx.save();
             this.ctx.globalAlpha = 0.4 + 0.2 * Math.sin(Date.now() * 0.01);
             this.ctx.strokeStyle = "#00ffff";

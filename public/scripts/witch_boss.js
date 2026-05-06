@@ -7,25 +7,27 @@ class WitchBossEnemy extends EnemyBase {
 
         super(ctx, x, y, id, world, {
             sheet: "images/witch.png",
-            scale: 15,
+            scale: 10,
             shadowScale: { x: 0, y: 0 },
             initialSequence: sequences.idle,
             sounds: {
-                attack: new Audio("sounds/thunder.mp3")
+                attack: new Audio("sounds/thunder.mp3"),
+                damage: new Audio("sounds/EnemyDamage.wav"),
+                death: new Audio("sounds/Explosion.wav")
             },
             speed: 0,
-            maxHealth: 900,
-            maxPoise: 200,
-            recoverTime: 40,
+            maxHealth: 1000,
+            maxPoise: 2000,
+            recoverTime: 0,
             range: 0,
-            attackDuration: 130,
-            attackCooldown: 400,
-            damageFrame: 120,
+            attackDuration: 126,
+            attackCooldown: 504,
+            damageFrame: 36,
             damageAmount: 40,
             size: {
-                hHalfSize: 300,
-                vUpperSize: 300,
-                vLowerSize: 400
+                hHalfSize: 25,
+                vUpperSize: 410,
+                vLowerSize: 380
             },
             patrol: { xl: x, xr: x }
         });
@@ -34,22 +36,19 @@ class WitchBossEnemy extends EnemyBase {
         this.animationState = "idle";
         this.animationDirection = -1;
         this.direction = 0;
+        this.cooldownTimer = this.attackCooldown / 3;
     }
 
     attack() {
-        if (this.attackStanceTimer > 0 || this.cooldownTimer > 0 || !this.alive) return;
-
-        this.sprite.setSequence(this.sequences.attack);
         this.attackStanceTimer = this.attackDuration;
         this.cooldownTimer = this.attackCooldown;
+    }
 
+    applyAttack() {
         if (this.sounds.attack) {
             this.sounds.attack.currentTime = 0;
             this.sounds.attack.play().catch(() => {});
         }
-    }
-
-    applyAttack() {
         for (const player of this.world.players) {
             if (player.alive) {
                 player.takeDamage(this.damageAmount);
@@ -57,36 +56,30 @@ class WitchBossEnemy extends EnemyBase {
         }
     }
 
+    getAnimationState() {
+        if (this.attackStanceTimer > 0)
+            return "attack";
+        return "idle";
+    };
+
     update(time) {
         if (!this.alive) return;
 
-        if (this.recoverTimer > 0) this.recoverTimer--;
-        if (this.cooldownTimer > 0) this.cooldownTimer--;
-
-        if (this.attackStanceTimer > 0) {
-            if (this.attackStanceTimer === this.damageFrame) {
-                this.applyAttack();
-            }
-            this.attackStanceTimer--;
-            if (this.attackStanceTimer === 0) {
-                this.sprite.setSequence(this.sequences.idle);
-                this.animationState = "idle";
-            }
-        } else if (this.recoverTimer === 0 && this.alive) {
-            if (this.cooldownTimer === 0) {
+        if (this.attackStanceTimer == 0) {
+            if (this.cooldownTimer == 0)
                 this.attack();
-            }
         }
 
+        if (this.cooldownTimer > 0) this.cooldownTimer--;
+
+        if (this.attackStanceTimer == this.damageFrame)
+            this.applyAttack();
+
+        if (this.attackStanceTimer > 0)
+            this.attackStanceTimer--;
+
+        this.updateAnimation();
         this.sprite.update(time);
-    }
-
-
-    getAnimationState() {
-        return this.animationState;
-    }
-
-    updateAnimation() {
     }
 }
 

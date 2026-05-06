@@ -281,19 +281,19 @@ const Client = (function(){
 
         world.enemies = [
             Skeleton(context, 500, 942, "skeleton", world),
-            Goblin(context, 850, 938, "skeleton", world),
-            Mushroom(context, 1200, 938, "skeleton", world),
+            Goblin(context, 850, 938, "goblin", world),
+            Mushroom(context, 1200, 938, "mushroom", world),
             
-            Boss(context, 350, 638, "death_bringer", world),
+            Boss(context, 1500, 638, "death_bringer", world),
 
             Skeleton(context, 400, 366, "skeleton", world),
-            Goblin(context, 700, 362, "skeleton", world),
-            Mushroom(context, 1000, 362, "skeleton", world),
-            Bat(context, 1300, 362, "skeleton", world),
+            Goblin(context, 700, 362, "goblin", world),
+            Mushroom(context, 1000, 362, "mushroom", world),
+            Bat(context, 1300, 362, "bat", world),
 
-            Bat(context, 300, 170, "skeleton", world),
-            Bat(context, 900, 170, "skeleton", world),
-            Bat(context, 1500, 170, "skeleton", world),
+            Bat(context, 300, 170, "bat", world),
+            Bat(context, 900, 170, "bat", world),
+            Bat(context, 1500, 170, "bat", world),
         ];
 
         world.coins = [
@@ -517,33 +517,31 @@ const Client = (function(){
                     Floor(context, 1664, 1048),
                     Floor(context, 1920, 1048),
 
-                    Floor(context, 500, 880),
-                    Floor(context, 900, 880),
+                    Floor(context, 512, 856),
+                    Floor(context, 1024, 856),
 
+                    Floor(context, 256, 664),
+                    Floor(context, 768, 664),
+                    Floor(context, 1280, 664),
 
-                    Floor(context, 700, 680),
-                    Floor(context, 1100, 680),
-                    Floor(context, 300, 680),
-
-                    Floor(context, 500, 480),
-                    Floor(context, 900, 480),
+                    Floor(context, 512, 472),
+                    Floor(context, 1024, 472),
 
                 ];
                 world.enemies = [
-                    Boss(context, 350, 830, "boss", world),
-                    WitchBoss(context, 1570, 700, "witch_boss", world)
+                    WitchBoss(context, 1600, 636, "witch", world)
                 ];
                     world.shields = [
-                    ShieldPickup(context, 500, 820, world),
-                    ShieldPickup(context, 900, 820, world),
+                    ShieldPickup(context, 512, 776, world),
+                    ShieldPickup(context, 1024, 776, world),
 
 
-                    ShieldPickup(context, 700, 620, world),
-                    ShieldPickup(context, 1100, 620, world),
-                    ShieldPickup(context, 300, 620, world),
+                    ShieldPickup(context, 256, 584, world),
+                    ShieldPickup(context, 768, 584, world),
+                    ShieldPickup(context, 1280, 584, world),
 
-                    ShieldPickup(context, 500, 420, world),
-                    ShieldPickup(context, 900, 420, world),
+                    ShieldPickup(context, 512, 392, world),
+                    ShieldPickup(context, 1024, 392, world),
                 ];
                 world.coins = [];
                 world.bullets = [];
@@ -610,64 +608,68 @@ const Client = (function(){
 
             inGame = false;
 
-            $("#main-page").hide();
-            $("#lobby").show();
-            $("#end-page").show();
-            const rankedPlayers = Object.entries(players).map(([id, player]) => {
-                const enemies = player.enemies_killed || {};
-                const skeletonKills = Number(enemies.skeleton ?? 0);
-                const bossKills = Number(enemies.boss ?? 0);
-                const totalKills = skeletonKills + bossKills;
-                return {
-                    id,
-                    name: player.name || "Unknown",
-                    coins: Number(player.coin_collected ?? 0),
-                    score: Number(player.score ?? 0),
-                    skeletonKills,
-                    bossKills,
-                    totalKills,
-                    isLocal: id === socket.id
-                };
-            });
+            setTimeout(() => {
+                $("#main-page").hide();
+                $("#lobby").show();
+                $("#end-page").show();
+                const rankedPlayers = Object.entries(players).map(([id, player]) => {
+                    const enemies = player.enemies_killed || {};
+                    const witchKill = Number(enemies.witch ?? 0);
+                    const bringerKill = Number(enemies.bringer ?? 0);
+                    const enemyKills = Number(enemies.enemy ?? 0);
+                    const totalKills = witchKill + bringerKill + enemyKills;
+                    return {
+                        id,
+                        name: player.name || "Unknown",
+                        coins: Number(player.coin_collected ?? 0),
+                        score: Number(player.score ?? 0),
+                        witchKill,
+                        bringerKill,
+                        enemyKills,
+                        totalKills,
+                        isLocal: id === socket.id
+                    };
+                });
 
-            rankedPlayers.sort((a, b) => {
-                if (b.score !== a.score) return b.score - a.score;
-                if (b.coins !== a.coins) return b.coins - a.coins;
-                return b.totalKills - a.totalKills;
-            });
+                rankedPlayers.sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    if (b.coins !== a.coins) return b.coins - a.coins;
+                    return b.totalKills - a.totalKills;
+                });
 
-            const formatNumber = (value) => Number(value).toLocaleString("en-US");
+                const formatNumber = (value) => Number(value).toLocaleString("en-US");
 
-            const leaderboardRows = rankedPlayers.map((player, index) => {
-                const rowClass = player.isLocal ? "leaderboard-row is-local" : "leaderboard-row";
-                return `
-                    <div class="${rowClass}" style="--row-delay:${index * 70}ms">
-                        <div class="cell rank">${index + 1}</div>
-                        <div class="cell name">${player.name}${player.isLocal ? " <span class=\"you-badge\">You</span>" : ""}</div>
-                        <div class="cell kills">
-                            <div class="kills-total">${formatNumber(player.totalKills)} kills</div>
-                            <div class="kills-breakdown">Skeleton ${formatNumber(player.skeletonKills)} | Boss ${formatNumber(player.bossKills)}</div>
+                const leaderboardRows = rankedPlayers.map((player, index) => {
+                    const rowClass = player.isLocal ? "leaderboard-row is-local" : "leaderboard-row";
+                    return `
+                        <div class="${rowClass}" style="--row-delay:${index * 70}ms">
+                            <div class="cell rank">${index + 1}</div>
+                            <div class="cell name">${player.name}${player.isLocal ? " <span class=\"you-badge\">You</span>" : ""}</div>
+                            <div class="cell kills">
+                                <div class="kills-total">${formatNumber(player.totalKills)} kills</div>
+                                <div class="kills-breakdown">Witch ${formatNumber(player.witchKill)} | Death Bringer ${formatNumber(player.bringerKill)} | Enemy ${formatNumber(player.enemyKills)}</div>
+                            </div>
+                            <div class="cell coins">${formatNumber(player.coins)}</div>
+                            <div class="cell score">${formatNumber(player.score)}</div>
                         </div>
-                        <div class="cell coins">${formatNumber(player.coins)}</div>
-                        <div class="cell score">${formatNumber(player.score)}</div>
+                    `;
+                }).join("");
+
+                const leaderboardHtml = `
+                    <div class="leaderboard">
+                        <div class="leaderboard-row leaderboard-head">
+                            <div class="cell rank">#</div>
+                            <div class="cell name">Player</div>
+                            <div class="cell kills">Kills</div>
+                            <div class="cell coins">Coins</div>
+                            <div class="cell score">Score</div>
+                        </div>
+                        ${leaderboardRows}
                     </div>
                 `;
-            }).join("");
 
-            const leaderboardHtml = `
-                <div class="leaderboard">
-                    <div class="leaderboard-row leaderboard-head">
-                        <div class="cell rank">#</div>
-                        <div class="cell name">Player</div>
-                        <div class="cell kills">Kills</div>
-                        <div class="cell coins">Coins</div>
-                        <div class="cell score">Score</div>
-                    </div>
-                    ${leaderboardRows}
-                </div>
-            `;
-
-            $("#game-results").html(leaderboardHtml);
+                $("#game-results").html(leaderboardHtml);
+            }, 3000);
         });
 
         rafId = requestAnimationFrame(doFrame);
