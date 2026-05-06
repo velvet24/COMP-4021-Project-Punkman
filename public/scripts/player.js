@@ -50,6 +50,7 @@ class PlayerBase {
 
         this.acceptInput = true;
         this.cheatMode = false;
+        this.shieldActive = false;
     }
 
     setLocalPlayer() {
@@ -110,6 +111,15 @@ class PlayerBase {
 
     takeDamage(damage) {
         if (this.cheatMode) {
+            if (this.sounds.parry) {
+                this.sounds.parry.currentTime = 0;
+                this.sounds.parry.play().catch(() => {});
+            }
+            return;
+        }
+
+        if (this.shieldActive) {
+            this.shieldActive = false;
             if (this.sounds.parry) {
                 this.sounds.parry.currentTime = 0;
                 this.sounds.parry.play().catch(() => {});
@@ -321,5 +331,22 @@ class PlayerBase {
 
     draw() {
         this.sprite.draw();
+        if (this.shieldActive) {
+            const { x, y } = this.sprite.getXY();
+            const size = this.sprite.getDisplaySize();
+            const radius = Math.max(size.width, size.height) * 0.5;
+            this.ctx.save();
+            this.ctx.globalAlpha = 0.4 + 0.2 * Math.sin(Date.now() * 0.01);
+            this.ctx.strokeStyle = "#00ffff";
+            this.ctx.lineWidth = 4;
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            this.ctx.stroke();
+            this.ctx.restore();
+        }
+    }
+
+    activateShield() {
+        this.shieldActive = true;
     }
 }

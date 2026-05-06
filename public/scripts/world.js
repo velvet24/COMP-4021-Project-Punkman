@@ -4,6 +4,7 @@ const World = function() {
     const bullets = [];
     const coins = [];
     const obstacles = [];
+    const shields = [];  
 
     let shooterAlive = true;
 
@@ -12,7 +13,7 @@ const World = function() {
     const killShooter = function() {shooterAlive = false;}
 
     return { 
-        players, enemies, bullets, coins, obstacles,
+        players, enemies, bullets, coins, obstacles, shields,
         isShooterAlive, killShooter 
     };
 };

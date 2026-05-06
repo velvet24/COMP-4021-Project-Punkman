@@ -364,7 +364,11 @@ const Client = (function(){
                     if(!alive)
                         world.coins.splice(i, 1);
                 }
-
+                for (let i = world.shields.length - 1; i >= 0; i--) {
+                    let alive = world.shields[i].update(simulationNow);
+                    if (!alive)
+                        world.shields.splice(i, 1);
+                }
                 shooterSpawnTimer--;
                 if (shooterSpawnTimer == 0 && world.isShooterAlive()) {
                     spawnX += 500;
@@ -388,6 +392,7 @@ const Client = (function(){
 
             world.obstacles.forEach(_ => _.draw());
             world.coins.forEach(_ => _.draw());
+            world.shields.forEach(_ => _.draw());
             world.enemies.forEach(_ => _.draw());
             world.players.forEach(_ => _.draw());
             world.bullets.forEach(_ => _.draw());
@@ -501,9 +506,34 @@ const Client = (function(){
                     Floor(context, 1408, 1048),
                     Floor(context, 1664, 1048),
                     Floor(context, 1920, 1048),
+
+                    Floor(context, 500, 880),
+                    Floor(context, 900, 880),
+
+
+                    Floor(context, 700, 680),
+                    Floor(context, 1100, 680),
+                    Floor(context, 300, 680),
+
+                    Floor(context, 500, 480),
+                    Floor(context, 900, 480),
+
                 ];
                 world.enemies = [
-                    Boss(context, 350, 830, "boss", world)
+                    Boss(context, 350, 830, "boss", world),
+                    WitchBoss(context, 1570, 700, "witch_boss", world)
+                ];
+                    world.shields = [
+                    ShieldPickup(context, 500, 820, world),
+                    ShieldPickup(context, 900, 820, world),
+
+
+                    ShieldPickup(context, 700, 620, world),
+                    ShieldPickup(context, 1100, 620, world),
+                    ShieldPickup(context, 300, 620, world),
+
+                    ShieldPickup(context, 500, 420, world),
+                    ShieldPickup(context, 900, 420, world),
                 ];
                 world.coins = [];
                 world.bullets = [];
