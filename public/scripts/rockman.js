@@ -69,6 +69,27 @@ class RockmanPlayer extends PlayerBase {
         }
     }
 
+    update(time) {
+        if (!this.alive) {
+            this.updateAnimation();
+            this.sprite.update(time);
+            return;
+        }
+        super.update(time);
+    }
+
+    updateAnimation() {
+        if (!this.alive) {
+            const seqName = this.animationDirection == -1 ? "recoverLeft" : "recoverRight";
+            if (this.animationState !== seqName) {
+                this.sprite.setSequence(this.sequences[seqName]);
+                this.animationState = seqName;
+            }
+            return;
+        }
+        super.updateAnimation();
+    }
+
     getAnimationState() {
         const dir = this.animationDirection == -1 ? "Left" : "Right";
         if (this.recoverTimer > 0)        return `recover${dir}`;

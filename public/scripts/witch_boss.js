@@ -1,12 +1,13 @@
 class WitchBossEnemy extends EnemyBase {
     constructor(ctx, x, y, id, world) {
         const sequences = {
-            idle:   { x: 0, y: 100, width: 300, height: 100, count: 4, timing: 200, loop: true },
-            attack: { x: 0, y: 0, width: 300, height: 100, count: 14, timing: 150, loop: false }
+            idle:      { x: 0, y: 100, width: 300, height: 100, count: 4,  timing: 200, loop: true  },
+            attack:    { x: 0, y: 0,   width: 300, height: 100, count: 14, timing: 150, loop: false },
+            deathLeft: { x: 0, y: 200, width: 300, height: 100, count: 14, timing: 150, loop: false }
         };
 
         super(ctx, x, y, id, world, {
-            sheet: "images/witch.png",
+            sheet: "images/witch_spritesheet.png",
             scale: 10,
             shadowScale: { x: 0, y: 0 },
             initialSequence: sequences.idle,
@@ -68,16 +69,14 @@ class WitchBossEnemy extends EnemyBase {
     };
 
     update(time) {
-        if (!this.alive) return;
-
-        if (this.attackStanceTimer == 0) {
+        if (this.attackStanceTimer == 0 && this.alive) {
             if (this.cooldownTimer == 0)
                 this.attack();
         }
 
         if (this.cooldownTimer > 0) this.cooldownTimer--;
 
-        if (this.attackStanceTimer == this.damageFrame)
+        if (this.attackStanceTimer == this.damageFrame && this.alive)
             this.applyAttack();
 
         if (this.attackStanceTimer > 0)
