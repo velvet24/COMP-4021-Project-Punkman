@@ -219,6 +219,7 @@ class EnemyBase {
     }
 
     draw() {
+        this.getBoundingBox().draw();
         this.sprite.draw();
     }
 }

@@ -55,21 +55,9 @@ const BoundingBox = function(ctx, top, left, bottom, right) {
     // This function checks whether the two bounding boxes intersect.
     // - `box` - The other bounding box
     const intersect = function(box) {
-        /* Check the points of the other box */
-        let points = box.getPoints();
-        for (const key in points) {
-            if (isPointInBox(...points[key]))
-                return true;
-        }
-
-        /* Check the points of this box */
-        points = getPoints();
-        for (const key in points) {
-            if (box.isPointInBox(...points[key]))
-                return true;
-        }
-
-        return false;
+        if (right < box.getLeft() || left > box.getRight()) return false;
+        if (bottom < box.getTop() || top > box.getBottom()) return false;
+        return true;
     };
 
     // This function generates a random point inside the bounding box.
@@ -77,6 +65,17 @@ const BoundingBox = function(ctx, top, left, bottom, right) {
         const x = left + (Math.random() * (right - left));
         const y = top + (Math.random() * (bottom - top));
         return {x, y};
+    };
+
+    // This function draws the bounding box for debugging.
+    // - `color` - The stroke color of the bounding box
+    // - `lineWidth` - The line width of the bounding box
+    const draw = function(color = "red", lineWidth = 3) {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.stroke(path);
+        ctx.restore();
     };
 
     // The methods are returned as an object here.
@@ -88,6 +87,7 @@ const BoundingBox = function(ctx, top, left, bottom, right) {
         getPoints: getPoints,
         isPointInBox: isPointInBox,
         intersect: intersect,
-        randomPoint: randomPoint
+        randomPoint: randomPoint,
+        draw: draw
     };
 };

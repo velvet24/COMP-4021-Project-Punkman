@@ -289,11 +289,11 @@ const Client = (function(){
             Skeleton(context, 400, 366, "skeleton", world),
             Goblin(context, 700, 362, "goblin", world),
             Mushroom(context, 1000, 362, "mushroom", world),
-            Bat(context, 1300, 362, "bat", world),
+            Bat(context, 1300, 388, "bat", world),
 
-            Bat(context, 300, 170, "bat", world),
-            Bat(context, 900, 170, "bat", world),
-            Bat(context, 1500, 170, "bat", world),
+            Bat(context, 300, 196, "bat", world),
+            Bat(context, 900, 196, "bat", world),
+            Bat(context, 1500, 196, "bat", world),
         ];
 
         world.coins = [
@@ -449,7 +449,7 @@ const Client = (function(){
         });
 
         socket.on("input", (input) => {
-            if (!world.players[input.index].getAcceptInput())
+            if (!world.players[input.index].active)
                 return;
             
             if (input.event == "keydown") {
@@ -602,7 +602,7 @@ const Client = (function(){
             requestAnimationFrame(fadeOut);
         });
 
-        socket.on("game_end", (players) => {
+        socket.on("game_end", ({ players, outcome }) => {
             if(!inGame)
                 return;
 
@@ -612,6 +612,13 @@ const Client = (function(){
                 $("#main-page").hide();
                 $("#lobby").show();
                 $("#end-page").show();
+                if (outcome === "win") {
+                    $("#end-title").text("Victory!");
+                    $("#end-subtitle").text("You defeated the Witch!");
+                } else {
+                    $("#end-title").text("Game Over");
+                    $("#end-subtitle").text("Final Standings");
+                }
                 const rankedPlayers = Object.entries(players).map(([id, player]) => {
                     const enemies = player.enemies_killed || {};
                     const witchKill = Number(enemies.witch ?? 0);

@@ -56,6 +56,11 @@ class WitchBossEnemy extends EnemyBase {
         }
     }
 
+    getBoundingBox() {
+        const { x, y } = this.sprite.getXY();
+        return BoundingBox(this.ctx, y - this.vUpperSize, x - this.hHalfSize, y + this.vLowerSize, x + 300);
+    }
+
     getAnimationState() {
         if (this.attackStanceTimer > 0)
             return "attack";

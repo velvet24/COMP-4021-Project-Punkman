@@ -71,13 +71,11 @@ class BossEnemy extends EnemyBase {
     }
 
     applyRangeAttack() {
-        const alivePlayers = this.world.players.filter(p => p.alive);
-        if (alivePlayers.length == 0) return;
+        const alivePlayers = this.world.players.filter(p => p.active);
 
-        const target = alivePlayers[0];
-        this.world.bullets.push(
-            CloudStrike(this.ctx, target, this.world)
-        );
+        for (const player of alivePlayers) {
+            this.world.bullets.push(CloudStrike(this.ctx, player, this.world))
+        }
     }
 
     update(time) {

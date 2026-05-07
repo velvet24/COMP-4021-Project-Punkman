@@ -164,7 +164,7 @@ io.on("connection", (socket) => {
         if(enemy_id.startsWith("witch")){
             players[socket.id]["enemies_killed"]["witch"]++;
             players[socket.id]["score"] += 50;
-            io.emit("game_end", players);
+            io.emit("game_end", { players, outcome: "win" });
         }
         else if(enemy_id.startsWith("death_bringer")){
             players[socket.id]["enemies_killed"]["bringer"]++;
@@ -183,7 +183,7 @@ io.on("connection", (socket) => {
     });
 
     socket.on("player_died", () => {
-        io.emit("game_end", players);
+        io.emit("game_end", { players, outcome: "lose" });
         for(const id in players){
             delete players[id];
         }

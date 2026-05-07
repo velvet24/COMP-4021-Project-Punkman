@@ -43,9 +43,6 @@ class KnightPlayer extends PlayerBase {
         this.ATTACK_FRAMES = 36;
         this.meleeDamageFrame = 6;
 
-        this.enableAttack = true;
-        this.damageApplied = false;
-
         this.isGuarding = false;
         this.enableGuard = true;
 
@@ -67,7 +64,6 @@ class KnightPlayer extends PlayerBase {
         if (this.canAttack()) {
             this.attackStanceTimer = this.ATTACK_FRAMES;
             this.cooldownTimer = this.ATTACK_FRAMES;
-            this.damageApplied = false;
         }
     }
     
@@ -98,15 +94,13 @@ class KnightPlayer extends PlayerBase {
         let { x, y } = this.sprite.getXY();
         let detector;
         if (this.animationDirection == 1) {
-            detector = BoundingBox(this.ctx, y - 30, x, y + 30, x + this.attackRange);
+            detector = BoundingBox(this.ctx, y - this.vUpperSize, x, y + this.vLowerSize, x + this.attackRange);
         } else {
-            detector = BoundingBox(this.ctx, y - 30, x - this.attackRange, y + 30, x);
+            detector = BoundingBox(this.ctx, y - this.vUpperSize, x - this.attackRange, y + this.vLowerSize, x);
         }
         for (const enemy of this.world.enemies) {
-            if (enemy.isAlive && enemy.isAlive() && enemy.getBoundingBox &&
-                enemy.getBoundingBox().intersect(detector)) {
+            if (enemy.getBoundingBox().intersect(detector)) {
                 enemy.takeDamage(50, 50, this.isLocalPlayer);
-                break;
             }
         }
     }
@@ -168,6 +162,12 @@ class KnightPlayer extends PlayerBase {
             this.animationState = targetState;
             this.sprite.setSequence(this.sequences[targetState]);
         }
+    }
+
+    draw() {
+        let { x, y } = this.sprite.getXY();
+        BoundingBox(this.ctx, y - this.vUpperSize, x, y + this.vLowerSize, x + this.attackRange).draw();
+        super.draw();
     }
 }
 

@@ -35,7 +35,7 @@ const Shooter = function(ctx, x, world) {
         let minDist = Infinity;
         let closest = null;
         for (const player of world.players) {
-            if (player.getBoundingBox) {
+            if (player.active) {
                 const box = player.getBoundingBox();
                 const px = (box.getLeft() + box.getRight()) / 2;
                 const py = (box.getTop() + box.getBottom()) / 2;

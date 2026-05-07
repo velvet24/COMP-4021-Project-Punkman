@@ -48,7 +48,7 @@ class PlayerBase {
             ...(config.sounds || {})
         };
 
-        this.acceptInput = true;
+        this.active = true;
         this.cheatMode = false;
         this.shieldActive = false;
     }
@@ -67,10 +67,6 @@ class PlayerBase {
 
     disableCheatMode() {
         this.cheatMode = false;
-    }
-
-    getAcceptInput() {
-        return this.acceptInput;
     }
 
     setIndex(index) {
@@ -96,7 +92,7 @@ class PlayerBase {
     }
 
     setLocation(x, y) {
-        this.acceptInput = true;
+        this.active = true;
         this.direction = 0;
         this.sprite.setXY(x, y);
     }
@@ -219,8 +215,8 @@ class PlayerBase {
 
         if (x > 2000 || y > 1100) return;
 
-        if (this.world.flag?.getBoundingBox().isPointInBox(x, y) && this.acceptInput) {
-            this.acceptInput = false;
+        if (this.world.flag?.getBoundingBox().isPointInBox(x, y) && this.active) {
+            this.active = false;
             this.move(1);
 
             if (this.isLocalPlayer) {
@@ -299,7 +295,7 @@ class PlayerBase {
                 }
             }
             x += hoffset;
-            if (this.gameArea.isPointInBox(x, y) || !this.acceptInput)
+            if (this.gameArea.isPointInBox(x, y) || !this.active)
                 this.sprite.setXY(x, y);
         }
 
@@ -328,6 +324,7 @@ class PlayerBase {
     }
 
     draw() {
+        this.getBoundingBox().draw();
         this.sprite.draw();
         if (this.shieldActive) {
             const { x, y } = this.sprite.getXY();
