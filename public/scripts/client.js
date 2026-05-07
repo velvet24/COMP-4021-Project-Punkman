@@ -523,7 +523,7 @@ const Client = (function(){
         });
 
         socket.on("input", (input) => {
-            if (!world.players[input.index].active)
+            if (!world.players[input.index].active && !inGame)
                 return;
             
             if (input.event == "keydown") {

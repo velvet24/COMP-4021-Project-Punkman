@@ -336,7 +336,6 @@ class PlayerBase {
     }
 
     draw() {
-        this.getBoundingBox().draw();
         this.sprite.draw();
         if (this.shieldActive) {
             const { x, y } = this.sprite.getXY();

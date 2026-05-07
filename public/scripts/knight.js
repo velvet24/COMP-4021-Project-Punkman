@@ -145,8 +145,6 @@ class KnightPlayer extends PlayerBase {
     }
 
     draw() {
-        let { x, y } = this.sprite.getXY();
-        BoundingBox(this.ctx, y - this.vUpperSize, x, y + this.vLowerSize, x + this.attackRange).draw();
         super.draw();
     }
 }
