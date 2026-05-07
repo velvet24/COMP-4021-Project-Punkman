@@ -347,10 +347,36 @@ const Client = (function(){
         ];
 
         world.coins = [
-            Gem(context, 256, 976, "green", "gem0", world),
-            Gem(context, 512, 976, "red", "gem1", world),
-            Gem(context, 768, 976, "yellow", "gem2", world),
-            Gem(context, 1024, 976, "purple", "gem3", world)
+            Gem(context, 256, 976, "green", "gem", world),
+            Gem(context, 512, 976, "red", "gem", world),
+            Gem(context, 768, 976, "yellow", "gem", world),
+            Gem(context, 1024, 976, "purple", "gem", world),
+
+            Gem(context, 1280, 976, "green", "gem", world),
+            Gem(context, 1536, 976, "red", "gem", world),
+            Gem(context, 1792, 976, "yellow", "gem", world),
+
+            Gem(context, 128, 784, "green", "gem", world),
+            Gem(context, 384, 784, "red", "gem", world),
+            Gem(context, 640, 784, "yellow", "gem", world),
+            Gem(context, 896, 784, "purple", "gem", world),
+
+            Gem(context, 1152, 784, "green", "gem", world),
+            Gem(context, 1408, 784, "red", "gem", world),
+            Gem(context, 1664, 784, "yellow", "gem", world),
+
+            Gem(context, 384, 400, "green", "gem", world),
+            Gem(context, 640, 400, "red", "gem", world),
+            Gem(context, 896, 400, "yellow", "gem", world),
+            Gem(context, 1152, 400, "purple", "gem", world),
+
+            Gem(context, 1408, 400, "green", "gem", world),
+            Gem(context, 1664, 400, "red", "gem", world),
+
+            Gem(context, 128, 208, "green", "gem", world),
+            Gem(context, 384, 208, "red", "gem", world),
+            Gem(context, 640, 208, "yellow", "gem", world),
+            Gem(context, 896, 208, "purple", "gem", world),
         ];
 
         world.flag = ArrowSign(context, 1850, 175);
@@ -425,9 +451,7 @@ const Client = (function(){
                         world.coins.splice(i, 1);
                 }
                 for (let i = world.shields.length - 1; i >= 0; i--) {
-                    let alive = world.shields[i].update(simulationNow);
-                    if (!alive)
-                        world.shields.splice(i, 1);
+                    world.shields[i].update(simulationNow);
                 }
                 shooterSpawnTimer--;
                 if (shooterSpawnTimer == 0 && world.isShooterAlive()) {
@@ -587,16 +611,16 @@ const Client = (function(){
                     WitchBoss(context, 1600, 636, "witch", world)
                 ];
                     world.shields = [
-                    ShieldPickup(context, 512, 776, world),
-                    ShieldPickup(context, 1024, 776, world),
+                    ShieldPickup(context, 512, 784, world, 0),
+                    ShieldPickup(context, 1024, 784, world, 22500),
 
 
-                    ShieldPickup(context, 256, 584, world),
-                    ShieldPickup(context, 768, 584, world),
-                    ShieldPickup(context, 1280, 584, world),
+                    ShieldPickup(context, 256, 592, world, 15000),
+                    ShieldPickup(context, 768, 592, world, 0),
+                    ShieldPickup(context, 1280, 592, world, 30000),
 
-                    ShieldPickup(context, 512, 392, world),
-                    ShieldPickup(context, 1024, 392, world),
+                    ShieldPickup(context, 512, 400, world, 37500),
+                    ShieldPickup(context, 1024, 400, world, 7500),
                 ];
                 world.coins = [];
                 world.bullets = [];

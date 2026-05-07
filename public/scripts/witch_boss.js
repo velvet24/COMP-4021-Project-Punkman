@@ -26,7 +26,7 @@ class WitchBossEnemy extends EnemyBase {
             damageFrame: 36,
             damageAmount: 40,
             size: {
-                hHalfSize: 25,
+                hHalfSize: 75,
                 vUpperSize: 410,
                 vLowerSize: 380
             },

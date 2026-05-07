@@ -1,4 +1,6 @@
-const ShieldPickup = function(ctx, x, y, world) {
+const ShieldPickup = function(ctx, x, y, world, spawnTime) {
+    const RespawnTime = 30000;
+    let respawnAt = null;
     const sequences = {
         yellow: { x: 192, y: 64, width: 16, height: 16, count: 4, timing: 200, loop: true }
     };
@@ -10,10 +12,15 @@ const ShieldPickup = function(ctx, x, y, world) {
           .useSheet("images/object_sprites.png");
 
     const sound = new Audio("sounds/EnergyFill.wav");
-    let alive = true;
+    let alive = false;
 
     const update = function(time) {
-        if (!alive) return false;
+        if (respawnAt === null)
+            respawnAt = time + spawnTime;
+        if (!alive) {
+            if (time >= respawnAt) alive = true;
+            else return;
+        }
         const { x: ix, y: iy } = sprite.getXY();
         for (const player of world.players) {
             if (player.alive && player.getBoundingBox().isPointInBox(ix, iy)) {
@@ -21,20 +28,16 @@ const ShieldPickup = function(ctx, x, y, world) {
                 sound.play().catch(() => {});
                 player.activateShield();
                 alive = false;
-                return false;
+                respawnAt = time + RespawnTime;
+                return;
             }
         }
         sprite.update(time);
-        return true;
     };
 
     const draw = function() {
         if (alive) sprite.draw();
     };
 
-    const getBoundingBox = function() {
-        return sprite.getBoundingBox();
-    };
-
-    return { update, draw, getBoundingBox, isAlive: () => alive };
+    return { update, draw, getBoundingBox: sprite.getBoundingBox, isAlive: () => alive };
 };
