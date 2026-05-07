@@ -10,7 +10,7 @@ const Shooter = function(ctx, x, world) {
 
     const sequences = {
         attackLeft:  { x: 0,   y: 0,  width: 26, height: 63, count: 6, timing: 150, loop: true },
-        attackRight: { x: 0, y: 64,  width: 26, height: 63, count: 6, timing: 150, loop: true },
+        attackRight: { x: 0,   y: 64, width: 26, height: 63, count: 6, timing: 150, loop: true },
 
     };
 

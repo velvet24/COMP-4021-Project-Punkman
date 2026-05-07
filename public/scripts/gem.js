@@ -8,7 +8,7 @@ const Gem = function(ctx, x, y, color, id, world) {
     // This is the sprite sequences of the gem of four colours
     // `green`, `red`, `yellow` and `purple`.
     const sequences = {
-        green:  { x: 192, y:  0, width: 16, height: 16, count: 4, timing: 200, loop: true },
+        green:  { x: 192, y: 0,  width: 16, height: 16, count: 4, timing: 200, loop: true },
         red:    { x: 192, y: 16, width: 16, height: 16, count: 4, timing: 200, loop: true },
         yellow: { x: 192, y: 32, width: 16, height: 16, count: 4, timing: 200, loop: true },
         purple: { x: 192, y: 48, width: 16, height: 16, count: 4, timing: 200, loop: true }

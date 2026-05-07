@@ -1,20 +1,20 @@
 class GoblinEnemy extends EnemyBase {
     constructor(ctx, x, y, id, world) {
         const sequences = {
-            idleLeft:    { x: 1050, y: 600, width: -150, height: 150, count: 4, timing: 150, loop: true },
-            idleRight:   { x: 0,    y: 1500,  width:  150, height: 150, count: 4, timing: 150, loop: true },
+            idleLeft:    { x: 1050, y: 600,  width: -150, height: 150, count: 4, timing: 150, loop: true },
+            idleRight:   { x: 0,    y: 1500, width: 150,  height: 150, count: 4, timing: 150, loop: true },
 
-            walkLeft:    { x: 1050,  y: 750, width: -150, height: 150, count: 8, timing: 150, loop: true },
-            walkRight:   { x: 0,  y: 1650,  width:  150, height: 150, count: 8, timing: 150, loop: true },
+            walkLeft:    { x: 1050, y: 750,  width: -150, height: 150, count: 8, timing: 150, loop: true },
+            walkRight:   { x: 0,    y: 1650, width: 150,  height: 150, count: 8, timing: 150, loop: true },
 
-            attackLeft:  { x: 1050,  y: 150,  width: -150, height: 150, count: 8, timing: 150, loop: true },
-            attackRight: { x: 0,  y: 1050,    width:  150, height: 150, count: 8, timing: 150, loop: true },
+            attackLeft:  { x: 1050, y: 150,  width: -150, height: 150, count: 8, timing: 150, loop: true },
+            attackRight: { x: 0,    y: 1050, width: 150,  height: 150, count: 8, timing: 150, loop: true },
 
-            hitLeft:     { x: 1050, y: 0, width: -150, height: 150, count:  4, timing: 150, loop: false },
-            hitRight:    { x: 0,    y: 900,  width:  150, height: 150, count:  4, timing: 150, loop: false },
+            hitLeft:     { x: 1050, y: 0,    width: -150, height: 150, count: 4, timing: 150, loop: false },
+            hitRight:    { x: 0,    y: 900,  width: 150,  height: 150, count: 4, timing: 150, loop: false },
 
-            deathLeft:   { x: 1050,  y: 450, width: -150, height: 150, count: 4, timing: 150, loop: false },
-            deathRight:  { x: 0,  y: 1350,  width:  150, height: 150, count: 4, timing: 150, loop: false },
+            deathLeft:   { x: 1050, y: 450,  width: -150, height: 150, count: 4, timing: 150, loop: false },
+            deathRight:  { x: 0,    y: 1350, width: 150,  height: 150, count: 4, timing: 150, loop: false },
         };
 
         super(ctx, x, y, id, world, {

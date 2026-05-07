@@ -2,19 +2,19 @@ class SkeletonEnemy extends EnemyBase {
     constructor(ctx, x, y, id, world) {
         const sequences = {
             idleLeft:    { x: 731, y: 296, width: -43, height: 37, count: 11, timing: 150, loop: true },
-            idleRight:   { x: 0,   y: 111, width:  43, height: 37, count: 11, timing: 150, loop: true },
+            idleRight:   { x: 0,   y: 111, width: 43,  height: 37, count: 11, timing: 150, loop: true },
 
             walkLeft:    { x: 731, y: 333, width: -43, height: 37, count: 13, timing: 150, loop: true },
-            walkRight:   { x: 0,   y: 148, width:  43, height: 37, count: 13, timing: 150, loop: true },
+            walkRight:   { x: 0,   y: 148, width: 43,  height: 37, count: 13, timing: 150, loop: true },
 
             attackLeft:  { x: 731, y: 185, width: -43, height: 37, count: 18, timing: 150, loop: true },
-            attackRight: { x: 0,   y: 0,   width:  43, height: 37, count: 18, timing: 150, loop: true },
+            attackRight: { x: 0,   y: 0,   width: 43,  height: 37, count: 18, timing: 150, loop: true },
 
             hitLeft:     { x: 731, y: 259, width: -43, height: 37, count:  8, timing: 150, loop: false },
-            hitRight:    { x: 0,   y: 74,  width:  43, height: 37, count:  8, timing: 150, loop: false },
+            hitRight:    { x: 0,   y: 74,  width: 43,  height: 37, count:  8, timing: 150, loop: false },
 
             deathLeft:   { x: 731, y: 222, width: -43, height: 37, count: 15, timing: 150, loop: false },
-            deathRight:  { x: 0,   y: 37,  width:  43, height: 37, count: 15, timing: 150, loop: false },
+            deathRight:  { x: 0,   y: 37,  width: 43,  height: 37, count: 15, timing: 150, loop: false },
         };
 
         super(ctx, x, y, id, world, {

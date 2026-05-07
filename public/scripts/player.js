@@ -197,9 +197,18 @@ class PlayerBase {
         throw new Error("attack() must be implemented by subclass");
     }
 
-    // Virtual method, subclasses are expected to select their own animation states.
     updateAnimation() {
-        throw new Error("updateAnimation() must be implemented by subclass");
+        if (!this.alive) return;
+        const target = this.getAnimationState();
+        if (target && this.animationState !== target) {
+            this.animationState = target;
+            this.sprite.setSequence(this.sequences[target]);
+        }
+    }
+
+    // Virtual method, subclasses are expected to select their own animation states.
+    getAnimationState() {
+        throw new Error("getAnimationState() must be implemented by subclass");
     }
 
     getBoundingBox() {
@@ -318,6 +327,9 @@ class PlayerBase {
 
         if (this.cooldownTimer > 0)
             this.cooldownTimer--;
+
+        if (this.attackStanceTimer > 0)
+            this.attackStanceTimer--;
 
         this.updateAnimation();
         this.sprite.update(time);

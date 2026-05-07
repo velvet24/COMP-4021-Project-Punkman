@@ -3,17 +3,17 @@ class BossEnemy extends EnemyBase {
         const sequences = {
             idleLeft:   { x: 0,    y: 279,   width: 208, height: 93, count: 8, timing: 150, loop: true },
             idleRight:  { x: 1872, y: 837,   width: -208, height: 93, count: 8, timing: 150, loop: true },
-            walkLeft:   { x: 0,    y: 465,  width: 208, height: 93, count: 8, timing: 100, loop: true },
+            walkLeft:   { x: 0,    y: 465,   width: 208, height: 93, count: 8, timing: 100, loop: true },
             walkRight:  { x: 1872, y: 1023,  width: -208, height: 93, count: 8, timing: 100, loop: true },
-            attackLeft: { x: 0,    y: 0, width: 208, height: 93, count: 10, timing: 120, loop: false },
-            attackRight:{ x: 1872, y: 558, width: -208, height: 93, count: 10, timing: 120, loop: false },
-            castLeft:   { x: 0,    y: 93, width: 208, height: 93, count: 9,  timing: 100, loop: false },
-            castRight:  { x: 1872, y: 651, width: -208, height: 93, count: 9,  timing: 100, loop: false },
-            hitLeft:    { x: 0,    y: 372, width: 208, height: 93, count: 3,  timing: 200, loop: false },
-            hitRight:   { x: 1872, y: 930, width: -208, height: 93, count: 3,  timing: 200, loop: false },
-            deathLeft:  { x: 0,    y: 186, width: 208, height: 93, count: 10, timing: 150, loop: false },
-            deathRight: { x: 1872, y: 744, width: -208, height: 93, count: 10, timing: 150, loop: false },
-            spawn:      { x: 1872,    y: 186, width: -208, height: 93, count: 10, timing: 150, loop: false }
+            attackLeft: { x: 0,    y: 0,     width: 208, height: 93, count: 10, timing: 120, loop: false },
+            attackRight: { x: 1872, y: 558,  width: -208, height: 93, count: 10, timing: 120, loop: false },
+            castLeft:   { x: 0,    y: 93,    width: 208, height: 93, count: 9,  timing: 100, loop: false },
+            castRight:  { x: 1872, y: 651,   width: -208, height: 93, count: 9,  timing: 100, loop: false },
+            hitLeft:    { x: 0,    y: 372,   width: 208, height: 93, count: 3,  timing: 200, loop: false },
+            hitRight:   { x: 1872, y: 930,   width: -208, height: 93, count: 3,  timing: 200, loop: false },
+            deathLeft:  { x: 0,    y: 186,   width: 208, height: 93, count: 10, timing: 150, loop: false },
+            deathRight: { x: 1872, y: 744,   width: -208, height: 93, count: 10, timing: 150, loop: false },
+            spawn:      { x: 1872, y: 186,   width: -208, height: 93, count: 10, timing: 150, loop: false }
         };
 
         super(ctx, x, y, id, world, {
