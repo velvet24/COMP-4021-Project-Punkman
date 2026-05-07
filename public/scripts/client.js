@@ -226,7 +226,57 @@ const Client = (function(){
         
         const sounds = {
             background: new Audio("sounds/FlashManStage.mp3"),
+            boss: new Audio("sounds/Silver Will.mp3"),
+            victory: new Audio("sounds/victory.mp3"),
+            defeat: new Audio("sounds/YOU DIED.mp3"),
             cheat: new Audio("sounds/1up.wav")
+        };
+
+        sounds.background.loop = true;
+        sounds.background.volume = 0.75;
+        sounds.background.play().catch(() => {});
+
+        sounds.boss.loop = true;
+        sounds.boss.volume = 0.75;
+
+        let bossMusicStarted = false;
+
+        const fadeOutTrack = function(track, duration = 1200) {
+            return new Promise((resolve) => {
+                if (!track || track.paused) {
+                    resolve();
+                    return;
+                }
+
+                const initialVolume = track.volume;
+                let start = null;
+
+                const step = function(timestamp) {
+                    if (start == null) start = timestamp;
+                    const progress = Math.min((timestamp - start) / duration, 1);
+                    track.volume = initialVolume * (1 - progress);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                        return;
+                    }
+
+                    track.pause();
+                    track.currentTime = 0;
+                    track.volume = initialVolume;
+                    resolve();
+                };
+
+                requestAnimationFrame(step);
+            });
+        };
+
+        const switchMusic = function(fromTrack, toTrack, duration = 1200) {
+            return fadeOutTrack(fromTrack, duration).then(() => {
+                if (!toTrack) return;
+                toTrack.currentTime = 0;
+                toTrack.play().catch(() => {});
+            });
         };
 
         const world = World();
@@ -503,6 +553,11 @@ const Client = (function(){
             cancelAnimationFrame(rafId);
             rafId = null;
 
+            if (!bossMusicStarted) {
+                bossMusicStarted = true;
+                switchMusic(sounds.background, sounds.boss, 1500);
+            }
+
             const FADE_DURATION = 600;
             let fadeStart = null;
 
@@ -608,7 +663,17 @@ const Client = (function(){
 
             inGame = false;
 
+            const currentTrack = bossMusicStarted ? sounds.boss : sounds.background;
+            if (outcome === "win") {
+                switchMusic(currentTrack, sounds.victory, 3000);
+            }
+            else {
+                switchMusic(currentTrack, sounds.defeat, 3000);
+            }
+
             setTimeout(() => {
+                cancelAnimationFrame(rafId);
+                rafId = null;
                 $("#main-page").hide();
                 $("#lobby").show();
                 $("#end-page").show();
@@ -617,7 +682,7 @@ const Client = (function(){
                     $("#end-subtitle").text("You defeated the Witch!");
                 } else {
                     $("#end-title").text("Game Over");
-                    $("#end-subtitle").text("Final Standings");
+                    $("#end-subtitle").text("YOU DIED");
                 }
                 const rankedPlayers = Object.entries(players).map(([id, player]) => {
                     const enemies = player.enemies_killed || {};
