@@ -383,16 +383,16 @@ const Client = (function(){
 
         let pawn;
 
-        let index = 1;
+        let index = 0;
 
         for (const id in players) {
             let character;
             switch (players[id].character) {
                 case "Rockman":
-                    character = Rockman(context, index*100, 960, gameArea, world);
+                    character = Rockman(context, (index + 1) * 100, 960, gameArea, world);
                     break;
                 case "Knight":
-                    character = Knight(context, index*100, 960, gameArea, world);
+                    character = Knight(context, (index + 1) * 100, 960, gameArea, world);
                     break;
             }
 
@@ -418,6 +418,7 @@ const Client = (function(){
         context.imageSmoothingEnabled = false;
 
         let rafId = null;
+        let syncTimer = 0;
 
         function doFrame(now) {
             if (lastFrameTime == 0) {
@@ -470,6 +471,13 @@ const Client = (function(){
                 accumulator = 0;
             }
 
+            syncTimer++;
+            if (syncTimer >= 6) {
+                syncTimer = 0;
+                const { x, y } = pawn.sprite.getXY();
+                socket.emit("sync_pos", { index: pawn.getIndex(), x, y });
+            }
+
             context.clearRect(0, 0, cv.width, cv.height);
             
             world.flag?.draw();
@@ -507,19 +515,32 @@ const Client = (function(){
         }
 
         $(document).on("keydown", function(event) {
-            let input = {};
-            input.event = "keydown";
-            input.key = event.keyCode;
-            input.index = pawn.getIndex() - 1;
-            socket.emit("input", input);
+            const localIndex = pawn.getIndex();
+            if (world.players[localIndex] && world.players[localIndex].active && inGame) {
+                switch (event.keyCode) {
+                    case 32: case 87: world.players[localIndex].jump(); break;
+                    case 65: world.players[localIndex].move(-1); break;
+                    case 68: world.players[localIndex].move(1); break;
+                    case 74: world.players[localIndex].attack(); break;
+                    case 75: case 83: world.players[localIndex].guard?.(); break;
+                    case 76: cheatMode(); break;
+                }
+            }
+            socket.emit("input", { event: "keydown", key: event.keyCode, index: localIndex });
         });
 
         $(document).on("keyup", function(event) {
-            let input = {};
-            input.event = "keyup";
-            input.key = event.keyCode;
-            input.index = pawn.getIndex() - 1;
-            socket.emit("input", input);
+            const localIndex = pawn.getIndex();
+            if (world.players[localIndex] && world.players[localIndex].active && inGame) {
+                switch (event.keyCode) {
+                    case 32: case 87: world.players[localIndex].resetJump(); break;
+                    case 65: world.players[localIndex].stop(-1); break;
+                    case 68: world.players[localIndex].stop(1); break;
+                    case 74: world.players[localIndex].stopAttack(); break;
+                    case 75: case 83: world.players[localIndex].stopGuard?.(); break;
+                }
+            }
+            socket.emit("input", { event: "keyup", key: event.keyCode, index: localIndex });
         });
 
         socket.on("input", (input) => {
@@ -570,6 +591,18 @@ const Client = (function(){
                         world.players[input.index].stopGuard?.();
                         break;
                 }
+            }
+        });
+
+        socket.on("sync_pos", ({ index, x, y }) => {
+            if (!inGame) return;
+            const player = world.players[index];
+            if (!player) return;
+            const cur = player.sprite.getXY();
+            const dx = x - cur.x;
+            const dy = y - cur.y;
+            if (dx * dx + dy * dy > 2500) {
+                player.sprite.setXY(x, y);
             }
         });
 

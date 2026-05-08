@@ -156,7 +156,11 @@ io.on("connection", (socket) => {
     });
 
     socket.on("input", (input) => {
-        io.emit("input", input);
+        socket.broadcast.emit("input", input);
+    });
+
+    socket.on("sync_pos", (data) => {
+        socket.broadcast.emit("sync_pos", data);
     });
 
     socket.on("enemy_dead", (enemy_id) => {
