@@ -236,37 +236,30 @@ class PlayerBase {
         }
 
         if (!this.standing() || this.velocityY < 0) {
-            this.velocityY += this.gravity;
             let validLocation = true;
-            let voffset = 0;
-            if (this.velocityY > 0) {
-                while (validLocation && voffset <= this.velocityY) {
-                    voffset++;
-                    const target = BoundingBox(this.ctx, y - this.vUpperSize + voffset, x - this.hHalfSize, y + this.vLowerSize + voffset, x + this.hHalfSize);
-                    for (const obstacle of this.world.obstacles) {
-                        if (obstacle.getBoundingBox().intersect(target)) {
-                            validLocation = false;
-                            voffset--;
-                            break;
-                        }
-                    }
+            const targetY = y + this.velocityY;
+            const stepY = this.velocityY > 0 ? 10 : -10;
+            while (validLocation && ((stepY > 0 && y < targetY) || (stepY < 0 && y > targetY))) {
+                y += stepY;
+                if ((stepY > 0 && y > targetY) || (stepY < 0 && y < targetY)) {
+                    y = targetY;
                 }
-            }
-            else {
-                while (validLocation && this.velocityY <= voffset) {
-                    voffset--;
-                    const target = BoundingBox(this.ctx, y - this.vUpperSize + voffset, x - this.hHalfSize, y + this.vLowerSize + voffset, x + this.hHalfSize);
-                    for (const obstacle of this.world.obstacles) {
-                        if (obstacle.getBoundingBox().intersect(target)) {
-                            validLocation = false;
+                const target = BoundingBox(this.ctx, y - this.vUpperSize, x - this.hHalfSize, y + this.vLowerSize, x + this.hHalfSize);
+                for (const obstacle of this.world.obstacles) {
+                    if (obstacle.getBoundingBox().intersect(target)) {
+                        validLocation = false;
+                        if (stepY > 0) {
+                            y = obstacle.getBoundingBox().getTop() - this.vLowerSize - 1;
+                        }
+                        else {
                             this.velocityY = 0;
-                            voffset++;
-                            break;
+                            y = obstacle.getBoundingBox().getBottom() + this.vUpperSize + 1;
                         }
+                        break;
                     }
                 }
             }
-            y += voffset;
+            this.velocityY += this.gravity;
             if (this.gameArea.isPointInBox(x, y))
                 this.sprite.setXY(x, y);
         }
@@ -276,34 +269,30 @@ class PlayerBase {
 
         if (this.canMove()) {
             let validLocation = true;
-            let hoffset = 0;
-            if (this.direction == -1) {
-                while (validLocation && -hoffset < this.speed / 60) {
-                    hoffset--;
-                    const target = BoundingBox(this.ctx, y - this.vUpperSize, x - this.hHalfSize + hoffset, y + this.vLowerSize, x + this.hHalfSize + hoffset);
+            const moveDistance = this.direction * this.speed / 60;
+            if (moveDistance !== 0) {
+                const targetX = x + moveDistance;
+                const stepX = moveDistance > 0 ? 10 : -10;
+                while (validLocation && ((stepX > 0 && x < targetX) || (stepX < 0 && x > targetX))) {
+                    x += stepX;
+                    if ((stepX > 0 && x > targetX) || (stepX < 0 && x < targetX)) {
+                        x = targetX;
+                    }
+                    const target = BoundingBox(this.ctx, y - this.vUpperSize, x - this.hHalfSize, y + this.vLowerSize, x + this.hHalfSize);
                     for (const obstacle of this.world.obstacles) {
                         if (obstacle.getBoundingBox().intersect(target)) {
                             validLocation = false;
-                            hoffset++;
+                            if (stepX > 0) {
+                                x = obstacle.getBoundingBox().getLeft() - this.hHalfSize - 1;
+                            }
+                            else {
+                                x = obstacle.getBoundingBox().getRight() + this.hHalfSize + 1;
+                            }
                             break;
                         }
                     }
                 }
             }
-            else if (this.direction == 1) {
-                while (validLocation && hoffset < this.speed / 60) {
-                    hoffset++;
-                    const target = BoundingBox(this.ctx, y - this.vUpperSize, x - this.hHalfSize + hoffset, y + this.vLowerSize, x + this.hHalfSize + hoffset);
-                    for (const obstacle of this.world.obstacles) {
-                        if (obstacle.getBoundingBox().intersect(target)) {
-                            validLocation = false;
-                            hoffset--;
-                            break;
-                        }
-                    }
-                }
-            }
-            x += hoffset;
             if (this.gameArea.isPointInBox(x, y) || !this.active)
                 this.sprite.setXY(x, y);
         }
