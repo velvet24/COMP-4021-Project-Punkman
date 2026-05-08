@@ -28,7 +28,7 @@ class BatEnemy extends EnemyBase {
                 death:  new Audio("sounds/Explosion.wav")
             },
             speed: 140,
-            maxHealth: 80,
+            maxHealth: 150,
             maxPoise: 30,
             range: 40,
             attackDuration: 72,

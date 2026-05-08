@@ -62,10 +62,7 @@ class RockmanPlayer extends PlayerBase {
             this.sounds.buster.currentTime = 0;
             this.sounds.buster.play().catch(() => {});
             const { x, y } = this.sprite.getXY();
-            if (this.animationDirection == 1)
-                this.world.bullets.push(Bullet(this.ctx, x + this.hHalfSize, y, this.animationDirection, this.isLocalPlayer, this.world));
-            else
-                this.world.bullets.push(Bullet(this.ctx, x - this.hHalfSize, y, this.animationDirection, this.isLocalPlayer, this.world));
+            this.world.bullets.push(Bullet(this.ctx, x + this.hHalfSize * this.animationDirection, y, this.animationDirection, this.cheatMode? 50: 20, this.isLocalPlayer, this.world));
         }
     }
 

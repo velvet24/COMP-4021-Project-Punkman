@@ -28,7 +28,7 @@ class GoblinEnemy extends EnemyBase {
                 death:  new Audio("sounds/Explosion.wav")
             },
             speed: 120,
-            maxHealth: 150,
+            maxHealth: 250,
             maxPoise: 40,
             range: 45,
             attackDuration: 72,

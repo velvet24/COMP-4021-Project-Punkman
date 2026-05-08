@@ -128,7 +128,7 @@ const Client = (function(){
     const initJoinPage = function(){
         $("#join-button").on("click", function(e){
             e.preventDefault();
-            socket.emit("join", user.name);
+            socket.emit("join", { name: user.name, avatar: user.avatar });
         });
 
         socket.on("join_error", (error) => {
@@ -203,8 +203,10 @@ const Client = (function(){
                 else
                     status = `${name} not yet ready!`;
 
-                $("#player" + index).find(".status").text(status);
-                $("#player" + index).show();
+                const slot = $("#player" + index);
+                slot.find(".status").text(status);
+                slot.find(".player-avatar").html(Avatar.getCode(player.avatar));
+                slot.show();
 
                 index++;
             }
@@ -399,6 +401,7 @@ const Client = (function(){
             if (id == socket.id) {
                 character.setLocalPlayer();
                 pawn = character;
+                $(`#player${index}-healthbar`).addClass("local-player-health");
             }
             $(`#player${index}-bar`).show();
             character.setIndex(index);

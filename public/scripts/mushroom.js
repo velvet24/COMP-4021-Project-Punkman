@@ -28,7 +28,7 @@ class MushroomEnemy extends EnemyBase {
                 death:  new Audio("sounds/Explosion.wav")
             },
             speed: 90,
-            maxHealth: 180,
+            maxHealth: 250,
             maxPoise: 45,
             range: 55,
             attackDuration: 72,

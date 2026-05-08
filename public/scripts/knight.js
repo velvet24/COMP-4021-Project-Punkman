@@ -100,7 +100,7 @@ class KnightPlayer extends PlayerBase {
         }
         for (const enemy of this.world.enemies) {
             if (enemy.getBoundingBox().intersect(detector)) {
-                enemy.takeDamage(50, 50, this.isLocalPlayer);
+                enemy.takeDamage(this.cheatMode? 200: 100, 50, this.isLocalPlayer);
             }
         }
     }

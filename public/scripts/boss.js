@@ -27,7 +27,7 @@ class BossEnemy extends EnemyBase {
                 death:  new Audio("sounds/bossDie.mp3")
             },
             speed: 100,
-            maxHealth: 800,
+            maxHealth: 1000,
             maxPoise: 200,
             recoverTime: 36,
             range: 300,

@@ -103,7 +103,10 @@ app.get("/signout", (req, res) => {
 io.on("connection", (socket) => {
     console.log("Player connected:", socket.id);
 
-    socket.on("join", (name) => {
+    socket.on("join", (joinData) => {
+        const name = joinData.name;
+        const avatar = joinData.avatar || "";
+
         if(gameStarted){
             socket.emit("join_error", "The game has started.");
             return;
@@ -122,7 +125,7 @@ io.on("connection", (socket) => {
             }
         }
 
-        players[socket.id] = {name: name, ready:false};
+        players[socket.id] = {name: name, avatar: avatar, ready:false};
         socket.emit("join_success");
         io.emit("update_players", players);
         console.log("Current players - ", players);

@@ -17,7 +17,7 @@ class WitchBossEnemy extends EnemyBase {
                 death: new Audio("sounds/Explosion.wav")
             },
             speed: 0,
-            maxHealth: 2000,
+            maxHealth: 3000,
             maxPoise: 10000,
             recoverTime: 0,
             range: 0,

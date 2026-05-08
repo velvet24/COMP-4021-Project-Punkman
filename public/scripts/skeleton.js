@@ -28,7 +28,7 @@ class SkeletonEnemy extends EnemyBase {
                 death:  new Audio("sounds/Explosion.wav")
             },
             speed: 100,
-            maxHealth: 200,
+            maxHealth: 250,
             maxPoise: 50,
             range: 50,
             attackDuration: 162,
