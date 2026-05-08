@@ -50,6 +50,7 @@ class PlayerBase {
 
         this.active = true;
         this.cheatMode = false;
+        this.aura = null;
         this.shieldActive = false;
     }
 
@@ -63,10 +64,14 @@ class PlayerBase {
 
     enableCheatMode() {
         this.cheatMode = true;
+        if (!this.aura) {
+            this.aura = Aura(this.ctx, this.sprite.getXY().x, this.sprite.getXY().y + this.vLowerSize - 70);
+        }
     }
 
     disableCheatMode() {
         this.cheatMode = false;
+        this.aura = null;
     }
 
     setIndex(index) {
@@ -322,9 +327,19 @@ class PlayerBase {
 
         this.updateAnimation();
         this.sprite.update(time);
+        
+        if (this.aura) {
+            const { x, y } = this.sprite.getXY();
+            this.aura.setXY(x, y + this.vLowerSize - 70);
+            this.aura.update(time);
+        }
     }
 
     draw() {
+        if (this.aura) {
+            this.aura.draw();
+        }
+        
         this.sprite.draw();
         if (this.shieldActive) {
             const { x, y } = this.sprite.getXY();
